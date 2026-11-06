@@ -51,7 +51,7 @@
 }
 
 :root {
-    --background: oklch(0.985 0.004 265);
+    --background: oklch(0.992 0.003 265);
     --foreground: oklch(0.21 0.025 270);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.21 0.025 270);
@@ -61,12 +61,12 @@
     --primary-foreground: oklch(0.99 0 0);
     --secondary: oklch(0.955 0.012 270);
     --secondary-foreground: oklch(0.3 0.04 275);
-    --muted: oklch(0.96 0.008 265);
+    --muted: oklch(0.958 0.008 268);
     --muted-foreground: oklch(0.5 0.025 268);
     --accent: oklch(0.945 0.025 275);
     --accent-foreground: oklch(0.3 0.06 278);
     --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.91 0.012 268);
+    --border: oklch(0.912 0.011 268);
     --input: oklch(0.9 0.012 268);
     --ring: oklch(0.6 0.2 278);
     --chart-1: oklch(0.87 0 0);
@@ -75,20 +75,20 @@
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
     --radius: 0.8rem;
-    --sidebar: oklch(0.975 0.006 268);
+    --sidebar: oklch(0.992 0.003 265);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.56 0.22 278);
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent: oklch(0.955 0.014 275);
     --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-border: oklch(0.912 0.011 268);
     --sidebar-ring: oklch(0.708 0 0);
 }
 
 .dark {
-    --background: oklch(0.16 0.022 272);
+    --background: oklch(0.175 0.02 272);
     --foreground: oklch(0.96 0.01 265);
-    --card: oklch(0.21 0.026 272);
+    --card: oklch(0.222 0.024 272);
     --card-foreground: oklch(0.96 0.01 265);
     --popover: oklch(0.22 0.028 272);
     --popover-foreground: oklch(0.96 0.01 265);
@@ -109,11 +109,11 @@
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.185 0.024 272);
+    --sidebar: oklch(0.175 0.02 272);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.7 0.18 278);
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent: oklch(0.26 0.03 275);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
@@ -125,22 +125,41 @@
     }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
     }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;
     }
   html {
     @apply font-sans;
+    caret-color: var(--primary);
+    scrollbar-color: color-mix(in oklch, var(--foreground) 18%, transparent) transparent;
+    }
+  ::selection {
+    background: color-mix(in oklch, var(--primary) 22%, transparent);
     }
 }
 /* ───────────────────────── Circuit Lab ───────────────────────── */
 
 :root {
-  --app-font: 'Geist Variable', sans-serif;
-  --board-bg: oklch(0.965 0.012 255);
-  --board-dots: oklch(0.55 0.03 260 / 0.28);
+  /* Geist has no Arabic letters, so Persian and Arabic words inside English
+   * text (like the language menu) fall through to Vazirmatn, not a system font */
+  --app-font: 'Geist Variable', 'Vazirmatn Variable', sans-serif;
+  --board-bg: oklch(0.958 0.011 268);
+  --board-dots: oklch(0.55 0.03 265 / 0.26);
   --wire-outline: oklch(0.25 0.02 265 / 0.5);
   --terminal-ring: oklch(0.45 0.02 265);
+  --stage-bg: oklch(0.972 0.007 268);
+  --stage-line: oklch(0.3 0.03 270 / 0.07);
+  --stage-hole: oklch(0.3 0.03 270 / 0.11);
+  --card-highlight: oklch(1 0 0 / 0.9);
+  --shadow-card:
+    0 1px 2px oklch(0.25 0.03 270 / 0.06),
+    0 8px 20px -10px oklch(0.25 0.03 270 / 0.22);
+  --shadow-float:
+    0 1px 2px oklch(0.25 0.03 270 / 0.05),
+    0 12px 32px -12px oklch(0.25 0.03 270 / 0.28);
 }
 
 html[lang='fa'],
@@ -148,17 +167,36 @@ html[lang='ar'] {
   --app-font: 'Vazirmatn Variable', 'Geist Variable', sans-serif;
 }
 
+/* any Persian or Arabic snippet, whatever the page language
+ * (in the base layer, so utilities like font-mono still win) */
+@layer base {
+  [lang='fa'],
+  [lang='ar'] {
+    font-family: 'Vazirmatn Variable', 'Geist Variable', sans-serif;
+  }
+}
+
 .dark {
   /* the board becomes a dark room so lamps and LEDs really shine */
-  --board-bg: oklch(0.13 0.022 272);
-  --board-dots: oklch(0.75 0.03 270 / 0.16);
+  --board-bg: oklch(0.135 0.02 272);
+  --board-dots: oklch(0.75 0.03 270 / 0.14);
   --wire-outline: oklch(0 0 0 / 0.55);
   --terminal-ring: oklch(0.8 0.02 265);
+  --stage-bg: oklch(0.165 0.02 272);
+  --stage-line: oklch(1 0 0 / 0.06);
+  --stage-hole: oklch(1 0 0 / 0.07);
+  --card-highlight: oklch(1 0 0 / 0.06);
+  --shadow-card:
+    0 1px 2px oklch(0 0 0 / 0.3),
+    0 10px 24px -12px oklch(0 0 0 / 0.6);
+  --shadow-float:
+    0 1px 2px oklch(0 0 0 / 0.3),
+    0 14px 36px -12px oklch(0 0 0 / 0.7);
 }
 
 .board {
   background:
-    radial-gradient(ellipse at 50% 0%, color-mix(in oklch, var(--primary) 7%, transparent), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in oklch, var(--primary) 6%, transparent), transparent 70%),
     var(--board-bg);
 }
 
@@ -173,6 +211,11 @@ html[lang='ar'] {
   --xy-selection-border: 1px dashed var(--primary);
 }
 
+.board .react-flow__attribution {
+  opacity: 0.5;
+  font-size: 9px;
+}
+
 .board .react-flow__node-part {
   border: 0;
   padding: 0;
@@ -185,20 +228,131 @@ html[lang='ar'] {
   outline-offset: 2px;
 }
 
-/* ── part cards ── */
+/* floating panels on the board share one look */
+.float-panel {
+  border: 1px solid var(--border);
+  background: color-mix(in oklch, var(--card) 92%, transparent);
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(12px) saturate(1.4);
+}
+
+/* ── part cards ──
+ * Everything a part shows lives inside its card: a title row, a framed
+ * window for the 3D model, and one control row. Every card has the same
+ * height so a board of parts lines up neatly. */
+
+.part-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.part-node__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 20px;
+  padding-inline: 4px 3px;
+}
+
+.part-node__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+/* a thin light edge along the top, like the bevel of a real plastic tile */
+.part-node::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 var(--card-highlight);
+  pointer-events: none;
+}
+
+/* status: a tiny indicator lamp, like the one on a real power supply */
+.status-led {
+  --led: oklch(0.78 0.01 265);
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 30%, color-mix(in oklch, var(--led) 45%, white), var(--led) 60%);
+  box-shadow:
+    inset 0 -1px 1px oklch(0 0 0 / 0.25),
+    0 0 0 1.5px color-mix(in oklch, var(--led) 22%, transparent);
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.status-led--lit {
+  box-shadow:
+    inset 0 -1px 1px oklch(0 0 0 / 0.2),
+    0 0 0 1.5px color-mix(in oklch, var(--led) 28%, transparent),
+    0 0 8px 1px color-mix(in oklch, var(--led) 70%, transparent);
+}
+
+.status-led--blink {
+  animation: led-blink 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes led-blink {
+  to {
+    opacity: 0.35;
+  }
+}
+
+/* the 3D model is drawn inside this window and never outside it;
+ * the faint holes behind it are a breadboard */
+.part-node__stage {
+  position: relative;
+  height: 100px;
+  border-radius: 12px;
+  overflow: hidden;
+  background:
+    radial-gradient(110% 85% at 50% 0%, color-mix(in oklch, var(--part-accent) 11%, transparent), transparent 72%) no-repeat,
+    radial-gradient(circle, var(--stage-hole) 0 1px, transparent 1.5px) 5px 5px / 10px 10px,
+    var(--stage-bg);
+  box-shadow:
+    inset 0 0 0 1px var(--stage-line),
+    inset 0 2px 4px oklch(0 0 0 / 0.05);
+}
+
+.part-node__control {
+  height: 28px;
+  min-width: 0;
+}
 
 .part-node--selected {
   border-color: var(--primary);
   box-shadow:
-    0 0 0 3px color-mix(in oklch, var(--primary) 28%, transparent),
-    0 14px 32px -12px oklch(0 0 0 / 0.35);
+    0 0 0 3px color-mix(in oklch, var(--primary) 24%, transparent),
+    var(--shadow-float);
 }
 
 .part-node--active:not(.part-node--selected) {
-  border-color: color-mix(in oklch, var(--part-accent) 55%, var(--border));
+  border-color: color-mix(in oklch, var(--part-accent) 50%, var(--border));
   box-shadow:
-    0 0 0 1px color-mix(in oklch, var(--part-accent) 35%, transparent),
-    0 10px 30px -10px color-mix(in oklch, var(--part-accent) 60%, transparent);
+    0 0 0 1px color-mix(in oklch, var(--part-accent) 30%, transparent),
+    0 12px 28px -12px color-mix(in oklch, var(--part-accent) 55%, transparent);
 }
 
 .part-node--danger {
@@ -208,7 +362,7 @@ html[lang='ar'] {
 .part-node__light {
   position: absolute;
   left: 50%;
-  top: 42%;
+  top: 46%;
   z-index: -1;
   width: 560px;
   height: 560px;
@@ -223,24 +377,62 @@ html[lang='ar'] {
   mix-blend-mode: screen;
 }
 
+/* small segmented controls and steppers inside a card */
+.node-track {
+  height: 28px;
+  border-radius: 9px;
+  background: var(--muted);
+  box-shadow: inset 0 0 0 1px var(--stage-line);
+}
+
+.node-track [data-slot='slider-track'] {
+  background: color-mix(in oklch, var(--foreground) 12%, transparent);
+}
+
+.node-track [data-slot='slider-range'] {
+  background: var(--part-accent);
+}
+
+.node-track [data-slot='slider-thumb'] {
+  border-color: var(--part-accent);
+  box-shadow: 0 1px 3px oklch(0 0 0 / 0.2);
+}
+
 /* ── terminals (React Flow handles) ── */
 
+/* terminals look like little metal screw terminals */
 .react-flow__handle.terminal {
   display: grid;
   place-items: center;
   width: 20px;
   height: 20px;
   border-radius: 9999px;
-  border: 3px solid var(--card);
-  background: oklch(0.7 0.02 265);
+  border: 2.5px solid var(--card);
+  background: radial-gradient(circle at 35% 30%, #fafafa 0%, #a1a1aa 48%, #52525b 100%);
   box-shadow:
-    0 0 0 1.5px var(--terminal-ring),
-    0 2px 6px oklch(0 0 0 / 0.25);
+    0 0 0 1px oklch(0 0 0 / 0.28),
+    0 2px 5px oklch(0 0 0 / 0.28);
   cursor: crosshair;
   transition:
     scale 0.15s ease,
     box-shadow 0.15s ease;
   z-index: 5;
+}
+
+/* the screw slot on plain terminals */
+.react-flow__handle.terminal::after {
+  content: '';
+  width: 8px;
+  height: 1.6px;
+  border-radius: 1px;
+  background: oklch(0.25 0 0 / 0.55);
+  rotate: -40deg;
+  pointer-events: none;
+}
+
+.react-flow__handle.terminal--plus::after,
+.react-flow__handle.terminal--minus::after {
+  display: none;
 }
 
 /* a much bigger invisible hit area for small fingers */
@@ -249,6 +441,12 @@ html[lang='ar'] {
   position: absolute;
   inset: -12px;
   border-radius: 9999px;
+}
+
+@media (pointer: coarse) {
+  .react-flow__handle.terminal::before {
+    inset: -16px;
+  }
 }
 
 .react-flow__handle.terminal:hover,
@@ -265,15 +463,15 @@ html[lang='ar'] {
 }
 
 .react-flow__handle.terminal--plus {
-  background: #ef4444;
+  background: radial-gradient(circle at 35% 30%, #fecaca 0%, #ef4444 45%, #991b1b 100%);
 }
 
 .react-flow__handle.terminal--minus {
-  background: #27272a;
+  background: radial-gradient(circle at 35% 30%, #a1a1aa 0%, #3f3f46 45%, #09090b 100%);
 }
 
 .dark .react-flow__handle.terminal--minus {
-  background: #52525b;
+  background: radial-gradient(circle at 35% 30%, #d4d4d8 0%, #52525b 50%, #18181b 100%);
 }
 
 .terminal__label {
@@ -281,18 +479,21 @@ html[lang='ar'] {
   font-size: 12px;
   font-weight: 800;
   line-height: 1;
+  text-shadow: 0 1px 0 oklch(0 0 0 / 0.35);
   pointer-events: none;
 }
 
 .terminal-legend {
   display: grid;
+  flex-shrink: 0;
   place-items: center;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 9999px;
   color: white;
   font-weight: 800;
   font-size: 12px;
+  line-height: 1;
 }
 
 .terminal-legend--plus {
@@ -301,6 +502,10 @@ html[lang='ar'] {
 
 .terminal-legend--minus {
   background: #27272a;
+}
+
+.dark .terminal-legend--minus {
+  background: #52525b;
 }
 
 /* ── wires ── */
@@ -386,6 +591,11 @@ html[lang='ar'] {
 .is-dragging-part * {
   cursor: grabbing !important;
   user-select: none;
+}
+
+/* keeps the bottom bar clear of the phone's home indicator */
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -27,25 +27,36 @@ export function getGlowTexture() {
 export const damp = THREE.MathUtils.damp
 export const DEG = Math.PI / 180
 
+export type Framing = {
+  /** where the camera sits, looking at the model's middle */
+  camera?: [number, number, number]
+  /** above 1 moves the camera back (the model looks smaller), below 1 moves it closer */
+  scale?: number
+  /** moves the camera and its aim up or down so the model sits in the middle of its window */
+  lift?: number
+}
+
 /** Camera + lighting shared by every part preview. */
 export function Stage({
   children,
   camera = [0, 0.55, 4.6],
+  scale = 1,
+  lift = 0,
   fov = 30,
-}: {
+}: Framing & {
   children: ReactNode
-  camera?: [number, number, number]
   fov?: number
 }) {
+  const position: [number, number, number] = [camera[0] * scale, camera[1] * scale + lift, camera[2] * scale]
   return (
     <>
       <PerspectiveCamera
         makeDefault
-        position={camera}
+        position={position}
         fov={fov}
         near={0.1}
         far={50}
-        onUpdate={(c) => c.lookAt(0, 0, 0)}
+        onUpdate={(c) => c.lookAt(0, lift, 0)}
       />
       <ambientLight intensity={0.85} />
       <hemisphereLight args={['#ffffff', '#475569', 0.7]} />
@@ -97,10 +108,13 @@ export function Smoke({
   active,
   position = [0, 0.6, 0],
   color = '#9ca3af',
+  rise = 0.7,
 }: {
   active: boolean
   position?: [number, number, number]
   color?: string
+  /** how far the puffs climb before they vanish */
+  rise?: number
 }) {
   const group = useRef<THREE.Group>(null)
   useFrame(({ clock }) => {
@@ -110,9 +124,10 @@ export function Smoke({
     if (!active) return
     g.children.forEach((child, i) => {
       const t = (clock.elapsedTime * 0.45 + i / g.children.length) % 1
-      child.position.set(Math.sin(t * 6 + i) * 0.12, t * 1.1, Math.cos(t * 5 + i) * 0.05)
-      child.scale.setScalar(0.12 + t * 0.3)
-      ;((child as THREE.Mesh).material as THREE.MeshStandardMaterial).opacity = (1 - t) * 0.55
+      // short rise and a quick fade so the smoke is gone before it reaches the window's edge
+      child.position.set(Math.sin(t * 6 + i) * 0.12, t * rise, Math.cos(t * 5 + i) * 0.05)
+      child.scale.setScalar(0.1 + t * 0.24)
+      ;((child as THREE.Mesh).material as THREE.MeshStandardMaterial).opacity = (1 - t) ** 2 * 0.6
     })
   })
   return (

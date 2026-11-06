@@ -35,7 +35,7 @@ import { selectSelectedPart, selectSelectedWire, useCircuit } from '@/store/circ
 import { useSettings } from '@/store/settings'
 import { useSimulation } from '@/store/simulation'
 import { Missions } from './Missions'
-import { PartIcon } from './PartIcon'
+import { PartArt } from './PartArt'
 import { STATUS_STYLE, partStatus } from './PartNode'
 
 type Tip = { text: string; tone: 'warn' | 'info' | 'danger' }
@@ -75,7 +75,7 @@ function tipFor(data: PartData, result: PartResult | undefined, status: PartStat
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-2">
-      <h4 className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">{title}</h4>
+      <h4 className="text-xs font-semibold text-muted-foreground">{title}</h4>
       {children}
     </section>
   )
@@ -83,9 +83,9 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function Reading({ label, value, unit, decimals }: { label: string; value: number; unit: string; decimals: number }) {
   return (
-    <div className="rounded-xl border bg-card p-2.5">
-      <div className="text-[11px] text-muted-foreground">{label}</div>
-      <div dir="ltr" className="flex items-baseline justify-end gap-1 font-mono text-base font-bold tabular-nums">
+    <div className="rounded-xl border bg-card px-2.5 py-2 shadow-[var(--shadow-card)]">
+      <div className="truncate text-[11px] text-muted-foreground">{label}</div>
+      <div dir="ltr" className="flex items-baseline justify-end gap-1 font-mono text-[15px] font-semibold tabular-nums">
         <SlidingNumber number={Number(value.toFixed(decimals))} decimalPlaces={decimals} />
         <span className="text-xs font-semibold text-muted-foreground">{unit}</span>
       </div>
@@ -246,13 +246,13 @@ function PartInspector({ node }: { node: PartNode }) {
     <div className="space-y-5 p-4">
       <header className="flex items-center gap-3">
         <span
-          className="grid size-12 shrink-0 place-items-center rounded-2xl"
-          style={{ background: `color-mix(in oklch, ${accent} 16%, transparent)`, color: accent }}
+          className="grid size-14 shrink-0 place-items-center rounded-2xl border"
+          style={{ background: `color-mix(in oklch, ${accent} 9%, var(--card))` }}
         >
-          <PartIcon partType={data.type} size={26} animateOnHover />
+          <PartArt partType={data.type} size={44} />
         </span>
         <div className="min-w-0 space-y-1">
-          <h3 className="truncate text-base font-bold">{t.parts[data.type].name}</h3>
+          <h3 className="truncate text-base font-semibold">{t.parts[data.type].name}</h3>
           <Badge className={cn('border-0', STATUS_STYLE[status])}>
             {status === 'on' ? t.parts[data.type].working : t.status[status]}
           </Badge>
@@ -359,7 +359,7 @@ function WireInspector({ edge }: { edge: WireEdge }) {
         >
           <Unplug size={24} animateOnHover />
         </span>
-        <h3 className="text-base font-bold">{t.inspector.wire}</h3>
+        <h3 className="text-base font-semibold">{t.inspector.wire}</h3>
       </header>
       <Section title={t.inspector.readings}>
         <CurrentReading label={t.inspector.wireCurrent} amps={current} />
@@ -387,19 +387,39 @@ function EmptyInspector() {
       <span className="grid size-14 place-items-center rounded-2xl bg-muted text-muted-foreground">
         <Unplug size={28} animate loop />
       </span>
-      <h3 className="font-bold">{t.inspector.empty}</h3>
-      <p className="text-sm text-muted-foreground">{t.inspector.emptyHint}</p>
-      <div className="mt-2 w-full space-y-2 rounded-xl border p-3 text-start text-xs">
-        <div className="flex items-center gap-2">
+      <h3 className="font-semibold">{t.inspector.empty}</h3>
+      <p className="max-w-60 text-sm text-balance text-muted-foreground">{t.inspector.emptyHint}</p>
+      <div className="mt-2 w-full space-y-2.5 rounded-xl border bg-card p-3 text-start text-sm">
+        <div className="flex items-center gap-2.5">
           <span className="terminal-legend terminal-legend--plus">+</span>
-          <span>{t.parts.battery.name} +</span>
+          <span>{t.inspector.plusEnd}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <span className="terminal-legend terminal-legend--minus">−</span>
-          <span>{t.parts.battery.name} −</span>
+          <span>{t.inspector.minusEnd}</span>
         </div>
       </div>
     </div>
+  )
+}
+
+/** Details of whatever is picked on the board: used by the side panel and the phone sheet. */
+export function InspectorBody() {
+  const part = useCircuit(selectSelectedPart)
+  const wire = useCircuit(selectSelectedWire)
+  const selectedId = part?.id ?? wire?.id ?? null
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={selectedId ?? 'empty'}
+        initial={{ opacity: 0, x: 12, filter: 'blur(4px)' }}
+        animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+        exit={{ opacity: 0, x: -12, filter: 'blur(4px)' }}
+        transition={{ duration: 0.18 }}
+      >
+        {part ? <PartInspector node={part} /> : wire ? <WireInspector edge={wire} /> : <EmptyInspector />}
+      </motion.div>
+    </AnimatePresence>
   )
 }
 
@@ -419,7 +439,7 @@ export function InspectorPanel() {
   }
 
   return (
-    <aside className="relative z-10 flex w-80 shrink-0 flex-col border-s bg-sidebar max-lg:hidden">
+    <aside className="relative z-10 flex w-80 shrink-0 flex-col border-s bg-sidebar max-lg:hidden xl:w-[22rem]">
       <Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 flex-col gap-0">
         <div className="px-3 pt-3">
           <TabsList className="w-full">
@@ -434,17 +454,7 @@ export function InspectorPanel() {
         </div>
         <TabsContent value="inspector" className="min-h-0 flex-1">
           <ScrollArea className="h-full">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={selectedId ?? 'empty'}
-                initial={{ opacity: 0, x: 12, filter: 'blur(4px)' }}
-                animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, x: -12, filter: 'blur(4px)' }}
-                transition={{ duration: 0.18 }}
-              >
-                {part ? <PartInspector node={part} /> : wire ? <WireInspector edge={wire} /> : <EmptyInspector />}
-              </motion.div>
-            </AnimatePresence>
+            <InspectorBody />
           </ScrollArea>
         </TabsContent>
         <TabsContent value="missions" className="min-h-0 flex-1">

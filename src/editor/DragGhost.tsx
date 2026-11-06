@@ -9,7 +9,7 @@ import { playPlace } from '@/lib/sound'
 import { cn } from '@/lib/utils'
 import { NODE_HEIGHT, NODE_WIDTH, useCircuit } from '@/store/circuit'
 import { useDrag } from '@/store/drag'
-import { PartIcon } from './PartIcon'
+import { PartArt } from './PartArt'
 
 const BOARD_SELECTOR = '[data-board]'
 const TAP_DISTANCE = 6
@@ -122,10 +122,10 @@ export function DragGhost() {
             )}
           >
             <span
-              className="grid size-10 place-items-center rounded-xl"
-              style={{ background: `color-mix(in oklch, ${PARTS[type].accent} 18%, transparent)`, color: PARTS[type].accent }}
+              className="grid size-11 place-items-center rounded-xl"
+              style={{ background: `color-mix(in oklch, ${PARTS[type].accent} 10%, var(--card))` }}
             >
-              <PartIcon partType={type} size={22} animate />
+              <PartArt partType={type} size={36} />
             </span>
             <span className="flex flex-col">
               <span className="text-sm font-bold">{t.parts[type].name}</span>

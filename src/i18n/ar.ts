@@ -101,8 +101,9 @@ export const ar: Dictionary = {
     soundOn: 'الصوت مفعّل',
     soundOff: 'الصوت مكتوم',
     language: 'اللغة',
-    theme: 'تبديل المظهر',
+    theme: 'الوضع الداكن',
     help: 'مساعدة',
+    more: 'المزيد',
   },
   confirm: {
     clearTitle: 'هل تريد مسح اللوحة؟',
@@ -151,6 +152,8 @@ export const ar: Dictionary = {
     readings: 'القياسات',
     settings: 'الإعدادات',
     whatItDoes: 'ماذا تفعل هذه القطعة؟',
+    plusEnd: 'النقطة الحمراء: الطرف +',
+    minusEnd: 'النقطة السوداء: الطرف −',
   },
   node: { on: 'موصول', off: 'مفصول', press: 'اضغط', replace: 'استبدال' },
   statusBar: {
@@ -160,8 +163,7 @@ export const ar: Dictionary = {
     noBattery: 'لا توجد بطارية بعد',
     empty: 'اللوحة فارغة',
     paused: 'المحاكاة متوقفة',
-    parts: 'قطع',
-    wires: 'أسلاك',
+    count: (parts, wires) => `${parts} قطع · ${wires} أسلاك`,
     batteryCurrent: 'تيار البطارية',
   },
   toasts: {

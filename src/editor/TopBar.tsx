@@ -1,4 +1,4 @@
-import { GradientText } from '@animate-ui/react/primitives/texts/gradient'
+import { Ellipsis } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { LiquidButton } from '@/components/animate-ui/buttons/liquid'
 import { ThemeTogglerButton, ThemeTogglerButtonIcon } from '@/components/animate-ui/buttons/theme-toggler'
@@ -12,7 +12,6 @@ import { Trash2 } from '@/components/animate-ui/icons/trash-2'
 import { Undo2 } from '@/components/animate-ui/icons/undo-2'
 import { Volume2 } from '@/components/animate-ui/icons/volume-2'
 import { VolumeX } from '@/components/animate-ui/icons/volume-x'
-import { Zap } from '@/components/animate-ui/icons/zap'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +25,7 @@ import {
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -44,23 +44,45 @@ import { useCircuit } from '@/store/circuit'
 import { useSettings } from '@/store/settings'
 import { useSimulation } from '@/store/simulation'
 import { HelpDialog } from './HelpDialog'
-import { MobileParts } from './MobileParts'
+
+/** The app's mark: a closed loop with a battery on one side and a lit bulb on top. */
+function BrandMark() {
+  return (
+    <svg viewBox="0 0 36 36" className="size-9 shrink-0" aria-hidden>
+      <rect width="36" height="36" rx="10" fill="var(--primary)" />
+      <rect width="36" height="18" rx="10" fill="#fff" opacity="0.08" />
+      <path
+        d="M11 14.5V12a3 3 0 0 1 3-3h0.5M21.5 9H22a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-8a3 3 0 0 1-3-3v-2.5"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path d="M7.5 16.2h7M9 19.6h4" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="18" cy="9" r="5.5" fill="#fde047" opacity="0.35" />
+      <circle cx="18" cy="9" r="3.4" fill="#fde047" />
+    </svg>
+  )
+}
 
 function ToolButton({
   label,
   onClick,
   disabled,
+  className,
   children,
 }: {
   label: string
   onClick: () => void
   disabled?: boolean
+  className?: string
   children: ReactNode
 }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span>
+        {/* the span lets the tooltip work while the button is disabled */}
+        <span className={className}>
           <Button variant="ghost" size="icon-lg" aria-label={label} onClick={onClick} disabled={disabled}>
             {children}
           </Button>
@@ -71,18 +93,38 @@ function ToolButton({
   )
 }
 
+function LanguageItems() {
+  const { lang } = useI18n()
+  const setLang = useSettings((s) => s.setLang)
+  return (
+    <DropdownMenuRadioGroup value={lang} onValueChange={(value) => setLang(value as Lang)}>
+      {LANGUAGES.map((l) => (
+        <DropdownMenuRadioItem key={l.code} value={l.code} className="justify-between">
+          <span dir={l.dir} lang={l.code}>
+            {l.label}
+          </span>
+          <span lang={l.code} className="text-xs text-muted-foreground">
+            {l.short}
+          </span>
+        </DropdownMenuRadioItem>
+      ))}
+    </DropdownMenuRadioGroup>
+  )
+}
+
 function LanguageMenu() {
   const { t, lang } = useI18n()
-  const setLang = useSettings((s) => s.setLang)
   const current = LANGUAGES.find((l) => l.code === lang) ?? LANGUAGES[0]
   return (
     <DropdownMenu>
       <Tooltip>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="lg" className="gap-1.5 px-2 font-bold" aria-label={t.toolbar.language}>
+            <Button variant="ghost" size="lg" className="gap-1.5 px-2 font-semibold" aria-label={t.toolbar.language}>
               <Globe size={18} animateOnHover />
-              <span className="min-w-5 text-xs">{current.short}</span>
+              <span lang={current.code} className="min-w-5 text-xs">
+                {current.short}
+              </span>
             </Button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
@@ -91,14 +133,7 @@ function LanguageMenu() {
       <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuLabel>{t.toolbar.language}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuRadioGroup value={lang} onValueChange={(value) => setLang(value as Lang)}>
-          {LANGUAGES.map((l) => (
-            <DropdownMenuRadioItem key={l.code} value={l.code} className="justify-between">
-              <span dir={l.dir}>{l.label}</span>
-              <span className="text-xs text-muted-foreground">{l.short}</span>
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
+        <LanguageItems />
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -110,12 +145,14 @@ function RunToggle() {
   const { t } = useI18n()
   const running = useSimulation((s) => s.running)
   const toggle = useSimulation((s) => s.toggleRunning)
+  const label = running ? t.toolbar.running : t.toolbar.paused
   return (
     <LiquidButton
       onClick={toggle}
       aria-pressed={running}
+      aria-label={label}
       className={cn(
-        'h-9 gap-2 rounded-xl px-3.5 text-sm font-bold',
+        'h-9 gap-2 rounded-xl px-3 text-sm font-semibold',
         running
           ? '[--liquid-button-background-color:var(--color-emerald-500)] [--liquid-button-color:var(--color-emerald-600)] text-white hover:text-white'
           : '[--liquid-button-background-color:var(--muted)] [--liquid-button-color:var(--primary)]',
@@ -125,9 +162,52 @@ function RunToggle() {
         {running && <span className="absolute inline-flex size-full animate-ping rounded-full bg-white/80" />}
         <span className={cn('relative inline-flex size-2.5 rounded-full', running ? 'bg-white' : 'bg-muted-foreground')} />
       </span>
-      <span className="max-lg:hidden">{running ? t.toolbar.running : t.toolbar.paused}</span>
+      <span className="max-sm:hidden">{label}</span>
       {running ? <Pause size={16} animateOnHover /> : <Play size={16} animateOnHover />}
     </LiquidButton>
+  )
+}
+
+/** Phones: the less-used buttons fold into one menu so the bar never scrolls sideways. */
+function MoreMenu({ onClear, onHelp, canClear }: { onClear: () => void; onHelp: () => void; canClear: boolean }) {
+  const { t } = useI18n()
+  const theme = useSettings((s) => s.theme)
+  const setTheme = useSettings((s) => s.setTheme)
+  const sound = useSettings((s) => s.sound)
+  const toggleSound = useSettings((s) => s.toggleSound)
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon-lg" aria-label={t.toolbar.more} className="md:hidden">
+          <Ellipsis className="size-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuCheckboxItem
+          checked={sound}
+          onCheckedChange={() => {
+            unlockAudio()
+            toggleSound()
+          }}
+        >
+          {t.toolbar.soundOn}
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={theme === 'dark'}
+          onCheckedChange={(dark) => setTheme(dark ? 'dark' : 'light')}
+        >
+          {t.toolbar.theme}
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-xs text-muted-foreground">{t.toolbar.language}</DropdownMenuLabel>
+        <LanguageItems />
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={onHelp}>{t.toolbar.help}</DropdownMenuItem>
+        <DropdownMenuItem variant="destructive" disabled={!canClear} onSelect={onClear}>
+          {t.toolbar.clear}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -142,6 +222,7 @@ export function TopBar() {
   const hasParts = useCircuit((s) => s.nodes.length > 0)
   const { undo, redo, load, clear } = useCircuit.getState()
   const [pending, setPending] = useState<Pending>(null)
+  const [helpOpen, setHelpOpen] = useState(false)
 
   const loadPreset = (id: PresetId) => {
     load(buildPreset(id))
@@ -154,32 +235,25 @@ export function TopBar() {
   }
 
   return (
-    <header className="relative z-20 flex h-14 shrink-0 items-center gap-1.5 overflow-x-auto border-b bg-background px-3 [scrollbar-width:none] *:shrink-0">
-      <div className="flex items-center gap-2.5 pe-2">
-        <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-amber-400 via-orange-500 to-pink-500 text-white shadow-md shadow-orange-500/30">
-          <Zap size={20} animateOnHover />
-        </span>
+    <header className="relative z-20 flex h-14 shrink-0 items-center gap-0.5 border-b bg-background px-2 sm:gap-1 sm:px-3">
+      <div className="flex min-w-0 items-center gap-2.5 pe-1 sm:pe-2">
+        <BrandMark />
         <div className="leading-tight max-sm:hidden">
-          <GradientText
-            text={t.app.title}
-            className="text-base font-extrabold"
-            gradient="linear-gradient(90deg, #f59e0b 0%, #ec4899 30%, #6366f1 60%, #f59e0b 100%)"
-          />
-          <p className="text-[11px] text-muted-foreground">{t.app.subtitle}</p>
+          <p className="text-[15px] font-semibold tracking-tight">{t.app.title}</p>
+          <p className="text-[11px] text-muted-foreground max-lg:hidden">{t.app.subtitle}</p>
         </div>
       </div>
 
-      <Separator orientation="vertical" className="mx-1 !h-6" />
-      <MobileParts />
+      <Separator orientation="vertical" className="mx-1 !h-6 max-sm:hidden" />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="lg" className="gap-2 font-semibold">
-            <BookOpen size={17} animateOnHover />
+          <Button variant="ghost" size="lg" className="gap-2 px-2.5 font-medium" aria-label={t.toolbar.examples}>
+            <BookOpen size={18} animateOnHover />
             <span className="max-sm:hidden">{t.toolbar.examples}</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-72">
+        <DropdownMenuContent align="start" className="w-72 max-w-[calc(100vw-1rem)]">
           <DropdownMenuLabel>{t.toolbar.examples}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {PRESET_ORDER.map((id) => (
@@ -188,7 +262,7 @@ export function TopBar() {
               className="flex-col items-start gap-0.5 py-2"
               onSelect={() => (hasParts ? setPending({ kind: 'preset', id }) : loadPreset(id))}
             >
-              <span className="font-semibold">{t.presets[id].name}</span>
+              <span className="font-medium">{t.presets[id].name}</span>
               <span className="text-xs text-muted-foreground">{t.presets[id].description}</span>
             </DropdownMenuItem>
           ))}
@@ -201,41 +275,54 @@ export function TopBar() {
       <ToolButton label={t.toolbar.redo} onClick={redo} disabled={!canRedo}>
         <Undo2 size={18} animateOnHover className="-scale-x-100" />
       </ToolButton>
-      <ToolButton label={t.toolbar.clear} onClick={() => setPending({ kind: 'clear' })} disabled={!hasParts}>
+      <ToolButton
+        label={t.toolbar.clear}
+        onClick={() => setPending({ kind: 'clear' })}
+        disabled={!hasParts}
+        className="max-md:hidden"
+      >
         <Trash2 size={18} animateOnHover />
       </ToolButton>
 
-      <div className="ms-auto flex shrink-0 items-center gap-1 ps-2">
+      <div className="ms-auto flex shrink-0 items-center gap-1 ps-1">
         <RunToggle />
-        <ToolButton
-          label={sound ? t.toolbar.soundOn : t.toolbar.soundOff}
-          onClick={() => {
-            unlockAudio()
-            toggleSound()
-          }}
-        >
-          {sound ? <Volume2 size={18} animateOnHover /> : <VolumeX size={18} animateOnHover />}
-        </ToolButton>
-        <LanguageMenu />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span>
-              <ThemeTogglerButton
-                theme={theme}
-                resolvedTheme={theme}
-                setTheme={(next) => setTheme(next === 'dark' ? 'dark' : 'light')}
-                modes={['light', 'dark']}
-                variant="ghost"
-                size="default"
-                aria-label={t.toolbar.theme}
-              >
-                <ThemeTogglerButtonIcon light={<Sun size={18} />} dark={<Moon size={18} />} />
-              </ThemeTogglerButton>
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{t.toolbar.theme}</TooltipContent>
-        </Tooltip>
-        <HelpDialog />
+        <div className="flex items-center gap-0.5 max-md:hidden">
+          <ToolButton
+            label={sound ? t.toolbar.soundOn : t.toolbar.soundOff}
+            onClick={() => {
+              unlockAudio()
+              toggleSound()
+            }}
+          >
+            {sound ? <Volume2 size={18} animateOnHover /> : <VolumeX size={18} animateOnHover />}
+          </ToolButton>
+          <LanguageMenu />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <ThemeTogglerButton
+                  theme={theme}
+                  resolvedTheme={theme}
+                  setTheme={(next) => setTheme(next === 'dark' ? 'dark' : 'light')}
+                  modes={['light', 'dark']}
+                  variant="ghost"
+                  size="default"
+                  aria-label={t.toolbar.theme}
+                >
+                  <ThemeTogglerButtonIcon light={<Sun size={18} />} dark={<Moon size={18} />} />
+                </ThemeTogglerButton>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t.toolbar.theme}</TooltipContent>
+          </Tooltip>
+          <HelpDialog />
+        </div>
+        <MoreMenu
+          canClear={hasParts}
+          onClear={() => setPending({ kind: 'clear' })}
+          onHelp={() => setHelpOpen(true)}
+        />
+        <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} withTrigger={false} />
       </div>
 
       <AlertDialog open={pending !== null} onOpenChange={(open) => !open && setPending(null)}>

@@ -17,6 +17,7 @@ import { useSettings } from '@/store/settings'
 import { SceneCanvas } from '@/three/SceneCanvas'
 import { CanvasControls, DropZone, EmptyState, ShortCircuitAlert, WirePalette } from './CanvasOverlays'
 import { PartNode } from './PartNode'
+import { BoardStatusPill } from './StatusBar'
 import { ConnectionLine, WireEdge } from './WireEdge'
 
 const nodeTypes = { part: PartNode }
@@ -95,9 +96,10 @@ export function Workspace() {
           pannable
           zoomable
           position="bottom-right"
-          className="!m-3 overflow-hidden rounded-xl border shadow-lg max-sm:!hidden"
+          className="float-panel !m-3 overflow-hidden rounded-xl max-lg:!hidden"
           nodeBorderRadius={14}
-          nodeColor={(n) => PARTS[(n as PartNodeType).data.type].accent}
+          style={{ width: 168, height: 112 }}
+          nodeColor={(n) => `color-mix(in oklch, ${PARTS[(n as PartNodeType).data.type].accent} 70%, transparent)`}
           maskColor="color-mix(in oklch, var(--background) 70%, transparent)"
         />
         <WirePalette />
@@ -107,6 +109,7 @@ export function Workspace() {
         <EmptyState />
         <DropZone />
         <ShortCircuitAlert />
+        <BoardStatusPill />
       </ReactFlow>
     </div>
   )

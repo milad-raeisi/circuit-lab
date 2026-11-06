@@ -6,7 +6,7 @@ import { resistorBands } from '@/circuit/catalog'
 import type { Rotation } from '@/circuit/types'
 import { DEG, Halo, Smoke, damp } from '../helpers'
 
-const OPEN_ANGLE = 0.95
+const OPEN_ANGLE = 0.62
 
 /** Classic school "knife switch": a copper blade on a wooden base. */
 export function SwitchModel({
@@ -129,9 +129,9 @@ export function ResistorModel({
             <meshStandardMaterial color={color} roughness={0.5} metalness={i === 3 ? 0.7 : 0} />
           </mesh>
         ))}
-        {[-0.95, 0.95].map((x) => (
+        {[-0.85, 0.85].map((x) => (
           <mesh key={x} position={[x, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.028, 0.028, 0.7, 8]} />
+            <cylinderGeometry args={[0.028, 0.028, 0.5, 8]} />
             <meshStandardMaterial color="#d4d4d8" metalness={0.9} roughness={0.25} />
           </mesh>
         ))}

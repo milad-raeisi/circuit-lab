@@ -21,8 +21,8 @@ import { useSettings } from './settings'
 
 const HISTORY_LIMIT = 80
 
-export const NODE_WIDTH = 168
-export const NODE_HEIGHT = 186
+export const NODE_WIDTH = 176
+export const NODE_HEIGHT = 178
 
 export const uid = (prefix: string) =>
   `${prefix}-${crypto.randomUUID().replaceAll('-', '').slice(0, 8)}`

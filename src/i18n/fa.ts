@@ -101,8 +101,9 @@ export const fa: Dictionary = {
     soundOn: 'صدا روشن',
     soundOff: 'صدا خاموش',
     language: 'زبان',
-    theme: 'تغییر تم',
+    theme: 'حالت تاریک',
     help: 'راهنما',
+    more: 'بیشتر',
   },
   confirm: {
     clearTitle: 'میز کار پاک شود؟',
@@ -151,6 +152,8 @@ export const fa: Dictionary = {
     readings: 'اندازه‌گیری‌ها',
     settings: 'تنظیمات',
     whatItDoes: 'این قطعه چه کار می‌کند؟',
+    plusEnd: 'نقطه قرمز: سر +',
+    minusEnd: 'نقطه سیاه: سر −',
   },
   node: { on: 'وصل', off: 'قطع', press: 'فشار بده', replace: 'تعویض' },
   statusBar: {
@@ -160,8 +163,7 @@ export const fa: Dictionary = {
     noBattery: 'هنوز باتری نداری',
     empty: 'میز خالی است',
     paused: 'شبیه‌سازی متوقف است',
-    parts: 'قطعه',
-    wires: 'سیم',
+    count: (parts, wires) => `${parts} قطعه · ${wires} سیم`,
     batteryCurrent: 'جریان باتری',
   },
   toasts: {

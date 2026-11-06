@@ -11,18 +11,18 @@ type BoardState = 'paused' | 'empty' | 'noBattery' | 'short' | 'complete' | 'ope
 const TONE: Record<BoardState, string> = {
   paused: 'bg-muted text-muted-foreground',
   empty: 'bg-muted text-muted-foreground',
-  noBattery: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-  short: 'bg-red-500/15 text-red-600 dark:text-red-400',
-  complete: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-  open: 'bg-sky-500/15 text-sky-700 dark:text-sky-300',
+  noBattery: 'bg-amber-500/15 text-amber-800 dark:text-amber-300',
+  short: 'bg-red-500/15 text-red-700 dark:text-red-400',
+  complete: 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300',
+  open: 'bg-sky-500/15 text-sky-800 dark:text-sky-300',
 }
 
-export function StatusBar() {
+/** One short sentence about the whole board, shared by the desktop bar and the phone pill. */
+function useBoardStatus() {
   const { t } = useI18n()
   const running = useSimulation((s) => s.running)
   const result = useSimulation((s) => s.result)
   const parts = useCircuit((s) => s.nodes.length)
-  const wires = useCircuit((s) => s.edges.length)
 
   const state: BoardState = !running
     ? 'paused'
@@ -45,38 +45,82 @@ export function StatusBar() {
     open: t.statusBar.open,
   }[state]
 
-  return (
-    <footer className="relative z-20 flex h-9 shrink-0 items-center gap-3 border-t bg-background px-3 text-xs">
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span
-          key={state}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-          className={cn('flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-semibold', TONE[state])}
-        >
-          <span className={cn('size-1.5 rounded-full bg-current', (state === 'complete' || state === 'short') && 'animate-pulse')} />
-          {label}
-        </motion.span>
-      </AnimatePresence>
+  return { state, label, milliamps: Math.round(result.batteryCurrent * 1000) }
+}
 
-      <span className="flex items-center gap-1.5 text-muted-foreground max-sm:hidden">
+function StatusPill({ className }: { className?: string }) {
+  const { state, label } = useBoardStatus()
+  return (
+    <AnimatePresence mode="popLayout" initial={false}>
+      <motion.span
+        key={state}
+        initial={{ opacity: 0, y: 8, filter: 'blur(3px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        exit={{ opacity: 0, y: -8, filter: 'blur(3px)' }}
+        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+        role="status"
+        className={cn(
+          'flex min-w-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold whitespace-nowrap',
+          TONE[state],
+          className,
+        )}
+      >
+        <span
+          className={cn(
+            'size-1.5 shrink-0 rounded-full bg-current',
+            (state === 'complete' || state === 'short') && 'animate-pulse',
+          )}
+        />
+        <span className="truncate">{label}</span>
+      </motion.span>
+    </AnimatePresence>
+  )
+}
+
+/** Desktop footer: board state, battery current, counts and the main shortcuts. */
+export function StatusBar() {
+  const { t } = useI18n()
+  const { milliamps } = useBoardStatus()
+  const parts = useCircuit((s) => s.nodes.length)
+  const wires = useCircuit((s) => s.edges.length)
+
+  return (
+    <footer className="relative z-20 flex h-9 shrink-0 items-center gap-4 border-t bg-background px-3 text-xs max-lg:hidden">
+      <StatusPill className="py-0.5" />
+
+      <span className="flex items-center gap-1.5 text-muted-foreground">
         {t.statusBar.batteryCurrent}
-        <span dir="ltr" className="flex items-baseline gap-0.5 font-mono font-bold text-foreground tabular-nums">
-          <SlidingNumber number={Math.round(result.batteryCurrent * 1000)} />
+        <span dir="ltr" className="flex items-baseline gap-0.5 font-mono font-semibold text-foreground tabular-nums">
+          <SlidingNumber number={milliamps} />
           <span className="text-muted-foreground">{t.units.milliamp}</span>
         </span>
       </span>
 
-      <span className="ms-auto text-muted-foreground">
-        {parts} {t.statusBar.parts} · {wires} {t.statusBar.wires}
-      </span>
-      <span className="flex items-center gap-1 text-muted-foreground max-lg:hidden" dir="ltr">
+      <span className="ms-auto text-muted-foreground tabular-nums">{t.statusBar.count(parts, wires)}</span>
+      <span className="flex items-center gap-1 text-muted-foreground" dir="ltr">
         <Kbd>R</Kbd>
         <Kbd>Del</Kbd>
         <Kbd>⌘Z</Kbd>
       </span>
     </footer>
+  )
+}
+
+/** On phones and tablets the board state floats over the bottom of the board instead. */
+export function BoardStatusPill() {
+  const { t } = useI18n()
+  const { state, milliamps } = useBoardStatus()
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-3 z-[6] flex justify-center px-16 text-xs lg:hidden">
+      <div className="float-panel flex max-w-full min-w-0 items-center gap-2 rounded-full p-1">
+        <StatusPill />
+        {state === 'complete' && (
+          <span dir="ltr" className="flex shrink-0 items-baseline gap-0.5 pe-2 font-mono font-semibold tabular-nums">
+            <SlidingNumber number={milliamps} />
+            <span className="text-muted-foreground">{t.units.milliamp}</span>
+          </span>
+        )}
+      </div>
+    </div>
   )
 }

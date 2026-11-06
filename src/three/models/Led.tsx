@@ -88,9 +88,9 @@ export function LedModel({
         <meshStandardMaterial color="#d4d4d8" metalness={0.9} roughness={0.25} />
       </mesh>
 
-      <Halo color={color} intensity={brightness} position={[0, 0.32, 0.1]} scale={2.4} />
+      <Halo color={color} intensity={brightness} position={[0, 0.32, 0.1]} scale={1.7} />
       <pointLight ref={light} position={[0, 0.35, 0.5]} color={color} intensity={0} distance={3} decay={1.5} />
-      <Smoke active={burnt} position={[0, 0.7, 0]} />
+      <Smoke active={burnt} position={[0, 0.65, 0]} rise={0.45} />
     </group>
   )
 }

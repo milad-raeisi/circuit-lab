@@ -125,9 +125,9 @@ export function LampModel({
         <meshStandardMaterial color="#b45309" metalness={0.8} roughness={0.3} />
       </mesh>
 
-      <Halo color={color} intensity={brightness} position={[0, 0.34, 0]} scale={3.1} />
+      <Halo color={color} intensity={brightness} position={[0, 0.34, 0]} scale={2} />
       <pointLight ref={light} position={[0, 0.34, 0.3]} color={color} intensity={0} distance={4} decay={1.4} />
-      <Smoke active={burnt} position={[0, 0.75, 0]} />
+      <Smoke active={burnt} position={[0, 0.7, 0]} rise={0.45} />
     </group>
   )
 }

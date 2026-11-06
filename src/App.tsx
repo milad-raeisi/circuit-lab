@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { DragGhost } from '@/editor/DragGhost'
 import { InspectorPanel } from '@/editor/Inspector'
+import { MobileDock } from '@/editor/MobileDock'
 import { PartsSidebar } from '@/editor/PartsSidebar'
 import { StatusBar } from '@/editor/StatusBar'
 import { TopBar } from '@/editor/TopBar'
@@ -47,6 +48,7 @@ export default function App() {
               <InspectorPanel />
             </div>
             <StatusBar />
+            <MobileDock />
           </div>
           <DragGhost />
         </ReactFlowProvider>
