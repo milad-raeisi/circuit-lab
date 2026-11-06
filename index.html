@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Circuit Lab: drag, wire and power up simple electric circuits. A playful circuit simulator for kids." />
+    <meta name="theme-color" content="#6d5dfc" />
+    <title>Circuit Lab · Build it, power it up!</title>
+    <script>
+      // Apply the saved theme and language before the app renders (no flash).
+      try {
+        var saved = JSON.parse(localStorage.getItem('circuit-lab:settings') || '{}').state || {}
+        var root = document.documentElement
+        if (saved.theme === 'dark') root.classList.add('dark')
+        if (saved.lang === 'ar' || saved.lang === 'fa') {
+          root.lang = saved.lang
+          root.dir = 'rtl'
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,399 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/vazirmatn";
+@import "@xyflow/react/dist/style.css" layer(base);
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: var(--app-font);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+    --background: oklch(0.985 0.004 265);
+    --foreground: oklch(0.21 0.025 270);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.21 0.025 270);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.21 0.025 270);
+    --primary: oklch(0.56 0.22 278);
+    --primary-foreground: oklch(0.99 0 0);
+    --secondary: oklch(0.955 0.012 270);
+    --secondary-foreground: oklch(0.3 0.04 275);
+    --muted: oklch(0.96 0.008 265);
+    --muted-foreground: oklch(0.5 0.025 268);
+    --accent: oklch(0.945 0.025 275);
+    --accent-foreground: oklch(0.3 0.06 278);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.91 0.012 268);
+    --input: oklch(0.9 0.012 268);
+    --ring: oklch(0.6 0.2 278);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --radius: 0.8rem;
+    --sidebar: oklch(0.975 0.006 268);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.56 0.22 278);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+    --background: oklch(0.16 0.022 272);
+    --foreground: oklch(0.96 0.01 265);
+    --card: oklch(0.21 0.026 272);
+    --card-foreground: oklch(0.96 0.01 265);
+    --popover: oklch(0.22 0.028 272);
+    --popover-foreground: oklch(0.96 0.01 265);
+    --primary: oklch(0.7 0.18 278);
+    --primary-foreground: oklch(0.16 0.03 275);
+    --secondary: oklch(0.26 0.028 272);
+    --secondary-foreground: oklch(0.96 0.01 265);
+    --muted: oklch(0.25 0.022 272);
+    --muted-foreground: oklch(0.71 0.025 268);
+    --accent: oklch(0.29 0.045 278);
+    --accent-foreground: oklch(0.96 0.01 265);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 9%);
+    --input: oklch(1 0 0 / 14%);
+    --ring: oklch(0.62 0.18 278);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: oklch(0.185 0.024 272);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.7 0.18 278);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+    }
+  html {
+    @apply font-sans;
+    }
+}
+/* ───────────────────────── Circuit Lab ───────────────────────── */
+
+:root {
+  --app-font: 'Geist Variable', sans-serif;
+  --board-bg: oklch(0.965 0.012 255);
+  --board-dots: oklch(0.55 0.03 260 / 0.28);
+  --wire-outline: oklch(0.25 0.02 265 / 0.5);
+  --terminal-ring: oklch(0.45 0.02 265);
+}
+
+html[lang='fa'],
+html[lang='ar'] {
+  --app-font: 'Vazirmatn Variable', 'Geist Variable', sans-serif;
+}
+
+.dark {
+  /* the board becomes a dark room so lamps and LEDs really shine */
+  --board-bg: oklch(0.13 0.022 272);
+  --board-dots: oklch(0.75 0.03 270 / 0.16);
+  --wire-outline: oklch(0 0 0 / 0.55);
+  --terminal-ring: oklch(0.8 0.02 265);
+}
+
+.board {
+  background:
+    radial-gradient(ellipse at 50% 0%, color-mix(in oklch, var(--primary) 7%, transparent), transparent 60%),
+    var(--board-bg);
+}
+
+.board .react-flow {
+  --xy-background-color: transparent;
+  --xy-background-pattern-dots-color-default: var(--board-dots);
+  --xy-minimap-background-color: var(--card);
+  --xy-minimap-mask-background-color: color-mix(in oklch, var(--background) 65%, transparent);
+  --xy-controls-button-background-color: var(--card);
+  --xy-attribution-background-color: transparent;
+  --xy-selection-background-color: color-mix(in oklch, var(--primary) 10%, transparent);
+  --xy-selection-border: 1px dashed var(--primary);
+}
+
+.board .react-flow__node-part {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.board .react-flow__node-part.selectable:focus-visible .part-node {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ── part cards ── */
+
+.part-node--selected {
+  border-color: var(--primary);
+  box-shadow:
+    0 0 0 3px color-mix(in oklch, var(--primary) 28%, transparent),
+    0 14px 32px -12px oklch(0 0 0 / 0.35);
+}
+
+.part-node--active:not(.part-node--selected) {
+  border-color: color-mix(in oklch, var(--part-accent) 55%, var(--border));
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--part-accent) 35%, transparent),
+    0 10px 30px -10px color-mix(in oklch, var(--part-accent) 60%, transparent);
+}
+
+.part-node--danger {
+  animation: danger-pulse 0.8s ease-in-out infinite alternate;
+}
+
+.part-node__light {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: -1;
+  width: 560px;
+  height: 560px;
+  border-radius: 9999px;
+  pointer-events: none;
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+.dark .part-node__light {
+  mix-blend-mode: screen;
+}
+
+/* ── terminals (React Flow handles) ── */
+
+.react-flow__handle.terminal {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  border: 3px solid var(--card);
+  background: oklch(0.7 0.02 265);
+  box-shadow:
+    0 0 0 1.5px var(--terminal-ring),
+    0 2px 6px oklch(0 0 0 / 0.25);
+  cursor: crosshair;
+  transition:
+    scale 0.15s ease,
+    box-shadow 0.15s ease;
+  z-index: 5;
+}
+
+/* a much bigger invisible hit area for small fingers */
+.react-flow__handle.terminal::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 9999px;
+}
+
+.react-flow__handle.terminal:hover,
+.react-flow__handle.terminal.connectingfrom {
+  scale: 1.25;
+}
+
+.react-flow__handle.terminal.connectingto,
+.react-flow__handle.terminal.valid {
+  scale: 1.4;
+  box-shadow:
+    0 0 0 3px var(--primary),
+    0 0 18px var(--primary);
+}
+
+.react-flow__handle.terminal--plus {
+  background: #ef4444;
+}
+
+.react-flow__handle.terminal--minus {
+  background: #27272a;
+}
+
+.dark .react-flow__handle.terminal--minus {
+  background: #52525b;
+}
+
+.terminal__label {
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.terminal-legend {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  color: white;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.terminal-legend--plus {
+  background: #ef4444;
+}
+
+.terminal-legend--minus {
+  background: #27272a;
+}
+
+/* ── wires ── */
+
+.react-flow__edge-wire {
+  cursor: pointer;
+}
+
+.wire-core {
+  transition: filter 0.2s ease;
+}
+
+.wire-core--selected {
+  filter: drop-shadow(0 0 5px var(--primary));
+}
+
+.wire-flow {
+  stroke: #fff7c2;
+  stroke-width: 4px;
+  filter: drop-shadow(0 0 3px #facc15);
+  animation-name: wire-flow;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  pointer-events: none;
+}
+
+.wire-hot {
+  stroke: #f97316;
+  stroke-width: 12px;
+  opacity: 0.5;
+  filter: blur(2px);
+  animation: hot-pulse 0.45s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.wire-drawing {
+  animation: wire-flow 0.5s linear infinite;
+}
+
+@keyframes wire-flow {
+  to {
+    stroke-dashoffset: -18px;
+  }
+}
+
+@keyframes hot-pulse {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+
+@keyframes danger-pulse {
+  from {
+    box-shadow: 0 0 0 2px oklch(0.63 0.24 27 / 0.4);
+  }
+  to {
+    box-shadow:
+      0 0 0 4px oklch(0.63 0.24 27 / 0.8),
+      0 0 30px oklch(0.63 0.24 27 / 0.6);
+  }
+}
+
+.short-vignette {
+  box-shadow: inset 0 0 140px 30px oklch(0.63 0.24 27 / 0.4);
+  animation: vignette 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes vignette {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── drag from the parts box ── */
+
+.is-dragging-part,
+.is-dragging-part * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wire-flow,
+  .wire-drawing,
+  .wire-hot,
+  .part-node--danger,
+  .short-vignette {
+    animation: none;
+  }
+}
