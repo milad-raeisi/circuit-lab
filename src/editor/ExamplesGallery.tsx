@@ -24,6 +24,7 @@ import {
 } from '@/circuit/presets'
 import type { LedColor, PartType } from '@/circuit/types'
 import { DICTIONARIES, useI18n, type Dictionary } from '@/i18n'
+import { foldSearch } from '@/lib/fold'
 import { cn } from '@/lib/utils'
 import { PartArt } from './PartArt'
 
@@ -82,30 +83,12 @@ function useWideScreen() {
 
 /* ---- search ---- */
 
-/**
- * Folds the small differences people do not type: case, accents, Arabic and
- * Persian letter shapes (ي/ی, ك/ک, ة/ه), short-vowel marks and the
- * zero-width joiners Persian uses inside words.
- */
-function fold(text: string) {
-  return text
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[̀-ًͯ-ٰٟـ‌‍]/g, '')
-    .replace(/[يى]/g, 'ی')
-    .replace(/ك/g, 'ک')
-    .replace(/ة/g, 'ه')
-    .replace(/[أإآ]/g, 'ا')
-    .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
-    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
-}
-
 /** Everything a child might type to find an example: its name, its words, its shelf and its parts, in their language and in English. */
 function searchText(id: PresetId, t: Dictionary) {
   const en = DICTIONARIES.en
   const { category, art } = PRESET_INFO[id]
   const parts = art.map((item) => (item.startsWith('led:') ? 'led' : item) as PartType)
-  return fold(
+  return foldSearch(
     [
       t.presets[id].name,
       t.presets[id].description,
@@ -123,7 +106,7 @@ function useMatches(query: string, level: LevelChoice): readonly PresetId[] {
   const { t } = useI18n()
   const index = useMemo(() => new Map(PRESET_ORDER.map((id) => [id, searchText(id, t)])), [t])
   return useMemo(() => {
-    const words = fold(query).split(/\s+/).filter(Boolean)
+    const words = foldSearch(query).split(/\s+/).filter(Boolean)
     return PRESET_ORDER.filter(
       (id) =>
         (level === 'any' || PRESET_INFO[id].level === level) && words.every((word) => index.get(id)!.includes(word)),

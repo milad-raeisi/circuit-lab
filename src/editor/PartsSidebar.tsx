@@ -5,6 +5,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { PARTS, PART_ORDER, type PartCategory } from '@/circuit/catalog'
 import type { PartType } from '@/circuit/types'
 import { useI18n } from '@/i18n'
+import { en } from '@/i18n/en'
+import { foldSearch } from '@/lib/fold'
 import { cn } from '@/lib/utils'
 import { useDrag } from '@/store/drag'
 import { usePlacePart } from './DragGhost'
@@ -88,10 +90,12 @@ function TapTile({ type, onPicked }: { type: PartType; onPicked: () => void }) {
 function usePartGroups(query: string) {
   const { t } = useI18n()
   return useMemo(() => {
-    const q = query.trim().toLowerCase()
+    // letter shapes and digits are folded, and the English name always matches too,
+    // so "LED", «كليد» or «کلید» find the same parts in any language
+    const q = foldSearch(query)
     const matches = PART_ORDER.filter((type) => {
       if (!q) return true
-      const text = `${t.parts[type].name} ${t.parts[type].description} ${type}`.toLowerCase()
+      const text = foldSearch(`${t.parts[type].name} ${t.parts[type].description} ${en.parts[type].name} ${type}`)
       return text.includes(q)
     })
     return CATEGORIES.map((category) => ({
@@ -124,7 +128,7 @@ function PartSearch({ value, onChange, shortcut }: { value: string; onChange: (v
     <div className="group relative">
       <Search
         aria-hidden
-        className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary"
+        className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-foreground/55 transition-colors group-focus-within:text-foreground"
       />
       <input
         ref={input}
@@ -142,10 +146,11 @@ function PartSearch({ value, onChange, shortcut }: { value: string; onChange: (v
         autoComplete="off"
         spellCheck={false}
         className={cn(
-          'h-10 w-full rounded-md border border-border bg-muted ps-9 pe-10 text-sm text-foreground outline-none',
-          'shadow-[inset_0_1px_2px_oklch(0_0_0/0.05)] transition-[background-color,border-color,box-shadow]',
-          'placeholder:text-muted-foreground hover:border-foreground/20',
-          'focus-visible:border-primary focus-visible:bg-card focus-visible:shadow-none focus-visible:ring-4 focus-visible:ring-primary/15',
+          // a white field with a clear edge, so it never melts into the panel behind it
+          'h-10 w-full rounded-md border border-foreground/20 bg-card ps-9 pe-10 text-sm text-foreground outline-none',
+          'shadow-[0_1px_2px_oklch(0_0_0/0.07)] transition-[border-color,box-shadow]',
+          'placeholder:text-muted-foreground hover:border-foreground/35',
+          'focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/25',
           '[&::-webkit-search-cancel-button]:appearance-none',
         )}
       />
@@ -183,7 +188,17 @@ export function PartTray({ mode, onPicked }: { mode: 'drag' | 'tap'; onPicked?: 
 
   return (
     <div className="space-y-4">
-      <PartSearch value={query} onChange={setQuery} shortcut={mode === 'drag'} />
+      {/* stays in view while the list scrolls under it; the room above keeps its focus ring
+          from being cut off, and a soft fade below lets the tiles slide out of sight */}
+      <div
+        className={cn(
+          'sticky top-0 z-10 -mx-4 px-4 pt-1.5 pb-1 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-gradient-to-b after:to-transparent',
+          // the same colour as the panel it sits in: the desktop sidebar or the phone's sheet
+          mode === 'drag' ? 'bg-sidebar after:from-sidebar' : 'bg-popover after:from-popover',
+        )}
+      >
+        <PartSearch value={query} onChange={setQuery} shortcut={mode === 'drag'} />
+      </div>
       {groups.map(({ category, items }) => (
         <section key={category} className="space-y-2">
           <h3 className="px-0.5 text-xs font-semibold text-muted-foreground">{t.categories[category]}</h3>
