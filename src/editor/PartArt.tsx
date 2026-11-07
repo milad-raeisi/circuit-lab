@@ -2223,6 +2223,8 @@ const NotGate = ({ id }: ArtProps) => <Gate id={id} kind="notGate" />
 const AndGate = ({ id }: ArtProps) => <Gate id={id} kind="andGate" />
 const OrGate = ({ id }: ArtProps) => <Gate id={id} kind="orGate" />
 const XorGate = ({ id }: ArtProps) => <Gate id={id} kind="xorGate" />
+const NandGate = ({ id }: ArtProps) => <Gate id={id} kind="nandGate" />
+const NorGate = ({ id }: ArtProps) => <Gate id={id} kind="norGate" />
 
 function Timer555({ id }: ArtProps) {
   return (
