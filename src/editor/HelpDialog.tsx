@@ -72,7 +72,12 @@ export function HelpDialog({
         <footer className="flex items-center gap-3 border-t pt-4">
           <BrandLogo className="size-10" />
           <div className="min-w-0 leading-tight">
-            <p className="text-sm font-semibold">{t.app.title}</p>
+            <p className="text-sm font-semibold">
+              {t.app.title}
+              <span dir="ltr" className="ms-1.5 text-xs font-normal text-muted-foreground tabular-nums">
+                v{__APP_VERSION__}
+              </span>
+            </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {t.app.madeBy}
               <span aria-hidden className="mx-1.5">·</span>

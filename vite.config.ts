@@ -26,9 +26,15 @@ function serviceWorker(): Plugin {
   }
 }
 
+/** The app's version from package.json: shown in the help window, and a new one publishes a release. */
+const VERSION = JSON.parse(readFileSync(path.resolve(import.meta.dirname, 'package.json'), 'utf8')).version as string
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), serviceWorker()],
+  define: {
+    __APP_VERSION__: JSON.stringify(VERSION),
+  },
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
