@@ -20,7 +20,7 @@ const BALL: [number, number] = [-0.66, 1.02]
 const HIT = 0.108
 const CONTACT_Y = 0.27
 
-const BRASS = { color: '#dcb256', metalness: 0.62, roughness: 0.24 } as const
+const BRASS = { color: '#e8bd5a', metalness: 0.55, roughness: 0.22 } as const
 const IRON = { color: '#8d939b', metalness: 0.6, roughness: 0.4 } as const
 
 /** The gong's dome, a raised ring near the middle and a rolled lip, turned to face +z. */
@@ -59,7 +59,7 @@ function grainTexture() {
   for (let i = 0; i < 46; i++) {
     const y = random() * 128
     const wave = 2 + random() * 5
-    ctx.strokeStyle = random() > 0.5 ? 'rgba(60,28,12,0.35)' : 'rgba(190,120,70,0.25)'
+    ctx.strokeStyle = random() > 0.5 ? 'rgba(60,28,12,0.22)' : 'rgba(190,120,70,0.16)'
     ctx.lineWidth = 0.6 + random() * 1.8
     ctx.beginPath()
     for (let x = 0; x <= 256; x += 8) ctx.lineTo(x, y + Math.sin(x / 40 + i) * wave)
@@ -143,7 +143,8 @@ export function BellModel({ ring, hot }: { ring: number; hot: boolean }) {
     amp.current = damp(amp.current, ringing ? 1 : 0, 9, dt)
     const loud = 0.55 + 0.45 * Math.min(1, r)
     const before = phase.current % 1
-    if (amp.current > 0.01) phase.current += dt * (4.5 + 2.5 * r)
+    // a few strikes a second, so each one can be seen (a real bell buzzes faster)
+    if (amp.current > 0.01) phase.current += dt * (3.6 + 2.2 * r)
     else phase.current = 0
     const u = phase.current % 1
     // the hammer lands: the gong shivers and a ring of sound leaves it
@@ -177,7 +178,7 @@ export function BellModel({ ring, hot }: { ring: number; hot: boolean }) {
   })
 
   return (
-    <group position={[0.03, 0.02, 0]} rotation={[-0.08, -0.32, 0]}>
+    <group position={[0.0, 0.0, 0]} rotation={[-0.08, -0.32, 0]}>
       {/* the wooden board, its screws and the two terminals */}
       <RoundedBox args={[2.5, 1.68, 0.12]} radius={0.03} smoothness={2} position={[0, 0, -0.06]}>
         <meshStandardMaterial color="#7a4226" roughness={0.55} />

@@ -142,6 +142,12 @@ export type PresetId =
   | 'weatherStation'
   | 'airportBoard'
   | 'cinemaSign'
+  // talk to the AI board
+  | 'aiSmartHome'
+  | 'aiTrafficLight'
+  | 'aiPartyLights'
+  | 'aiPlantHelper'
+  | 'aiRobotPet'
 
 /** Words some presets show on their screens, in the app's language. An empty string shows the screen's own sample. */
 export type PresetTexts = {
@@ -2431,6 +2437,122 @@ const PRESETS: Record<PresetId, Preset> = {
       { key: 'b6', pin: 'D13', type: 'led', color: 'yellow', ohms: 220, wire: 'yellow' },
     ]),
   ),
+
+  // ── talk to the AI board ──
+  // Each opens with a program already running, so something works before anyone asks;
+  // then the child tells the board in their own words what to change.
+
+  // the lamp comes on in the dark; ask for the fan (a motor on its own battery) or the doorbell
+  aiSmartHome: join(
+    {
+      parts: [
+        { key: 'board', type: 'aiBoard', x: 0, y: 0, data: program('aiBoard', { P2: 'invert' }) },
+        { key: 'ldr', type: 'ldr', x: -330, y: -230, rotation: 90, data: { light: 0.15 } },
+        { key: 'div', type: 'resistor', x: -330, y: 30, rotation: 90, data: { resistance: 1000 } },
+        { key: 'rb', type: 'resistor', x: 330, y: -250, data: { resistance: 1000 } },
+        { key: 'q', type: 'transistor', x: 620, y: -250 },
+        { key: 'fan', type: 'motor', x: 870, y: -520, rotation: 90 },
+        { key: 'fanBat', type: 'battery', x: 1110, y: -520, rotation: 270, data: { voltage: 3 } },
+      ],
+      wires: [
+        ['board:5V', 'ldr:a', 'red'],
+        ['ldr:b', 'board:IN', 'yellow'],
+        ['ldr:b', 'div:a', 'yellow'],
+        ['div:b', 'board:GND', 'black'],
+        ['board:P1', 'rb:a', 'blue'],
+        ['rb:b', 'q:B', 'blue'],
+        ['fanBat:a', 'fan:a', 'red'],
+        ['fan:b', 'q:C', 'yellow'],
+        ['q:E', 'fanBat:b', 'black'],
+        ['fanBat:b', 'lamp:b', 'black'],
+      ],
+    },
+    outputs(
+      'board',
+      [
+        { key: 'bell', pin: 'P3', type: 'buzzer', ohms: 100, wire: 'blue' },
+        { key: 'lamp', pin: 'P2', type: 'led', color: 'white', ohms: 100, wire: 'white' },
+      ],
+      'div:b',
+    ),
+  ),
+  // red, then green, then yellow, like the street; ask it to flash yellow at night
+  aiTrafficLight: join(
+    { parts: [{ key: 'board', type: 'aiBoard', x: 0, y: 0, data: program('aiBoard', { P3: 'step1', P1: 'step2', P2: 'step3' }) }], wires: [] },
+    outputs('board', [
+      { key: 'red', pin: 'P3', type: 'led', color: 'red', ohms: 220, wire: 'white' },
+      { key: 'yellow', pin: 'P2', type: 'led', color: 'yellow', ohms: 220, wire: 'yellow' },
+      { key: 'green', pin: 'P1', type: 'led', color: 'green', ohms: 220, wire: 'green' },
+    ]),
+  ),
+  // three lights run one after another and the gold one breathes; ask for a new dance
+  aiPartyLights: join(
+    {
+      parts: [
+        { key: 'board', type: 'aiBoard', x: 0, y: 0, data: program('aiBoard', { P4: 'step1', P3: 'step2', P2: 'step3', P1: 'fade' }) },
+      ],
+      wires: [],
+    },
+    outputs('board', [
+      { key: 'red', pin: 'P4', type: 'led', color: 'red', ohms: 220, wire: 'white' },
+      { key: 'green', pin: 'P3', type: 'led', color: 'green', ohms: 220, wire: 'green' },
+      { key: 'blue', pin: 'P2', type: 'led', color: 'blue', ohms: 100, wire: 'blue' },
+      { key: 'gold', pin: 'P1', type: 'led', color: 'yellow', ohms: 220, wire: 'yellow' },
+    ]),
+  ),
+  // dry soil: the red light is on and the pump runs; wet soil: the green light. Ask it to change the rules
+  aiPlantHelper: join(
+    {
+      parts: [
+        { key: 'board', type: 'aiBoard', x: 0, y: 0, data: program('aiBoard', { P1: 'invert', P2: 'follow', P3: 'invert' }) },
+        { key: 'rb', type: 'resistor', x: 330, y: -250, data: { resistance: 1000 } },
+        { key: 'q', type: 'transistor', x: 620, y: -250 },
+        { key: 'pump', type: 'motor', x: 870, y: -520, rotation: 90 },
+        { key: 'pumpBat', type: 'battery', x: 1110, y: -520, rotation: 270, data: { voltage: 3 } },
+      ],
+      wires: [
+        ['board:P1', 'rb:a', 'blue'],
+        ['rb:b', 'q:B', 'blue'],
+        ['pumpBat:a', 'pump:a', 'red'],
+        ['pump:b', 'q:C', 'yellow'],
+        ['q:E', 'pumpBat:b', 'black'],
+        ['pumpBat:b', 'happy:b', 'black'],
+      ],
+    },
+    sensorFor('board', 'aiBoard', 'soilSensor', { sense: 0.25 }),
+    outputs(
+      'board',
+      [
+        { key: 'thirsty', pin: 'P3', type: 'led', color: 'red', ohms: 220, wire: 'white' },
+        { key: 'happy', pin: 'P2', type: 'led', color: 'green', ohms: 220, wire: 'green' },
+      ],
+      'sensor:GND',
+    ),
+  ),
+  // the tail (a servo) wags and the blue eyes shine; ask it to beep when you touch it
+  aiRobotPet: join(
+    {
+      parts: [
+        { key: 'board', type: 'aiBoard', x: 0, y: 0, data: program('aiBoard', { P1: 'fade', P3: 'on', P4: 'on' }) },
+        { key: 'tail', type: 'servo', ...ABOVE_BOARD },
+      ],
+      wires: [
+        ['board:5V', 'tail:VCC', 'red'],
+        ['tail:GND', 'board:GND', 'black'],
+        ['board:P1', 'tail:OUT', 'yellow'],
+      ],
+    },
+    sensorFor('board', 'aiBoard', 'touchSensor'),
+    outputs(
+      'board',
+      [
+        { key: 'voice', pin: 'P5', type: 'buzzer', ohms: 100, wire: 'white' },
+        { key: 'eyeL', pin: 'P4', type: 'led', color: 'blue', ohms: 100, wire: 'blue' },
+        { key: 'eyeR', pin: 'P3', type: 'led', color: 'blue', ohms: 100, wire: 'blue' },
+      ],
+      'sensor:GND',
+    ),
+  ),
 }
 
 /** How hard an example is to understand: 1 easy, 2 medium, 3 hard. */
@@ -2449,6 +2571,7 @@ export type PresetCategory =
   | 'home'
   | 'games'
   | 'screens'
+  | 'ai'
 
 export const PRESET_CATEGORIES: readonly PresetCategory[] = [
   'first',
@@ -2457,6 +2580,7 @@ export const PRESET_CATEGORIES: readonly PresetCategory[] = [
   'logic',
   'boards',
   'smart',
+  'ai',
   'sound',
   'motion',
   'home',
@@ -2604,6 +2728,12 @@ export const PRESET_INFO: Record<PresetId, PresetInfo> = {
   weatherStation: { category: 'screens', level: 2, art: ['tempSensor', 'oled', 'lcd'] },
   airportBoard: { category: 'screens', level: 2, art: ['powerSupply', 'lcd', 'segment'] },
   cinemaSign: { category: 'screens', level: 2, art: ['mega', 'led:yellow', 'matrix'] },
+
+  aiTrafficLight: { category: 'ai', level: 1, art: ['aiBoard', 'led:red', 'led:yellow', 'led:green'] },
+  aiPartyLights: { category: 'ai', level: 1, art: ['aiBoard', 'led:red', 'led:green', 'led:blue'] },
+  aiRobotPet: { category: 'ai', level: 2, art: ['touchSensor', 'aiBoard', 'servo', 'led:blue'] },
+  aiSmartHome: { category: 'ai', level: 2, art: ['ldr', 'aiBoard', 'motor', 'buzzer'] },
+  aiPlantHelper: { category: 'ai', level: 3, art: ['soilSensor', 'aiBoard', 'transistor', 'motor'] },
 }
 
 /** Every example, shelf by shelf, easiest first. */

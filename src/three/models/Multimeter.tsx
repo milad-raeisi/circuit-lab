@@ -15,20 +15,24 @@ import { METAL, merge, useBuilt } from './shared'
  */
 
 const W = 1.72
-const H = 2.5
+const H = 2.3
 const D = 0.46
 /** the dark face panel, inside the boot's rim */
 const FACE_W = W - 0.18
 const FACE_H = H - 0.18
 /** front plane of the face */
 const ZF = D / 2 + 0.02
-const LCD_Y = 0.68
-const BEZEL: [number, number] = [1.44, 0.8]
-const GLASS: [number, number] = [1.32, 0.62]
-const DIAL_Y = -0.26
-const KNOB_R = 0.29
-const LEGEND_R = 0.5
-const JACK_Y = -0.86
+const LCD_Y = 0.6
+const BEZEL: [number, number] = [1.44, 0.84]
+const GLASS: [number, number] = [1.32, 0.66]
+/** the HOLD and RANGE keys under the LCD */
+const KEY_Y = 0.06
+const DIAL_Y = -0.33
+const KNOB_R = 0.28
+const LEGEND_R = 0.48
+const JACK_Y = -0.8
+/** the little light that comes on with the beep */
+const BEEP_AT: [number, number] = [0.6, -0.44]
 const JACK_X = 0.32
 const BOOT = '#f2b10a'
 const FACE = '#2a2e35'
@@ -39,15 +43,15 @@ const DIAL_ANGLE: Record<MeterDial, number> = { volts: 70 * DEG, amps: 26 * DEG,
 /* ------------------------------------------------------------------ LCD */
 
 const LCD_W = 576
-const LCD_H = 272
+const LCD_H = 288
 /** digit cells: a sign cell, then four digits */
-const SIGN_X = 16
-const CELL_X = 52
-const CELL_W = 82
-const PITCH = 103
-const DIGIT_Y = 52
-const DIGIT_H = 172
-const T = 15
+const SIGN_X = 14
+const CELL_X = 50
+const CELL_W = 90
+const PITCH = 106
+const DIGIT_Y = 44
+const DIGIT_H = 198
+const T = 16
 
 const LIT = '#1a201b'
 const GHOST = 'rgba(26, 38, 26, 0.075)'
@@ -232,7 +236,7 @@ function drawLcd(ctx: CanvasRenderingContext2D, dial: MeterDial, text: string, u
   ctx.restore()
 
   // the little signs along the top: auto range, DC, continuity, beeping, battery
-  const row = 27
+  const row = 24
   ctx.save()
   ctx.font = `700 22px ${PRINT_FONT}`
   ctx.textBaseline = 'middle'
@@ -254,7 +258,7 @@ function drawLcd(ctx: CanvasRenderingContext2D, dial: MeterDial, text: string, u
   const on = text === 'OL' ? 0 : Math.min(bars, Math.round((counts / 2000) * bars))
   for (let i = 0; i < bars; i++) {
     lit(i < on)
-    ctx.fillRect(40 + i * 12.6, 238 + (i % 5 === 0 ? -4 : 0), 8, i % 5 === 0 ? 16 : 12)
+    ctx.fillRect(40 + i * 12.6, 256 + (i % 5 === 0 ? -4 : 0), 8, i % 5 === 0 ? 15 : 11)
   }
 
   // the edge of the glass sits in the shade of the bezel
@@ -368,13 +372,13 @@ function facePrint() {
     // the two buttons' names
     ctx.fillStyle = grey
     ctx.font = `700 ${0.05 * ppu}px ${PRINT_FONT}`
-    ctx.fillText('HOLD', X(-0.56), Y(0.235))
-    ctx.fillText('RANGE', X(0.56), Y(0.235))
+    ctx.fillText('HOLD', X(-0.56), Y(KEY_Y + 0.1))
+    ctx.fillText('RANGE', X(0.56), Y(KEY_Y + 0.1))
 
     // the beep light's little speaker
     ctx.fillStyle = grey
     ctx.save()
-    ctx.translate(X(0.6), Y(-0.5))
+    ctx.translate(X(BEEP_AT[0]), Y(BEEP_AT[1] - 0.1))
     ctx.scale(0.0026 * ppu, 0.0026 * ppu)
     ctx.strokeStyle = grey
     speakerIcon(ctx, -10, 0)
@@ -514,7 +518,7 @@ function BeepLight({ beep }: { beep: boolean }) {
     glow.current = lit.current * 0.8
   })
   return (
-    <group position={[0.6, -0.4, ZF]}>
+    <group position={[BEEP_AT[0], BEEP_AT[1], ZF]}>
       <mesh position={[0, 0, 0.01]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.055, 0.058, 0.02, 24]} />
         <meshStandardMaterial {...METAL} />
@@ -615,8 +619,8 @@ function Probe({ at, angle, color, dark }: { at: [number, number, number]; angle
 
 /** The probes lie on the bench, a little lower than the meter's face. */
 const BENCH_Z = -D / 2 + 0.085
-const RED_PROBE = { at: [-1.13, -0.98, BENCH_Z] as [number, number, number], angle: 0.11 }
-const BLACK_PROBE = { at: [1.15, -0.95, BENCH_Z] as [number, number, number], angle: -0.06 }
+const RED_PROBE = { at: [-1.13, -0.9, BENCH_Z] as [number, number, number], angle: 0.11 }
+const BLACK_PROBE = { at: [1.15, -0.87, BENCH_Z] as [number, number, number], angle: -0.06 }
 
 /** the cable from a plug's tail, over the boot's edge, down to the bench and round into its probe */
 function cable(side: 1 | -1, probe: { at: [number, number, number]; angle: number }): [number, number, number][] {
@@ -660,7 +664,7 @@ export function MultimeterModel({
   const rim = useBuilt(rimGeometry)
   const print = facePrint()
   return (
-    <group position={[0, 0.02, 0]} rotation={[-0.8, 0.14, 0]}>
+    <group position={[0, 0.02, 0]} rotation={[-0.74, 0.14, 0]}>
       {/* the yellow boot, its raised rim and the moulding seam round its side */}
       <RoundedBox args={[W, H, D]} radius={0.1} smoothness={3}>
         <meshStandardMaterial color={BOOT} roughness={0.78} />
@@ -683,18 +687,18 @@ export function MultimeterModel({
       </mesh>
 
       <Lcd dial={dial} text={text} unit={unit} beep={beep} />
-      <Key x={-0.56} y={0.14} />
-      <Key x={0.56} y={0.14} />
+      <Key x={-0.56} y={KEY_Y} />
+      <Key x={0.56} y={KEY_Y} />
       <Knob dial={dial} />
       <BeepLight beep={beep} />
 
       {/* red VΩA on the left, black COM on the right, like the card's terminals */}
       <Plug x={-JACK_X} side={-1} color="#d32020" shroud="#b91c1c" />
-      <Plug x={JACK_X} side={1} color="#1c1d21" shroud="#0f0f12" />
+      <Plug x={JACK_X} side={1} color="#25272c" shroud="#121316" />
       <Lead points={RED_CABLE} radius={0.04} color="#c81e1e" />
-      <Lead points={BLACK_CABLE} radius={0.04} color="#1f2024" />
+      <Lead points={BLACK_CABLE} radius={0.04} color="#28292e" />
       <Probe at={RED_PROBE.at} angle={RED_PROBE.angle} color="#d32020" dark="#991b1b" />
-      <Probe at={BLACK_PROBE.at} angle={BLACK_PROBE.angle} color="#1f2024" dark="#0a0a0c" />
+      <Probe at={BLACK_PROBE.at} angle={BLACK_PROBE.angle} color="#2a2c31" dark="#121317" />
     </group>
   )
 }

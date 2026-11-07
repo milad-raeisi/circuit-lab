@@ -166,6 +166,16 @@ export const enLearn: LearnBook = {
       like: 'It is like a whole desktop computer shrunk down to fit in your pocket.',
       fact: 'The Raspberry Pi was made to help children learn coding, and tens of millions of them have been sold around the world.',
     },
+    aiBoard: {
+      about: [
+        'The AI board has a helper inside called a language model: a computer program that has read a huge amount of writing, so it can understand your words and write back.',
+        'Ollama is a free app that runs the model on your own computer, not on the internet. Your words stay at home.',
+        'When you ask for something, the AI picks a program for each pin, like on, blink or fade, and the board runs it. It can only pick programs the pins already have.',
+        'AI can make mistakes. Look at the pins and the parts to check what it really did.',
+      ],
+      like: 'It is like asking a friend to work the switches for you: you say what you want, and your friend flips them.',
+      fact: 'A language model does not think like a person. It guesses the next word, again and again, very fast.',
+    },
     switch: {
       about: [
         'A switch opens or closes a gap in the loop. Closed (on), current flows. Open (off), the loop is broken and everything stops.',
@@ -740,6 +750,186 @@ export const enLearn: LearnBook = {
       ],
       like: 'It is like the heart monitor in a hospital, but for electricity.',
       fact: 'Engineers use oscilloscopes to see signals that change millions of times a second, much too fast for our eyes.',
+    },
+    zener: {
+      about: [
+        'A Zener diode is a diode that is happy to work backwards. Joined with its striped end toward +, it blocks the power until the push reaches 5.1 V.',
+        'Above 5.1 V it lets just enough through to hold the volts there. So a resistor and a Zener turn 9 V or 12 V into a steady 5.1 V.',
+        'Always put a resistor before it. Without one, too much current flows and it burns out.',
+      ],
+      like: 'It is like the overflow hole in a bathtub: the water can never get higher than the hole.',
+      fact: 'Zener diodes are named after Clarence Zener, the scientist who explained how they work.',
+    },
+    pnp: {
+      about: [
+        'A PNP transistor is the mirror of the NPN. Its E (emitter) goes to +, and the part it switches goes from C (collector) to −.',
+        'It turns on when a small current flows out of B (base), toward − through a resistor. Then a big current flows from E to C.',
+        'So the NPN switches the − side of a part, and the PNP switches the + side.',
+      ],
+      like: 'It is like a tap that opens when you pull the handle down instead of pushing it up.',
+      fact: 'Many circuits use an NPN and a PNP as a pair, one pushing and one pulling, like two kids on a seesaw.',
+    },
+    mosfet: {
+      about: [
+        'A MOSFET is a switch worked by volts, not by current. Put about 4 V on G (gate), and a big current can flow from D (drain) to S (source).',
+        'The gate is like a tiny capacitor: it takes almost no current, so a board pin can switch a big motor with it.',
+        'With only 2 or 3 V on G it is half on. Then it gets hot, so give G enough volts.',
+      ],
+      like: 'It is like a garden hose with a squeeze clip: press the clip a little, and water flows; press it all the way, and it gushes.',
+      fact: 'A computer chip has billions of tiny MOSFETs inside. They are the most made thing in the whole world!',
+    },
+    optocoupler: {
+      about: [
+        'An optocoupler has a little LED and a light sensor sealed inside one dark chip. Light the LED, and the sensor lets current flow from C to E.',
+        'The two sides are joined only by light, never by a wire. So one circuit can switch another with no electric path between them.',
+        'Its LED needs a resistor, just like any LED.',
+      ],
+      like: 'It is like flashing a torch at a friend across the street to tell them to start.',
+      fact: 'Optocouplers keep people safe inside chargers: the high voltage from the wall never touches the part you can hold.',
+    },
+    laser: {
+      about: [
+        'A laser module makes a beam of light that stays thin and straight, so it makes a sharp dot far away.',
+        'It has its own resistor inside, so you can join it straight to about 5 V.',
+        'Laser light is very strong. Never point it at anyone’s eyes, or at animals, cars or planes.',
+      ],
+      like: 'It is like water from a hose set to a thin jet, instead of a wide spray.',
+      fact: 'Scientists bounce lasers off mirrors left on the Moon to measure how far away it is, to a few centimetres!',
+    },
+    irLed: {
+      about: [
+        'An IR LED gives infrared light. It is a colour just past red that our eyes can’t see.',
+        'It works like a normal LED: + to +, and a resistor to keep it safe. It starts to shine at only 1.2 V.',
+        'Phone cameras can see infrared, so a TV remote looks purple through a camera when you press a button.',
+      ],
+      like: 'It is like a dog whistle: it is really there, but it is too high for us to notice.',
+      fact: 'A TV remote sends its buttons as a code of quick infrared flashes that the TV reads.',
+    },
+    solenoid: {
+      about: [
+        'A solenoid is a coil of wire with a loose iron rod inside. When current flows, the coil becomes a magnet and shoves the rod. Clack!',
+        'When the current stops, a spring pulls the rod back in.',
+        'It takes a lot of current, so a board pin can’t drive it alone. Let a MOSFET or a transistor switch it.',
+      ],
+      like: 'It is like a jack-in-the-box: press the switch and out it pops.',
+      fact: 'Door locks, pinball flippers and the valves in washing machines all use solenoids.',
+    },
+    pump: {
+      about: [
+        'A water pump has a small motor that spins a wheel with blades, called an impeller. The spinning wheel throws the water out through the tube.',
+        'More volts spin it faster, and the water goes higher. It needs about 1.5 V before it lifts any water at all.',
+        'This kind sits under the water. Running it dry for a long time can harm it.',
+      ],
+      like: 'It is like stirring a cup of tea so fast that the tea climbs up the sides.',
+      fact: 'Pumps like this water the plants in smart gardens and keep fish tanks bubbling.',
+    },
+    bell: {
+      about: [
+        'An electric bell has an electromagnet that pulls a little hammer onto a metal gong. Ding!',
+        'As the hammer moves, it breaks its own circuit, so the magnet lets go and a spring pulls the hammer back. Then it all starts again, many times a second.',
+        'That is why one steady battery can make it ring and ring.',
+      ],
+      like: 'It is like a woodpecker tapping a tree: tap, back, tap, back, as long as it has energy.',
+      fact: 'School bells and old fire alarms used this same clever trick for more than 150 years.',
+    },
+    barGraph: {
+      about: [
+        'A bar graph is ten small lights in a row. A chip on its board measures the voltage on IN and lights more bars as it goes higher.',
+        'No bars means IN is at −. All ten bars means IN is as high as +. Five bars means half way.',
+        'The bars go green, then yellow, then red, so you can see at a glance when it is getting high.',
+      ],
+      like: 'It is like the fuel gauge in a car, or the battery bars on a phone.',
+      fact: 'Music players use bar graphs that jump up and down with the beat. They are called VU meters.',
+    },
+    trafficLight: {
+      about: [
+        'This module has a red, a yellow and a green LED, each with its own resistor already inside.',
+        'Join − to −, and any of R, Y or G to + to light that colour. It is just right for a board’s pins.',
+        'Program a board to light them one after another, and you have a real traffic light!',
+      ],
+      like: 'It is like a tiny copy of the lights on the street corner.',
+      fact: 'The first electric traffic light was put up in Cleveland, USA, in 1914. It only had red and green.',
+    },
+    fan: {
+      about: [
+        'A fan is a small motor with angled blades. When the blades spin, they push air through, which cools things down.',
+        'This fan has a little circuit inside, so it only spins with + to + and − to −.',
+        'It is made for 5 V. Fewer volts make it slower and quieter.',
+      ],
+      like: 'It is like a paper windmill, but here the motor turns the blades to make the wind.',
+      fact: 'There is a fan like this inside most computers and game consoles to stop the chips from getting too hot.',
+    },
+    nandGate: {
+      about: [
+        'A NAND gate is an AND gate with a NOT on the end. Y is on, unless A and B are both on.',
+        'The little circle at the tip of its symbol means “the opposite”.',
+        'Like every logic chip, it needs power on + and −.',
+      ],
+      like: 'It is like a nightlight that stays on unless the door is shut and the big light is on.',
+      fact: 'With enough NAND gates you can build any other gate, and even a whole computer!',
+    },
+    norGate: {
+      about: [
+        'A NOR gate is an OR gate with a NOT on the end. Y is on only when A and B are both off.',
+        'If even one input turns on, Y turns off.',
+        'Like every logic chip, it needs power on + and −.',
+      ],
+      like: 'It is like a quiet room sign that only lights up when nobody is talking and no music is playing.',
+      fact: 'The computer that flew the Apollo astronauts to the Moon was built almost entirely from NOR gates.',
+    },
+    latch: {
+      about: [
+        'A latch is a tiny memory. A pulse on S (set) turns Q on, and Q stays on even after you let go.',
+        'A pulse on R (reset) turns Q off again. With both off, it simply remembers.',
+        'Take its power away and it forgets, just like a computer’s memory.',
+      ],
+      like: 'It is like a light switch: you flick it once and it stays where you left it.',
+      fact: 'A computer’s memory has billions of tiny latches. Each one remembers a single 1 or 0.',
+    },
+    counter: {
+      about: [
+        'The 4017 counter has a row of outputs, and only one is on at a time. Each pulse on CLK moves the “on” to the next one: 0, 1, 2, 3, 4, then back to 0.',
+        'Feed it pulses from a 555 blinker, and its lights chase each other along the row.',
+        'A pulse on RST sends it back to 0. Join an output to RST, and it counts only up to that number.',
+      ],
+      like: 'It is like passing a ball around a circle of friends: each clap, the ball moves on by one.',
+      fact: 'Chasing lights on shop signs and fairground rides were often made with this very chip.',
+    },
+    comparator: {
+      about: [
+        'A comparator looks at two voltages, on IN+ and IN−. When IN+ is higher, OUT turns on. When IN+ is lower, OUT turns off.',
+        'Put a sensor on IN+ and a knob on IN−. The knob sets the point where it switches.',
+        'It only listens to its inputs, so it does not change the circuits it watches.',
+      ],
+      like: 'It is like a referee who only says which of two players is taller.',
+      fact: 'Thermostats use a comparator to switch the heating on when the room is colder than you set.',
+    },
+    hBridge: {
+      about: [
+        'A motor driver lets a weak board pin control a strong motor, forwards and backwards.',
+        'Inside, four switches make the shape of a letter H around the motor. IN1 on: current flows one way, so the motor goes forward. IN2 on: it flows the other way, so the motor goes back.',
+        'The motor gets its power from the driver’s own + and −, not from the board’s pins.',
+      ],
+      like: 'It is like a railway switch that sends the train left or right, but for current.',
+      fact: 'Every robot car and toy drone has motor drivers to steer by spinning wheels or propellers.',
+    },
+    multimeter: {
+      about: [
+        'A multimeter is three meters in one. Turn the dial to V for volts, A for amps or Ω for ohms. It is the first tool every maker buys.',
+        'For volts, touch the probes to both sides of a part. For amps, open the loop and let the current go through the meter. For ohms, take the power away and touch both ends of a part.',
+        'On the beep setting, it beeps when its two probes are joined. That is great for finding broken wires!',
+      ],
+      like: 'It is like a doctor’s bag with a thermometer, a stethoscope and a scale, all in one.',
+      fact: 'The first meter that could measure volts, amps and ohms was invented in 1920 by a post office engineer.',
+    },
+    logicProbe: {
+      about: [
+        'A logic probe tells you what a wire in a logic circuit is doing. The red light means HIGH, the green light means LOW.',
+        'The PULSE light flashes whenever the wire changes, even if it changes too fast for you to see.',
+        'Clip its + and − to your circuit’s power, then touch the tip to the wire you want to test.',
+      ],
+      like: 'It is like a doctor listening to a heartbeat with a stethoscope.',
+      fact: 'Before computers were small, engineers used logic probes to hunt for faults in machines as big as a room.',
     },
   },
 }

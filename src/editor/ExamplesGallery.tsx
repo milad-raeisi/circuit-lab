@@ -49,6 +49,7 @@ const SHELVES: Record<PresetCategory, { accent: string; art: PartType }> = {
   motion: { accent: '#4f46e5', art: 'servo' },
   home: { accent: '#a16207', art: 'rgbLed' },
   games: { accent: '#c026d3', art: 'button' },
+  ai: { accent: '#6d5bd0', art: 'aiBoard' },
   screens: { accent: '#db2777', art: 'segment' },
 }
 
@@ -390,7 +391,11 @@ function LevelFilter({ level, onLevel, compact }: { level: LevelChoice; onLevel:
     <div
       role="radiogroup"
       aria-label={t.gallery.levelFilter}
-      className={cn('grid shrink-0 grid-cols-4 gap-0.5 rounded-md border bg-muted p-0.5', compact ? 'h-9 w-full' : 'h-10')}
+      // on phones "All levels" gets a little more room than the three short words
+      className={cn(
+        'grid shrink-0 gap-0.5 rounded-md border bg-muted p-0.5',
+        compact ? 'h-9 w-full grid-cols-[1.4fr_1fr_1fr_1fr]' : 'h-10 grid-cols-4',
+      )}
     >
       {choices.map((choice) => (
         <button
@@ -400,7 +405,7 @@ function LevelFilter({ level, onLevel, compact }: { level: LevelChoice; onLevel:
           aria-checked={level === choice}
           onClick={() => onLevel(choice)}
           className={cn(
-            'flex min-w-0 items-center justify-center gap-1.5 rounded-[5px] px-2.5 text-xs font-medium whitespace-nowrap transition',
+            'flex min-w-0 items-center justify-center gap-1.5 rounded-[5px] px-2 text-xs font-medium whitespace-nowrap transition',
             'outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
             level === choice
               ? 'bg-card text-foreground shadow-sm ring-1 ring-foreground/10'

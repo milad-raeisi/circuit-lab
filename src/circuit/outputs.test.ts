@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { COUNTER_OUTPUTS, createPartData, gateOutput, isTimeDependent } from './catalog'
+import { ar } from '@/i18n/ar'
+import { en } from '@/i18n/en'
+import { fa } from '@/i18n/fa'
+import { arLearn } from '@/i18n/learn/ar'
+import { enLearn } from '@/i18n/learn/en'
+import { faLearn } from '@/i18n/learn/fa'
+import { COUNTER_OUTPUTS, PARTS, PART_ORDER, createPartData, gateOutput, isTimeDependent } from './catalog'
 import { OPEN_LOOP, barsLit, bridgeDirection, latchNext, meterReading, mosfetStep } from './devices'
 import { solveCircuit, type NetPart, type NetWire, type SimResult, type SolveOptions } from './solver'
 import type { PartData, PartType } from './types'
@@ -566,30 +572,50 @@ describe('meters', () => {
   })
 })
 
+const NEW_PARTS: PartType[] = [
+  'zener',
+  'pnp',
+  'mosfet',
+  'optocoupler',
+  'laser',
+  'irLed',
+  'solenoid',
+  'pump',
+  'bell',
+  'barGraph',
+  'trafficLight',
+  'fan',
+  'nandGate',
+  'norGate',
+  'latch',
+  'counter',
+  'comparator',
+  'hBridge',
+  'multimeter',
+  'logicProbe',
+]
+
 describe('every new part', () => {
+  it('is in the parts tray and speaks English, Persian and Arabic, with a lesson in each', () => {
+    for (const type of NEW_PARTS) {
+      expect(PART_ORDER).toContain(type)
+      expect(Object.keys(PARTS[type].terminals).length).toBeGreaterThan(1)
+      for (const [dictionary, book] of [
+        [en, enLearn],
+        [fa, faLearn],
+        [ar, arLearn],
+      ] as const) {
+        const words = dictionary.parts[type]
+        expect(words.name && words.description && words.working, type).toBeTruthy()
+        const lesson = book.parts[type]
+        expect(lesson?.about.length, type).toBeGreaterThanOrEqual(3)
+        expect(lesson?.like && lesson.fact, type).toBeTruthy()
+      }
+    }
+  })
+
   it('sits on an empty board without making a sound or burning', () => {
-    const types: PartType[] = [
-      'zener',
-      'pnp',
-      'mosfet',
-      'optocoupler',
-      'laser',
-      'irLed',
-      'solenoid',
-      'pump',
-      'bell',
-      'barGraph',
-      'trafficLight',
-      'fan',
-      'nandGate',
-      'norGate',
-      'latch',
-      'counter',
-      'comparator',
-      'hBridge',
-      'multimeter',
-      'logicProbe',
-    ]
+    const types = NEW_PARTS
     const result = run(types.map((type, i) => part(`p${i}`, type)), [], 3)
     for (const r of Object.values(result.parts)) {
       expect(r.damaged).toBe(false)

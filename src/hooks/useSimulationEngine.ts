@@ -5,10 +5,13 @@ import { isTimeDependent } from '@/circuit/catalog'
 import { DEFAULT_STEP, EMPTY_RESULT, solveCircuit, type PartResult, type SimResult } from '@/circuit/solver'
 import type { PartNode, PartType, WireEdge } from '@/circuit/types'
 import {
+  playClack,
   playClick,
   playPop,
   playSuccess,
+  setBellLevel,
   setBuzzerLevel,
+  setContinuityBeep,
   setMotorLevel,
   setSiren,
   setSizzle,
@@ -58,6 +61,8 @@ function electricalKey(nodes: PartNode[], edges: WireEdge[]) {
       d.cells,
       d.stickX,
       d.stickY,
+      // the multimeter's dial changes what it does to the circuit
+      d.dial,
       d.pins ? Object.values(d.pins).join('') : '',
     ].join(','),
   )
@@ -181,6 +186,13 @@ export function useSimulationEngine() {
         const now = result.parts[node.id]?.level ?? 0
         if (before !== now) playClick(now === 1)
       }
+      // a solenoid's rod clacks out and back
+      for (const node of nodes) {
+        if (node.data.type !== 'solenoid') continue
+        const before = (previous.parts[node.id]?.level ?? 0) > 0
+        const now = (result.parts[node.id]?.level ?? 0) > 0
+        if (before !== now) playClack(now)
+      }
 
       // parts that received too much power burn out (this re-runs the solver).
       // A blown fuse cuts the power first, so it protects everything else.
@@ -207,6 +219,8 @@ export function useSimulationEngine() {
       let tone = 0
       let pitch = 0
       let loudest = 0
+      let ring = 0
+      let beeping = false
       for (const node of nodes) {
         const r = result.parts[node.id]
         if (!r) continue
@@ -225,6 +239,10 @@ export function useSimulationEngine() {
         if (node.data.type === 'motor') hum = Math.max(hum, Math.abs(r.level))
         // a coin motor only buzzes softly
         if (node.data.type === 'vibration') hum = Math.max(hum, Math.abs(r.level) * 0.5)
+        // a fan whirs and a pump hums quietly
+        if (node.data.type === 'fan' || node.data.type === 'pump') hum = Math.max(hum, Math.abs(r.level) * 0.4)
+        if (node.data.type === 'bell') ring += r.level
+        if (node.data.type === 'multimeter' && r.channels?.beep === 1) beeping = true
         if (node.data.type === 'speaker' && !node.data.burnt) {
           tone += r.level
           // the loudest speaker picks the note
@@ -238,6 +256,8 @@ export function useSimulationEngine() {
       setSiren(siren, sirenSound)
       setMotorLevel(hum)
       setSpeakerTone(tone, pitch)
+      setBellLevel(ring)
+      setContinuityBeep(beeping)
 
       // missions
       for (const node of nodes) {

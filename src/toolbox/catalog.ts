@@ -224,9 +224,12 @@ export const STARTER_KIT: ToolId[] = [
 
 /** Tools that have a part on the board to try them out with. */
 export const BOARD_PARTS: Partial<Record<ToolId, PartType[]>> = {
-  multimeter: ['voltmeter', 'ammeter'],
+  multimeter: ['multimeter', 'voltmeter', 'ammeter'],
   clampMeter: ['ammeter'],
+  logicProbe: ['logicProbe'],
   oscilloscope: ['oscilloscope'],
-  benchSupply: ['powerSupply'],
   batteryHolder: ['battery'],
+  coinCells: ['coinCell'],
+  usbPower: ['powerBank'],
+  benchSupply: ['powerSupply'],
 }

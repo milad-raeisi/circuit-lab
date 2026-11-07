@@ -7,6 +7,7 @@ import type { SimResult } from '@/circuit/solver'
 import type { PartNode } from '@/circuit/types'
 import { useCircuit } from '@/store/circuit'
 import { useSimulation } from '@/store/simulation'
+import { anyThinking, useAiChat } from '@/ai/store'
 
 /** Views render at this priority; the clear pass runs just before them. */
 export const VIEW_PRIORITY = 2
@@ -66,6 +67,16 @@ function hasAmbientMotion(nodes: PartNode[], result: SimResult) {
         return (data.level ?? 0) > 0.01 // the crank turning
       case 'powerBank':
         return r.status === 'over' // its lights blink at the limit
+      case 'fan':
+        return r.level > 0.02 || r.status === 'over' // spinning blades and air, smoke
+      case 'pump':
+        return r.level > 0 // flowing water
+      case 'bell':
+        return r.level > 0 || r.status === 'over' // the hammer ringing, smoke
+      case 'solenoid':
+      case 'mosfet':
+      case 'hBridge':
+        return r.status === 'over' // smoke
       default:
         return false
     }
@@ -111,7 +122,8 @@ function useFrameScheduler(root: React.RefObject<RootState | null>) {
     const updateAmbient = () => {
       // a paused board is frozen: nothing needs drawing until something changes
       const { running, result } = useSimulation.getState()
-      ambient = running && hasAmbientMotion(useCircuit.getState().nodes, result)
+      // an AI board's ring of lights runs while its model thinks, even on a paused board
+      ambient = (running && hasAmbientMotion(useCircuit.getState().nodes, result)) || anyThinking()
       if (ambient && !raf) raf = requestAnimationFrame(loop)
     }
 
@@ -130,6 +142,12 @@ function useFrameScheduler(root: React.RefObject<RootState | null>) {
       // panning and zooming move every view
       flowStore.subscribe((s, prev) => {
         if (s.transform !== prev.transform) wake()
+      }),
+      // an AI board starts or stops thinking; the wake lets its ring fade out smoothly
+      useAiChat.subscribe((s, prev) => {
+        if (s.pending === prev.pending) return
+        updateAmbient()
+        wake()
       }),
     ]
     window.addEventListener('resize', wake)

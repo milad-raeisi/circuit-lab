@@ -11,6 +11,8 @@ export type PartType =
   | 'pico'
   | 'microbit'
   | 'raspberrypi'
+  // a board you talk to: a language model on your own computer (Ollama) sets its pins
+  | 'aiBoard'
   | 'switch'
   | 'button'
   | 'dimmer'

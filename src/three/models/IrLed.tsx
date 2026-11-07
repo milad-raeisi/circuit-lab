@@ -42,7 +42,8 @@ export function IrLedModel({ level, burnt, camera }: { level: number; burnt: boo
     const target = !burnt && camera ? Math.min(1.3, Math.max(0, level)) : 0
     seen.current = damp(seen.current, target, 18, dt)
     const b = seen.current
-    for (const m of [lens.current, dome.current]) if (m) m.emissiveIntensity = b * 0.45
+    if (lens.current) lens.current.emissiveIntensity = b * 0.45
+    if (dome.current) dome.current.emissiveIntensity = b * 0.45
     if (die.current) die.current.emissiveIntensity = b * 7
     if (light.current) light.current.intensity = b * 2.2
     glow.current = b * 0.7
@@ -129,7 +130,10 @@ export function IrLedModel({ level, burnt, camera }: { level: number; burnt: boo
       <Halo color={SEEN} intensity={glow} position={[0, 0.3, 0.12]} scale={1.7} />
       <Halo color="#ffffff" intensity={core} position={[0.06, 0.22, 0.1]} scale={0.5} />
       <pointLight ref={light} position={[0, 0.35, 0.5]} color={SEEN} intensity={0} distance={3} decay={1.5} />
-      <Smoke active={burnt} position={[0, 0.65, 0]} rise={0.45} />
+      {/* small puffs, so they fade before the top of the window */}
+      <group position={[0, 0.5, 0]} scale={0.55}>
+        <Smoke active={burnt} position={[0, 0, 0]} rise={0.3} />
+      </group>
     </group>
   )
 }

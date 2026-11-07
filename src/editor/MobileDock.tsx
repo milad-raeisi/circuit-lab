@@ -12,6 +12,7 @@ import { InspectorBody } from './Inspector'
 import { Missions } from './Missions'
 import { PartArt } from './PartArt'
 import { PartTray } from './PartsSidebar'
+import { useAiChat } from '@/ai/store'
 
 type Panel = 'parts' | 'missions' | 'details'
 
@@ -72,6 +73,18 @@ export function MobileDock() {
   const show = (next: Panel) => {
     setPanel(next)
     setOpen(true)
+  }
+
+  // an AI board's "Ask" button opens its chat in the details sheet
+  const askRequest = useAiChat((s) => s.openRequest?.n ?? 0)
+  const [lastAsk, setLastAsk] = useState(askRequest)
+  if (askRequest !== lastAsk) {
+    setLastAsk(askRequest)
+    // wide screens show the details in the side panel instead (Tailwind's lg breakpoint)
+    if (!window.matchMedia('(min-width: 64rem)').matches) {
+      setPanel('details')
+      setOpen(true)
+    }
   }
 
   const picked = part ? t.parts[part.data.type].name : wire ? t.inspector.wire : null

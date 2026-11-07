@@ -149,10 +149,15 @@ export function OptocouplerModel({
       <Lead points={[[LED_X + 0.02, 0.0, FRAME_Z + 0.07], [LED_X - 0.06, 0.16, FRAME_Z + 0.13], [-0.45, PIN_Y, FRAME_Z + 0.015]]} radius={0.007} color={GOLD.color} />
       <Lead points={[[EYE_X - 0.02, 0.01, FRAME_Z + 0.06], [EYE_X + 0.06, -0.15, FRAME_Z + 0.12], [0.45, -PIN_Y, FRAME_Z + 0.015]]} radius={0.007} color={GOLD.color} />
 
+      {/* the black lower half of the moulding: the lead frame lies on it */}
+      <mesh position={[0, 0, (-T / 2 + FRAME_Z - 0.012) / 2]}>
+        <boxGeometry args={[W - 0.03, H - 0.03, FRAME_Z - 0.012 + T / 2]} />
+        <meshStandardMaterial color={burnt ? '#0c0a09' : '#141217'} roughness={0.6} />
+      </mesh>
       {/* the clear silicone that carries the light across the gap */}
-      <mesh position={[0, 0, FRAME_Z + 0.04]} scale={[0.44, 0.2, 0.12]} renderOrder={3}>
+      <mesh position={[0, 0, FRAME_Z + 0.03]} scale={[0.42, 0.17, 0.09]} renderOrder={3}>
         <sphereGeometry args={[1, 28, 16]} />
-        <meshStandardMaterial color="#f5f3ff" transparent opacity={burnt ? 0.05 : 0.14} roughness={0.1} depthWrite={false} />
+        <meshStandardMaterial color="#ede9fe" transparent opacity={burnt ? 0.03 : 0.08} roughness={0.2} depthWrite={false} />
       </mesh>
       {/* the light crossing the gap: a bright core inside a wider soft cone */}
       <group position={[0, 0.005, FRAME_Z + 0.05]} rotation={[0, 0, -Math.PI / 2]}>
@@ -168,13 +173,13 @@ export function OptocouplerModel({
       <Halo color="#ff5a86" intensity={ledGlow} position={[LED_X + 0.04, -0.02, FRAME_Z + 0.12]} scale={0.75} />
       <Halo color="#4ade80" intensity={eyeGlow} position={[EYE_X, 0.03, FRAME_Z + 0.12]} scale={0.6} />
 
-      {/* the smoky case, drawn after everything inside it */}
+      {/* the smoky see-through case, drawn after everything inside it */}
       <RoundedBox args={[W, H, T]} radius={0.035} smoothness={2} renderOrder={5}>
         <meshStandardMaterial
-          color={burnt ? '#1c1310' : '#17141c'}
+          color={burnt ? '#1c1310' : '#3a3342'}
           transparent
-          opacity={burnt ? 0.92 : 0.7}
-          roughness={0.28}
+          opacity={burnt ? 0.92 : 0.34}
+          roughness={0.42}
           metalness={0.05}
           depthWrite={false}
         />
@@ -188,8 +193,8 @@ export function OptocouplerModel({
         <planeGeometry args={[0.5, 0.13]} />
         <meshStandardMaterial map={print} transparent opacity={burnt ? 0.3 : 0.9} roughness={0.7} depthWrite={false} />
       </mesh>
-      <group position={[0, 0, TOP]} scale={0.7}>
-        <Smoke active={burnt} position={[0, 0, 0]} rise={0.35} />
+      <group position={[0.1, 0.12, TOP]} scale={0.5}>
+        <Smoke active={burnt} position={[0, 0, 0]} rise={0.5} />
       </group>
     </group>
   )

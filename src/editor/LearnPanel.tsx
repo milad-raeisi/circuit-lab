@@ -1,18 +1,59 @@
 import { Gauge, Lightbulb, Sparkles, Waves, Zap } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useEffect, useSyncExternalStore, type ReactNode } from 'react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import type { PartResult } from '@/circuit/solver'
 import type { PartType } from '@/circuit/types'
 import { useI18n, type Lang } from '@/i18n'
-import { arLearn } from '@/i18n/learn/ar'
-import { enLearn } from '@/i18n/learn/en'
-import { faLearn } from '@/i18n/learn/fa'
 import type { LearnBook } from '@/i18n/learn/types'
 import { cn } from '@/lib/utils'
+import { useSettings } from '@/store/settings'
 
-const BOOKS: Record<Lang, LearnBook> = { en: enLearn, fa: faLearn, ar: arLearn }
+/*
+ * The lessons are long (three languages, every part), so they are not part of
+ * the app's first download: only the current language's book is fetched, the
+ * first time the app is idle, so it is ready before anyone opens a part.
+ */
+const LOADERS: Record<Lang, () => Promise<LearnBook>> = {
+  en: () => import('@/i18n/learn/en').then((m) => m.enLearn),
+  fa: () => import('@/i18n/learn/fa').then((m) => m.faLearn),
+  ar: () => import('@/i18n/learn/ar').then((m) => m.arLearn),
+}
+const books: Partial<Record<Lang, LearnBook>> = {}
+const loading = new Set<Lang>()
+const listeners = new Set<() => void>()
 
-const useBook = () => BOOKS[useI18n().lang]
+function loadBook(lang: Lang) {
+  if (books[lang] || loading.has(lang)) return
+  loading.add(lang)
+  LOADERS[lang]().then(
+    (book) => {
+      books[lang] = book
+      listeners.forEach((notify) => notify())
+    },
+    // a failed download (offline) is tried again next time
+    () => loading.delete(lang),
+  )
+}
+
+const subscribe = (notify: () => void) => {
+  listeners.add(notify)
+  return () => listeners.delete(notify)
+}
+
+/** The lessons in the current language, or undefined for the moment they take to load. */
+function useBook(): LearnBook | undefined {
+  const { lang } = useI18n()
+  const book = useSyncExternalStore(subscribe, () => books[lang])
+  useEffect(() => loadBook(lang), [lang])
+  return book
+}
+
+if (typeof window !== 'undefined') {
+  const preload = () => loadBook(useSettings.getState().lang)
+  // older Safari has no requestIdleCallback
+  if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(preload)
+  else setTimeout(preload, 1500)
+}
 
 const fmtVolts = (v: number) => `${Math.abs(v).toFixed(2)} V`
 const fmtAmps = (a: number) => (Math.abs(a) < 1 ? `${Math.round(Math.abs(a) * 1000)} mA` : `${Math.abs(a).toFixed(2)} A`)
@@ -72,7 +113,7 @@ function Callout({
 export function PartLesson({ type, result }: { type: PartType; result?: PartResult }) {
   const { t } = useI18n()
   const book = useBook()
-  const lesson = book.parts[type]
+  const lesson = book?.parts[type]
   const live = liveNumbers(result)
   return (
     <div className="space-y-3">
@@ -83,17 +124,17 @@ export function PartLesson({ type, result }: { type: PartType; result?: PartResu
           </p>
         ))}
       </div>
-      {lesson && (
+      {book && lesson && (
         <Callout icon={<Lightbulb />} title={book.labels.like} tone="amber">
           {lesson.like}
         </Callout>
       )}
-      {lesson && (
+      {book && lesson && (
         <Callout icon={<Sparkles />} title={book.labels.fact} tone="violet">
           {lesson.fact}
         </Callout>
       )}
-      {live && (
+      {book && live && (
         <Callout icon={<Zap />} title={book.labels.nowTitle} tone="sky">
           {book.now(fmtVolts(live.volts), fmtAmps(live.amps), live.ohms === null ? null : fmtOhms(live.ohms), fmtWatts(live.watts))}
         </Callout>
@@ -115,7 +156,8 @@ function splitOhms(ohms: number) {
 
 /** How to read a resistor's value from its coloured stripes, shown on this resistor's own value. */
 export function ResistorColorCode({ ohms }: { ohms: number }) {
-  const c = useBook().colorCode
+  const c = useBook()?.colorCode
+  if (!c) return null
   const { first, second, zeros } = splitOhms(ohms)
   const stripes = [DIGIT_COLORS[first], DIGIT_COLORS[second], DIGIT_COLORS[zeros], GOLD]
   const answers = [
@@ -259,8 +301,9 @@ function Term({ letter, color, value }: { letter: string; color: string; value?:
 /** Volts, amps, ohms, watts and how they fit together, filled with this part's own numbers. */
 export function BasicsLesson({ result }: { result?: PartResult }) {
   const book = useBook()
-  const b = book.basics
   const live = liveNumbers(result)
+  if (!book) return null
+  const b = book.basics
   return (
     <Accordion type="single" collapsible className="rounded-xl border bg-card/50 px-3">
       <AccordionItem value="basics" className="border-0">

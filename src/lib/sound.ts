@@ -360,7 +360,84 @@ export function playPlace() {
   blip(1320, 0.1, 'sine', 0.04, 0.04)
 }
 
+let bell: Voice | null = null
+let beep: Voice | null = null
+
+/**
+ * Electric bell: two bright, slightly out-of-tune partials of a metal gong,
+ * struck again and again. A falling sawtooth gives each strike a sharp start
+ * and a ringing fade; more current strikes faster and louder.
+ */
+export function setBellLevel(level: number) {
+  bell = continuousVoice(
+    bell,
+    level,
+    (ac) => {
+      const strike = ac.createGain()
+      strike.gain.value = 0.5
+      const gain = ac.createGain()
+      gain.gain.value = 0
+      const osc = ac.createOscillator()
+      osc.type = 'sine'
+      osc.frequency.value = 1420
+      const partial = ac.createOscillator()
+      partial.type = 'sine'
+      partial.frequency.value = 2370
+      const partialGain = ac.createGain()
+      partialGain.gain.value = 0.45
+      osc.connect(strike)
+      partial.connect(partialGain).connect(strike)
+      strike.connect(gain).connect(master!)
+      const lfo = ac.createOscillator()
+      lfo.type = 'sawtooth'
+      lfo.frequency.value = 6
+      const depth = ac.createGain()
+      // falling: loudest at the start of each strike
+      depth.gain.value = -0.5
+      lfo.connect(depth).connect(strike.gain)
+      osc.start()
+      partial.start()
+      lfo.start()
+      return { osc, gain, lfo }
+    },
+    (voice, value, ac) => {
+      voice.gain.gain.setTargetAtTime(0.045 * Math.min(1.5, value), ac.currentTime, 0.03)
+      voice.lfo?.frequency.setTargetAtTime(4.3 + 1.7 * Math.min(1.5, value), ac.currentTime, 0.1)
+    },
+  )
+}
+
+/** The multimeter's continuity beep: a steady, clear tone while its probes find a joined path. */
+export function setContinuityBeep(on: boolean) {
+  beep = continuousVoice(
+    beep,
+    on ? 1 : 0,
+    (ac) => {
+      const osc = ac.createOscillator()
+      osc.type = 'square'
+      osc.frequency.value = 2700
+      const filter = ac.createBiquadFilter()
+      filter.type = 'lowpass'
+      filter.frequency.value = 3600
+      const gain = ac.createGain()
+      gain.gain.value = 0
+      osc.connect(filter).connect(gain).connect(master!)
+      osc.start()
+      return { osc, gain }
+    },
+    (voice, _value, ac) => voice.gain.gain.setTargetAtTime(0.03, ac.currentTime, 0.01),
+  )
+}
+
+/** A solenoid's rod hitting its stop: a dull thunk out, a softer one back in. */
+export function playClack(out = true) {
+  blip(out ? 150 : 110, 0.09, 'triangle', out ? 0.16 : 0.1)
+  blip(out ? 2400 : 1800, 0.025, 'square', 0.04)
+}
+
 export function stopContinuousSounds() {
+  setBellLevel(0)
+  setContinuityBeep(false)
   setBuzzerLevel(0)
   setSiren(0, 'wail')
   setMotorLevel(0)

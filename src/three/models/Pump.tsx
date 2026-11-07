@@ -142,7 +142,7 @@ export function PumpModel({ flow }: { flow: number }) {
   const spout = (205 * Math.PI) / 180
 
   return (
-    <group position={[0.12, -0.02, 0]} rotation={[0.3, -0.22, 0]}>
+    <group position={[0.1, 0.04, 0]} rotation={[0.3, -0.22, 0]}>
       {/* the pump on the bottom: black body, motor end, inlet grille and outlet */}
       <group ref={body}>
         <group position={[-0.15, BOTTOM + 0.2, Z]}>

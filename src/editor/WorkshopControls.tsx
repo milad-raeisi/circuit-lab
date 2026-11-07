@@ -52,7 +52,7 @@ export function ChoiceTrack<T extends number>({
 }
 
 /** A tiny lamp with a letter: one input or output of a logic chip. */
-function Bit({ name, on, output }: { name: string; on: boolean; output?: boolean }) {
+export function Bit({ name, on, output }: { name: string; on: boolean; output?: boolean }) {
   return (
     <span
       className={cn(

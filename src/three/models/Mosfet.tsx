@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import * as THREE from 'three'
 import { Halo, Smoke, damp } from '../helpers'
 import { markingTexture } from './print'
-import { BRUSHED, METAL, merge, unit, useBuilt } from './shared'
+import { BRUSHED, merge, unit, useBuilt } from './shared'
 
 /* A TO-220 drawn to scale: 1 mm ≈ 0.064 units. */
 const W = 0.64
@@ -55,6 +55,8 @@ function legsGeometry() {
 }
 
 const HOT_TAB = new THREE.Color('#ff5a1f')
+/** tinned legs: full metalness looks black without an environment map */
+const TIN = { color: '#cfd3d9', metalness: 0.55, roughness: 0.32 } as const
 
 /**
  * An N-channel MOSFET (IRLZ44N) in its TO-220 case: black body, a metal tab
@@ -101,7 +103,7 @@ export function MosfetModel({
       </mesh>
       {/* the black body */}
       <RoundedBox args={[W, BODY_H, BODY_D]} radius={0.02} smoothness={2}>
-        <meshStandardMaterial ref={bodyMaterial} color="#1a1a1d" roughness={0.5} emissive="#7c2d12" emissiveIntensity={0} />
+        <meshStandardMaterial ref={bodyMaterial} color="#202024" roughness={0.42} emissive="#7c2d12" emissiveIntensity={0} />
       </RoundedBox>
       {/* type number, lasered into the front */}
       <mesh position={[-0.02, 0.1, BODY_D / 2 + 0.001]}>
@@ -122,7 +124,7 @@ export function MosfetModel({
       </mesh>
       <Halo color="#4ade80" intensity={halo} position={[0, -0.15, BODY_D / 2 + 0.08]} scale={0.9} />
       <mesh geometry={legs}>
-        <meshStandardMaterial {...METAL} />
+        <meshStandardMaterial {...TIN} />
       </mesh>
       <group position={[0, 0.3, 0.05]} scale={0.6}>
         <Smoke active={hot} position={[0, 0, 0]} rise={0.4} color="#d4d4d8" />

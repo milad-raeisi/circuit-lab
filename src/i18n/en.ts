@@ -8,6 +8,7 @@ import type {
   DisplayTint,
   LampColor,
   LedColor,
+  MeterDial,
   PartType,
   PinMode,
   SignEffect,
@@ -297,6 +298,71 @@ export type Dictionary = {
     stickY: string
     volts: string
   }
+  /** the Zener, PNP, MOSFET, optocoupler, laser, IR LED … the chips, the multimeter and the logic probe */
+  lab: {
+    tips: {
+      zenerHint: string
+      zenerLow: string
+      zenerForward: string
+      zenerHot: string
+      pnpBase: string
+      mosfetGate: string
+      mosfetHalf: string
+      mosfetHot: string
+      optoHint: string
+      laserSafety: string
+      laserWeak: string
+      irEyes: string
+      irCamera: string
+      solenoidWeak: string
+      solenoidHot: string
+      pumpWeak: string
+      bellWeak: string
+      bellHot: string
+      modulePower: string
+      barHint: string
+      trafficHint: string
+      fanReverse: string
+      fanWeak: string
+      latchHint: string
+      counterHint: string
+      comparatorHint: string
+      bridgeHint: string
+      bridgeHot: string
+      meterVolts: string
+      meterAmps: string
+      meterAmpsShort: string
+      meterOhms: string
+      meterOutside: string
+      meterReverse: string
+      meterBeep: string
+      probePower: string
+      probeLoose: string
+    }
+    eyes: string
+    camera: string
+    lookWith: string
+    viewHint: string
+    dial: string
+    dials: Record<MeterDial, string>
+    dialHints: Record<MeterDial, string>
+    reading: string
+    gate: string
+    held: string
+    push: string
+    flow: string
+    inVolts: string
+    bars: (n: number) => string
+    count: string
+    forward: string
+    back: string
+    stop: string
+    high: string
+    low: string
+    pulse: string
+    latchTable: { title: string; hint: string; keeps: string }
+    bridgeTable: { title: string; hint: string; motor: string }
+  }
   units: { volt: string; amp: string; milliamp: string; watt: string; ohm: string }
 }
 
@@ -393,6 +459,11 @@ export const en: Dictionary = {
       name: 'Raspberry Pi',
       description: 'A real little computer you program in Python. Its pins use 3.3 volts.',
       working: 'Running code',
+    },
+    aiBoard: {
+      name: 'AI board',
+      description: 'A board you talk to. Tell it what you want, and the AI sets its pins for you.',
+      working: 'Ready',
     },
     capacitor: {
       name: 'Capacitor',
@@ -1001,6 +1072,11 @@ export const en: Dictionary = {
     weatherStation: { name: 'Weather station', description: 'A temperature graph and the forecast' },
     airportBoard: { name: 'Airport board', description: 'Flights, times and a big clock' },
     cinemaSign: { name: 'Cinema sign', description: 'Bulbs run around a moving sign' },
+    aiSmartHome: { name: 'Talking smart home', description: 'Ask the board to run the fan, ring the bell or light the lamp' },
+    aiTrafficLight: { name: 'AI traffic light', description: 'Tell the lights how to change, in your own words' },
+    aiPartyLights: { name: 'AI party lights', description: 'Ask for a new light dance and watch it start' },
+    aiPlantHelper: { name: 'AI plant helper', description: 'The pump waters dry soil. Ask it to change the rules' },
+    aiRobotPet: { name: 'AI robot pet', description: 'A wagging tail and blue eyes. Teach it to beep when touched' },
   },
   gallery: {
     title: 'Examples',
@@ -1019,6 +1095,7 @@ export const en: Dictionary = {
       motion: { name: 'Motion and robots', short: 'Robots', blurb: 'Motors, magnets and servos that move things.' },
       home: { name: 'Home and city', short: 'Home', blurb: 'Gadgets for your house and your street.' },
       games: { name: 'Games and fun', short: 'Games', blurb: 'Play with friends and test your skills.' },
+      ai: { name: 'Talk to AI', short: 'AI', blurb: 'Tell the AI board what to do, and it sets its own pins.' },
     },
     levels: { 1: 'Easy', 2: 'Medium', 3: 'Hard' },
     search: 'Find an example',
@@ -1332,6 +1409,83 @@ export const en: Dictionary = {
     stickX: 'Left and right',
     stickY: 'Down and up',
     volts: 'Volts now',
+  },
+  lab: {
+    tips: {
+      zenerHint: 'Join its + end to + through a resistor, and its − end to −. Then it holds 5.1 V.',
+      zenerLow: 'It needs more than 5.1 V before it starts to hold. Try a 9 V battery and a resistor.',
+      zenerForward: 'It is joined the other way, so it lets power through like a plain diode. Turn it around to hold 5.1 V.',
+      zenerHot: 'Too much current: it is getting hot! Put a bigger resistor before it.',
+      pnpBase: 'Join E to +. Then pull B toward − through a resistor to turn it on.',
+      mosfetGate: 'Put a few volts on G to turn it on. Join S to −, and put the part it switches between + and D.',
+      mosfetHalf: 'G has only a few volts, so it is only half on. Give G 4 V or more.',
+      mosfetHot: 'It is half on and getting hot! Give G more volts so it switches fully on.',
+      optoHint: 'Light its LED: + through a resistor to +, and − to −. Then the switch from C to E closes.',
+      laserSafety: 'Never shine a laser into anyone’s eyes, not even your own!',
+      laserWeak: 'The beam is weak. It wants about 5 V.',
+      irEyes: 'It is shining, but our eyes can’t see this light. Tap Camera to look through a phone camera!',
+      irCamera: 'A phone camera can see infrared light: it looks like a purple glow. That is how a TV remote talks to the TV.',
+      solenoidWeak: 'Not enough current to push the rod. A board pin is too weak: let a MOSFET or a transistor switch it.',
+      solenoidHot: 'The coil is getting hot! Use fewer volts, and only push for a short time.',
+      pumpWeak: 'Not enough power to lift the water. Try more volts.',
+      bellWeak: 'Not enough current to ring. Try a bigger battery.',
+      bellHot: 'The coils are getting hot! Use fewer volts.',
+      modulePower: 'This module needs power. Join its + to + and its − to −.',
+      barHint: 'Join IN to the voltage you want to see, like the W pin of a potentiometer.',
+      trafficHint: 'Join R, Y or G to + (a board pin works well), and − to −.',
+      fanReverse: 'The fan only spins one way. Swap its + and − wires.',
+      fanWeak: 'Not enough power to spin. It wants about 5 V.',
+      latchHint: 'Press a button from + to S: Q turns on and stays on. A button from + to R turns it off again.',
+      counterHint: 'Send pulses to CLK from a button or a 555 blinker. Each pulse moves the light along.',
+      comparatorHint: 'OUT turns on when IN+ is higher than IN−. Try a light sensor on IN+ and a knob on IN−.',
+      bridgeHint: 'Turn IN1 or IN2 on (a board pin works) to spin the motor on M1 and M2. Both on, or both off, stops it.',
+      bridgeHot: 'Too much current: the driver is getting hot! Use a smaller motor or fewer volts.',
+      meterVolts: 'Touch the red probe to one side of a part, and the black probe (COM) to the other side.',
+      meterAmps: 'To measure amps, the current must go through the meter: open the loop and put the meter in the gap.',
+      meterAmpsShort: 'On A, the meter is like a bare wire. Never put it straight across a battery!',
+      meterOhms: 'Touch the two probes to the two ends of a part. OL means nothing joins them.',
+      meterOutside: 'Measure ohms with the power off: take the battery out of the loop first.',
+      meterReverse: 'The minus sign means the probes are swapped. That is OK: the number is still right!',
+      meterBeep: 'Beep! The probes are joined by a path, so current can flow.',
+      probePower: 'Join + and − to the + and − of the circuit you test. Then touch TIP to a wire.',
+      probeLoose: 'No light: the tip touches nothing, or the voltage there is only half way.',
+    },
+    eyes: 'Eyes',
+    camera: 'Camera',
+    lookWith: 'Look with',
+    viewHint: 'Our eyes can’t see infrared light, but a phone camera can.',
+    dial: 'Dial',
+    dials: { volts: 'Volts', amps: 'Amps', ohms: 'Ohms', beep: 'Beep' },
+    dialHints: {
+      volts: 'V: the push between the two probes. Put the probes on both sides of a part.',
+      amps: 'A: the current going through the meter. Put the meter in the loop.',
+      ohms: 'Ω: how hard it is for current to get through. Measure with the power off.',
+      beep: 'Beep: it beeps when the two probes are joined, so you can find broken wires.',
+    },
+    reading: 'Reading',
+    gate: 'Volts on G',
+    held: 'Volts across it',
+    push: 'Push',
+    flow: 'Water flow',
+    inVolts: 'Volts on IN',
+    bars: (n) => `${n} of 10 bars`,
+    count: 'Count',
+    forward: 'Forward',
+    back: 'Back',
+    stop: 'Stop',
+    high: 'High',
+    low: 'Low',
+    pulse: 'Pulse',
+    latchTable: {
+      title: 'Memory table',
+      hint: 'S sets Q to 1 and R sets it back to 0. With both off, Q keeps what it had. If both are on, R wins.',
+      keeps: 'keeps',
+    },
+    bridgeTable: {
+      title: 'Which way the motor turns',
+      hint: 'IN1 sets M1 and IN2 sets M2. The motor only turns when the two are different.',
+      motor: 'Motor',
+    },
   },
   units: { volt: 'V', amp: 'A', milliamp: 'mA', watt: 'W', ohm: 'Ω' },
 }

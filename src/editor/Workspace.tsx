@@ -86,7 +86,8 @@ export function Workspace() {
         deleteKeyCode={['Backspace', 'Delete']}
         snapToGrid
         snapGrid={[12, 12]}
-        minZoom={0.3}
+        // low enough that "fit" shows a whole wide example on a 390 px phone
+        minZoom={0.15}
         maxZoom={2}
         fitView
         fitViewOptions={{ padding: 0.25, maxZoom: 1.1 }}

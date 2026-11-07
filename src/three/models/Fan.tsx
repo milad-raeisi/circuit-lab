@@ -96,7 +96,7 @@ function blurTexture() {
   for (let d = 0; d < 360; d += 1) {
     const a = (d * Math.PI) / 180
     const lobe = (0.5 + 0.5 * Math.cos(a * BLADES)) ** 2
-    ctx.fillStyle = `rgba(30,30,34,${0.6 + 0.35 * lobe})`
+    ctx.fillStyle = `rgba(30,30,34,${0.8 + 0.18 * lobe})`
     ctx.beginPath()
     ctx.moveTo(c, c)
     ctx.arc(c, c, c, a, a + (1.6 * Math.PI) / 180)
@@ -181,7 +181,7 @@ export function FanModel({ speed, hot }: { speed: number; hot: boolean }) {
     // fast blades melt into a dark, see-through disc
     const smear = THREE.MathUtils.clamp((s - 0.45) * 1.3, 0, 0.8)
     if (bladeMaterial.current) bladeMaterial.current.opacity = 1 - smear * 0.9
-    if (discMaterial.current) discMaterial.current.opacity = Math.min(0.92, smear * 1.15)
+    if (discMaterial.current) discMaterial.current.opacity = Math.min(0.94, smear * 1.2)
     // the air leaves the front in a gentle spiral
     travel.current += dt * (0.25 + 0.75 * Math.min(1.5, s)) * (s > 0.02 ? 1 : 0)
     streaks.current.forEach((streak, i) => {
@@ -196,7 +196,7 @@ export function FanModel({ speed, hot }: { speed: number; hot: boolean }) {
   })
 
   return (
-    <group position={[-0.3, 0, 0]} rotation={[0.2, 0.6, 0]}>
+    <group position={[-0.26, 0.05, 0]} rotation={[0.2, 0.6, 0]}>
       <mesh geometry={frame}>
         <meshStandardMaterial {...PLASTIC} />
       </mesh>
@@ -226,10 +226,11 @@ export function FanModel({ speed, hot }: { speed: number; hot: boolean }) {
           <cylinderGeometry args={[HUB_R, HUB_R, 0.28, 36]} />
           <meshStandardMaterial {...PLASTIC} />
         </mesh>
-        <mesh geometry={blades} renderOrder={1}>
+        {/* the blur is drawn first, so the fading blades never punch holes in it */}
+        <mesh geometry={blades} renderOrder={2}>
           <meshStandardMaterial ref={bladeMaterial} {...PLASTIC} roughness={0.42} side={THREE.DoubleSide} transparent />
         </mesh>
-        <mesh renderOrder={2}>
+        <mesh renderOrder={1}>
           <ringGeometry args={[HUB_R, TIP_R, 64, 1]} />
           <meshBasicMaterial ref={discMaterial} map={blur} transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
         </mesh>
@@ -276,7 +277,7 @@ export function FanModel({ speed, hot }: { speed: number; hot: boolean }) {
           <meshBasicMaterial color="#7cc4ea" transparent opacity={0} depthWrite={false} />
         </mesh>
       ))}
-      <Smoke active={hot} position={[0, 0.2, FRONT + 0.1]} rise={0.4} />
+      <Smoke active={hot} position={[0.05, 0.32, FRONT + 0.12]} rise={0.35} color="#858b94" />
     </group>
   )
 }

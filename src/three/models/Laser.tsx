@@ -8,7 +8,7 @@ import { METAL, useBuilt } from './shared'
 
 /* The beam runs along +x at y = 0, from the lens to the middle of the card. */
 const LENS_X = -0.4
-const CARD_X = 1.06
+const CARD_X = 0.96
 const CARD = 0.76
 /** the card is turned partly toward you, so the beam meets it at a slant */
 const CARD_TURN = 0.8
@@ -130,7 +130,7 @@ export function LaserModel({ level, burnt }: { level: number; burnt: boolean }) 
   const barrel = burnt ? { ...BRASS, color: SOOT, metalness: 0.3, roughness: 0.8 } : BRASS
 
   return (
-    <group position={[0.16, -0.02, 0]} rotation={[0.36, 0.3, 0]}>
+    <group position={[0.22, 0.04, 0]} rotation={[0.36, 0.3, 0]}>
       {/* the black KY-008 board */}
       <RoundedBox args={[1.0, 0.06, 0.8]} radius={0.015} smoothness={2} position={[BOARD_X, BOARD_TOP - 0.03, 0]}>
         <meshStandardMaterial color="#141417" roughness={0.6} metalness={0.1} />
@@ -169,9 +169,7 @@ export function LaserModel({ level, burnt }: { level: number; burnt: boolean }) 
       </group>
       {/* header pins out of the back edge */}
       {[-0.22, 0, 0.22].map((z) => (
-        <group key={z} position={[0, 0, z]}>
-          <SidePin x={BOARD_X - 0.5} y={BOARD_TOP - 0.03} z={0} direction={-1} length={0.24} />
-        </group>
+        <SidePin key={z} x={BOARD_X - 0.5} y={BOARD_TOP - 0.03} z={z} direction={-1} length={0.2} />
       ))}
 
       {/* the laser head: the diode's can at the back, a brass barrel, the focus thread and the lens */}
@@ -265,13 +263,6 @@ export function LaserModel({ level, burnt }: { level: number; burnt: boolean }) 
         </group>
       </group>
 
-      {/* a burnt-out diode leaves soot round the head */}
-      {burnt && (
-        <mesh position={[-1.0, BOARD_TOP + 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.4, 1, 1]}>
-          <circleGeometry args={[0.26, 24]} />
-          <meshBasicMaterial color="#000000" transparent opacity={0.45} depthWrite={false} />
-        </mesh>
-      )}
       <Smoke active={burnt} position={[-0.9, 0.2, 0]} rise={0.4} />
     </group>
   )

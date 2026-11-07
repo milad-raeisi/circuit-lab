@@ -40,7 +40,13 @@ import { useSimulation } from '@/store/simulation'
 import { DisplayControl } from './DisplayControl'
 import { ChoiceTrack, GateLamps, LcdRow, RelayRow, RgbBars } from './WorkshopControls'
 import { LemonTrack, SlideSwitchRow, StickRow } from './InputControls'
+import { CameraViewfinder, LabControl } from './LabControls'
+import { hasLabControl, labGlow } from './labRules'
 import { ScopeFace } from '@/displays/ScopeFace'
+import { useAiChat } from '@/ai/store'
+import { aiBookFor } from '@/i18n/ai'
+import { AiAskButton } from './AiCard'
+import { PIN_GLYPHS } from './pinGlyphs'
 
 // three.js is the biggest library in the app: load it after the first paint
 const PartView = lazy(() => import('@/three/PartView'))
@@ -75,7 +81,7 @@ function glowColor(data: PartData, result?: PartResult) {
   if (data.type === 'led') return LED_COLORS[(data.color as LedColor) ?? 'red']
   // the RGB LED glows in whatever colour its three lights mix to
   if (data.type === 'rgbLed') return rgbMix(result?.channels)
-  return null
+  return labGlow(data, result)
 }
 
 /** How strongly an output part is working, as a share of its "full" level. */
@@ -141,33 +147,58 @@ const STATUS_TEXT: Record<PartStatus, string> = {
   short: 'text-red-700 dark:text-red-400',
 }
 
-/** The state word next to an indicator lamp. The word may be cut short, so it never leaves the card. */
-function StatusLamp({ status, label }: { status: PartStatus; label: string }) {
-  const lit = status !== 'idle' && status !== 'burnt'
+/**
+ * A card's title row: the part's name, its state word and an indicator lamp.
+ * The name always wins: when the word doesn't fit beside it, the word wraps
+ * onto a hidden second line and only the lamp shows the state.
+ */
+function CardTitle({
+  name,
+  status,
+  label,
+  thinking = false,
+}: {
+  name: string
+  status: PartStatus
+  label: string
+  /** an AI board waiting for its model: the word and the lamp say so */
+  thinking?: boolean
+}) {
+  const lit = thinking || (status !== 'idle' && status !== 'burnt')
   return (
-    <span className="flex max-w-[62%] min-w-0 shrink-0 items-center justify-end gap-1.5">
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span
-          key={status}
-          initial={{ opacity: 0, y: -5, filter: 'blur(2px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, y: 5, filter: 'blur(2px)' }}
-          transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-          className={cn('block truncate text-[10.5px] leading-none font-medium', STATUS_TEXT[status])}
-        >
-          {label}
-        </motion.span>
-      </AnimatePresence>
+    <div className="part-node__head">
+      <div className="part-node__label">
+        <span className="part-node__name">{name}</span>
+        <span className="part-node__status">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={thinking ? 'thinking' : status}
+              initial={{ opacity: 0, y: -5, filter: 'blur(2px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: 5, filter: 'blur(2px)' }}
+              transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+              className={cn(
+                'block text-[10.5px] leading-none font-medium whitespace-nowrap',
+                thinking ? 'text-violet-700 dark:text-violet-300' : STATUS_TEXT[status],
+              )}
+            >
+              {label}
+            </motion.span>
+          </AnimatePresence>
+        </span>
+      </div>
       <span
         aria-hidden
+        title={label}
         className={cn(
           'status-led',
           lit && 'status-led--lit',
-          (status === 'short' || status === 'over') && 'status-led--blink',
+          thinking && 'status-led--thinking',
+          !thinking && (status === 'short' || status === 'over') && 'status-led--blink',
         )}
-        style={{ ['--led' as string]: LED_COLOR[status] }}
+        style={{ ['--led' as string]: thinking ? '#8b7cf6' : LED_COLOR[status] }}
       />
-    </span>
+    </div>
   )
 }
 
@@ -304,25 +335,6 @@ function HoldButton({
   )
 }
 
-/**
- * A tiny mark under each pin's name for its program. The two blinks are
- * mirrored half moons; the opposite of the sensor is S with a bar over it,
- * the way engineers write "not S".
- */
-const PIN_GLYPHS: Record<PinMode, string> = {
-  off: '·',
-  on: '●',
-  blink: '◐',
-  blink2: '◑',
-  step1: '1',
-  step2: '2',
-  step3: '3',
-  fade: '∿',
-  follow: 'S',
-  invert: 'S',
-  alarm: '♪',
-}
-
 /** One board pin in the card's program row: tap it to change what the pin does. */
 function PinChip({
   label,
@@ -368,11 +380,13 @@ function BoardPins({
   type,
   pins,
   levels,
+  className,
 }: {
   id: string
   type: BoardType
   pins: Record<string, PinMode>
   levels?: Record<string, number>
+  className?: string
 }) {
   const { t } = useI18n()
   const updatePart = useCircuit((s) => s.updatePart)
@@ -388,7 +402,7 @@ function BoardPins({
     <div
       role="group"
       aria-label={t.inspector.program}
-      className="nodrag node-track grid grid-cols-6 gap-0.5 p-0.5"
+      className={cn('nodrag node-track grid grid-cols-6 gap-0.5 p-0.5', className)}
       dir="ltr"
     >
       {spec.pins.map((pin) => (
@@ -477,6 +491,9 @@ function NodeControl({ id, data, result }: { id: string; data: PartData; result?
       </label>
     )
   }
+
+  // the Zener, MOSFET, chips, multimeter … have their rows in LabControls
+  if (hasLabControl(data.type)) return <LabControl id={id} data={data} result={result} />
 
   switch (data.type) {
     case 'battery':
@@ -639,6 +656,14 @@ function NodeControl({ id, data, result }: { id: string; data: PartData; result?
     case 'microbit':
     case 'raspberrypi':
       return <BoardPins id={id} type={data.type} pins={data.pins ?? {}} levels={result?.pins} />
+    case 'aiBoard':
+      // the pins as on every board, and a button to talk to it
+      return (
+        <div className="flex gap-1">
+          <BoardPins id={id} type="aiBoard" pins={data.pins ?? {}} levels={result?.pins} className="min-w-0 flex-1" />
+          <AiAskButton id={id} />
+        </div>
+      )
     case 'capacitor': {
       const volts = result?.level ?? 0
       return (
@@ -652,6 +677,7 @@ function NodeControl({ id, data, result }: { id: string; data: PartData; result?
     }
     case 'diode':
     case 'transistor':
+    case 'pnp':
       return (
         <MeterRow
           fraction={Math.abs(result?.current ?? 0) / 0.3}
@@ -854,6 +880,8 @@ function NodeControl({ id, data, result }: { id: string; data: PartData; result?
     case 'andGate':
     case 'orGate':
     case 'xorGate':
+    case 'nandGate':
+    case 'norGate':
       return <GateLamps type={data.type} channels={result?.channels} label={t.parts[data.type].description} />
     case 'timer555':
       return (
@@ -927,7 +955,7 @@ function NodeControl({ id, data, result }: { id: string; data: PartData; result?
 }
 
 function PartNodeComponent({ id, data, selected }: NodeProps<PartNodeType>) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const result = useSimulation((s) => s.result.parts[id])
   const updateNodeInternals = useUpdateNodeInternals()
   const status = partStatus(data, result)
@@ -963,6 +991,8 @@ function PartNodeComponent({ id, data, selected }: NodeProps<PartNodeType>) {
       : chipStatus === 'on'
         ? t.parts[data.type].working
         : t.status[chipStatus]
+  // an AI board waiting for its model says so on its title row
+  const thinking = useAiChat((s) => data.type === 'aiBoard' && s.pending[id] !== undefined)
 
   return (
     // The wrapper has no background so the light glow (z-index −1) lands on the
@@ -987,13 +1017,16 @@ function PartNodeComponent({ id, data, selected }: NodeProps<PartNodeType>) {
           selected && 'part-node--selected',
           active && 'part-node--active',
           status === 'short' && 'part-node--danger',
+          thinking && 'part-node--thinking',
         )}
         style={{ ['--part-accent' as string]: def.accent }}
       >
-        <div className="part-node__head">
-          <span className="part-node__name">{t.parts[data.type].name}</span>
-          <StatusLamp status={chipStatus} label={statusLabel} />
-        </div>
+        <CardTitle
+          name={t.parts[data.type].name}
+          status={chipStatus}
+          label={thinking ? aiBookFor(lang).thinking : statusLabel}
+          thinking={thinking}
+        />
         {/* the 3D model (or a screen's front) is drawn only inside this framed window */}
         <div className="part-node__stage" style={screen ? { height: screen.faceHeight } : undefined}>
           <Suspense fallback={null}>
@@ -1002,9 +1035,10 @@ function PartNodeComponent({ id, data, selected }: NodeProps<PartNodeType>) {
             ) : data.type === 'oscilloscope' ? (
               <ScopeFace id={id} data={data} />
             ) : (
-              <PartView data={data} result={result} />
+              <PartView data={data} result={result} thinking={thinking} />
             )}
           </Suspense>
+          {data.type === 'irLed' && data.camera && <CameraViewfinder />}
         </div>
         <div className="part-node__control">
           <NodeControl id={id} data={data} result={result} />

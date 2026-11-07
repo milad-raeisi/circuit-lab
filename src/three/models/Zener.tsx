@@ -67,7 +67,7 @@ export function ZenerModel({
 
   useFrame((_, dt) => {
     const h = !burnt && holding > 5e-4 ? 0.4 + 0.6 * Math.min(1, holding / 0.04) : 0
-    const f = !burnt && forward > 1e-3 ? 0.18 + 0.17 * Math.min(1, forward / 0.05) : 0
+    const f = !burnt && forward > 1e-3 ? 0.25 + 0.2 * Math.min(1, forward / 0.05) : 0
     hold.current = damp(hold.current, h, 8, dt)
     leak.current = damp(leak.current, f, 8, dt)
     const total = hold.current + leak.current

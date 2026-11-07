@@ -98,7 +98,7 @@ export function SolenoidModel({ push, hot }: { push: number; hot: boolean }) {
   })
 
   return (
-    <group position={[0.0, 0.02, 0]} rotation={[0.4, -0.18, 0]}>
+    <group position={[-0.06, 0.115, 0]} rotation={[0.4, -0.18, 0]}>
       {/* the bent steel frame: a base with mounting holes and two ends the plunger runs through */}
       <RoundedBox args={[2 * END + PLATE, PLATE, 0.92]} radius={0.012} smoothness={2} position={[0, BASE_Y - PLATE / 2, 0]}>
         <meshStandardMaterial {...ZINC} />
@@ -168,11 +168,11 @@ export function SolenoidModel({ push, hot }: { push: number; hot: boolean }) {
         ))}
       </group>
       {/* the two leads out of the bottom of the coil */}
-      <Lead points={[[0.36, -0.22, 0.3], [0.42, -0.42, 0.5], [0.62, -0.5, 0.66], [0.84, -0.5, 0.72]]} radius={0.024} color="#dc2626" />
-      <Lead points={[[0.26, -0.24, 0.3], [0.3, -0.44, 0.52], [0.5, -0.54, 0.7], [0.72, -0.56, 0.8]]} radius={0.024} color="#1f2328" />
+      <Lead points={[[0.36, -0.22, 0.3], [0.42, -0.4, 0.46], [0.6, -0.46, 0.56], [0.8, -0.44, 0.6]]} radius={0.024} color="#dc2626" />
+      <Lead points={[[0.26, -0.24, 0.3], [0.3, -0.42, 0.48], [0.48, -0.5, 0.62], [0.68, -0.5, 0.68]]} radius={0.024} color="#1f2328" />
       {[
-        [0.86, -0.5, 0.725],
-        [0.74, -0.56, 0.805],
+        [0.82, -0.44, 0.605],
+        [0.7, -0.5, 0.685],
       ].map(([x, y, z]) => (
         <mesh key={x} position={[x + 0.03, y, z + 0.008]} rotation={[0, 0, Math.PI / 2]}>
           <cylinderGeometry args={[0.014, 0.014, 0.08, 6]} />
@@ -220,7 +220,10 @@ export function SolenoidModel({ push, hot }: { push: number; hot: boolean }) {
           <meshStandardMaterial color="#2a2a2e" roughness={0.85} />
         </mesh>
       </group>
-      <Smoke active={hot} position={[0, 0.45, 0]} rise={0.4} />
+      {/* smaller puffs, so they fade before the top of the window */}
+      <group position={[0, 0.28, 0.05]} scale={0.7}>
+        <Smoke active={hot} position={[0, 0, 0]} rise={0.35} color="#7c818a" />
+      </group>
     </group>
   )
 }

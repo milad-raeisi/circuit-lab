@@ -1497,6 +1497,71 @@ function RaspberryPi({ id }: ArtProps) {
   )
 }
 
+/** The AI board: the big "AI" chip in its ring of thinking lights, a llama, and the pin headers. */
+function AiBoard({ id }: ArtProps) {
+  const ring = Array.from({ length: 10 }, (_, i) => {
+    const a = (i / 10) * Math.PI * 2 - Math.PI / 2
+    return [round(22 + Math.cos(a) * 8.6), round(23.5 + Math.sin(a) * 8.6)] as const
+  })
+  return (
+    <>
+      <Shadow y={40} rx={20} />
+      <Pcb id={id} x={3.5} y={11} w={41} h={25} light="#33384f" dark="#171a28" edge="#090b12" holes={[[6.4, 13.9], [6.4, 33.1]]} />
+      {/* headers: 5V, GND and IN on the left, P1 … P6 on the right */}
+      <rect x="40.2" y="13.2" width="2.9" height="20.6" rx="0.4" fill="#0a0a0a" />
+      <rect x="40.2" y="13.2" width="2.9" height="19.8" rx="0.4" fill="#2a2a2e" />
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <rect key={i} x="41.1" y={14.4 + i * 3.2} width="1.1" height="1.1" fill="#0a0a0a" />
+      ))}
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <circle key={i} cx="37.6" cy={15 + i * 3.2} r="0.75" fill={i % 2 === 0 ? '#f59e0b' : '#7c5a1f'} />
+      ))}
+      <rect x="4.6" y="18.8" width="2.6" height="10.4" rx="0.4" fill="#2a2a2e" />
+      {[0, 1, 2].map((i) => (
+        <rect key={i} x="5.35" y={19.9 + i * 3.1} width="1.1" height="1.1" fill="#0a0a0a" />
+      ))}
+      {/* the ring of tiny lights: one runs around while it thinks */}
+      {ring.map(([cx, cy], i) => (
+        <g key={i}>
+          {i === 1 && <circle cx={cx} cy={cy} r="1.7" fill="#c4b5fd" opacity="0.45" />}
+          <circle cx={cx} cy={cy} r="0.62" fill={i === 1 ? '#ede9fe' : i === 0 ? '#a78bfa' : '#5b5675'} />
+        </g>
+      ))}
+      {/* the chip and its legs */}
+      <g fill="#a1a1aa">
+        {[0, 1, 2, 3].map((k) => (
+          <g key={k}>
+            <rect x={18.1 + k * 2.3} y="17.5" width="0.8" height="1.2" />
+            <rect x={18.1 + k * 2.3} y="28.4" width="0.8" height="1.2" />
+            <rect x="15.9" y={19.7 + k * 2.3} width="1.2" height="0.8" />
+            <rect x="26.9" y={19.7 + k * 2.3} width="1.2" height="0.8" />
+          </g>
+        ))}
+      </g>
+      <Chip x={16.8} y={18.4} w={10.4} h={10.6} />
+      <text
+        x="22"
+        y="25.3"
+        textAnchor="middle"
+        fontSize="5.4"
+        fontWeight="800"
+        fontFamily="ui-sans-serif, system-ui, sans-serif"
+        fill="#ddd6fe"
+      >
+        AI
+      </text>
+      {/* a little llama printed on the board */}
+      <g transform="translate(29.6 26.2) scale(0.74)" fill="#e9dfc8">
+        <path d="M0 5.6Q0 4 1.7 4H5.8Q6.6 4 6.6 3V1.1Q6.6.3 7.4.4L8.6.7Q9.3.9 8.6 1.5H7.7V4.7Q7.7 6.5 6.1 6.6H1.1Q0 6.6 0 5.6Z" />
+        <path d="M6.8.6 6.6-.9 7.4.4ZM7.6.5 7.8-1 8.3.6Z" />
+        <g stroke="#e9dfc8" strokeWidth="0.75" strokeLinecap="round">
+          <path d="M1.1 6.4V8.8M2.3 6.4V8.8M5.2 6.4V8.8M6.4 6.4V8.8" />
+        </g>
+      </g>
+    </>
+  )
+}
+
 /* ---- screens ---- */
 
 const round = (n: number) => +n.toFixed(2)
@@ -3760,10 +3825,11 @@ function Multimeter({ id }: ArtProps) {
 }
 
 function LogicProbe({ id }: ArtProps) {
+  // HIGH (lit), LOW and PULSE
   const leds = [
-    { x: 21.5, on: '#ef4444', off: '#ef4444', lit: true },
-    { x: 25, on: '#22c55e', off: '#166534', lit: false },
-    { x: 28.5, on: '#f59e0b', off: '#92400e', lit: false },
+    { x: 20.6, on: '#ef4444', off: '#ef4444', lit: true },
+    { x: 24.5, on: '#22c55e', off: '#166534', lit: false },
+    { x: 28.4, on: '#f59e0b', off: '#92400e', lit: false },
   ]
   return (
     <>
@@ -3793,18 +3859,18 @@ function LogicProbe({ id }: ArtProps) {
       <g transform="rotate(-38 24 24)">
         {/* the needle tip and its cone */}
         <path d="M40 23.6 46 24 40 24.4z" fill={`url(#${id}n)`} />
-        <path d="M34.5 21.2 40.4 23.3v1.4L34.5 26.8z" fill={`url(#${id}c)`} />
+        <path d="M34.5 20.6 40.4 23.3v1.4L34.5 27.4z" fill={`url(#${id}c)`} />
         {/* the pen body */}
-        <rect x="6" y="20.6" width="29" height="6.8" rx="2.6" fill={`url(#${id}b)`} />
-        <rect x="8" y="21.3" width="25" height="1.1" rx="0.55" fill="#fff" opacity="0.45" />
-        <rect x="4.6" y="21.6" width="3" height="4.8" rx="1" fill={`url(#${id}c)`} />
-        <path d="M10 20.8v6.4M11.3 20.8v6.4M12.6 20.8v6.4" stroke="#2e1065" strokeWidth="0.45" opacity="0.5" />
+        <rect x="6" y="20" width="29" height="8" rx="3" fill={`url(#${id}b)`} />
+        <rect x="8" y="20.8" width="25" height="1.2" rx="0.6" fill="#fff" opacity="0.45" />
+        <rect x="4.4" y="21.2" width="3" height="5.6" rx="1" fill={`url(#${id}c)`} />
+        <path d="M10 20.2v7.6M11.3 20.2v7.6M12.6 20.2v7.6" stroke="#2e1065" strokeWidth="0.45" opacity="0.5" />
         {leds.map((l) => (
           <g key={l.x}>
-            {l.lit && <circle cx={l.x} cy="24" r="3.4" fill={`url(#${id}glow)`} />}
-            <circle cx={l.x} cy="24" r="1.4" fill="#1e1b4b" />
-            <circle cx={l.x} cy="24" r="1" fill={l.lit ? l.on : l.off} />
-            <circle cx={l.x - 0.3} cy="23.7" r="0.35" fill="#fff" opacity={l.lit ? 0.9 : 0.45} />
+            {l.lit && <circle cx={l.x} cy="24" r="3.8" fill={`url(#${id}glow)`} />}
+            <circle cx={l.x} cy="24" r="1.6" fill="#1e1b4b" />
+            <circle cx={l.x} cy="24" r="1.15" fill={l.lit ? l.on : l.off} />
+            <circle cx={l.x - 0.35} cy="23.65" r="0.4" fill="#fff" opacity={l.lit ? 0.9 : 0.45} />
           </g>
         ))}
       </g>
@@ -3866,6 +3932,7 @@ const ART: Record<PartType, (p: ArtProps) => ReactNode> = {
   pico: Pico,
   microbit: Microbit,
   raspberrypi: RaspberryPi,
+  aiBoard: AiBoard,
   segment: SegmentDisplay,
   lcd: LcdDisplay,
   oled: OledDisplay,

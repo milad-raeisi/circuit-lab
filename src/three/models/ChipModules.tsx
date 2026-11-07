@@ -320,7 +320,7 @@ export function CounterModel({ count, clock, powered }: { count: number; clock: 
       <Indicator position={[-0.3, 0.47, FACE + 0.02]} color="#ef4444" off="#fecaca" level={powered ? 1 : 0} size={[0.07, 0.045, 0.035]} halo={0.35} />
       <Smd x={-0.48} y={0.38} kind="c" />
       {COUNTER_Y.map((y, i) => (
-        <RoundLed key={y} x={COUNTER_LED_X} y={y} color="#ff3b30" off="#b91c1c" level={powered && at === i ? 1 : 0} speed={26} />
+        <RoundLed key={y} x={COUNTER_LED_X} y={y} color="#ff3b30" off="#7f1d1d" level={powered && at === i ? 1 : 0} speed={26} />
       ))}
       <Print texture={digits} width={0.08} height={1.04} position={[0.83, 0, FACE + 0.002]} />
       <PowerHeader />
@@ -543,7 +543,7 @@ export function HBridgeModel({
   const warm = useRef(0)
   useFrame((_, dt) => {
     warm.current = damp(warm.current, hot ? 1 : 0, 1.5, dt)
-    if (sinkMaterial.current) sinkMaterial.current.emissiveIntensity = warm.current * 0.5
+    if (sinkMaterial.current) sinkMaterial.current.emissiveIntensity = warm.current * 0.4
   })
   return (
     <group position={[0.1, 0, 0]} rotation={TILT}>

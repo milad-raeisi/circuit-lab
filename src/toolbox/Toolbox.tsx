@@ -27,7 +27,7 @@ import { Quiz } from './QuizScreen'
 import { StarterKit } from './StarterKit'
 import { useToolbox } from './store'
 import { ToolArt, ToolboxMark } from './ToolArt'
-import { ink, searchTools, stage, useBook, useWide } from './ui'
+import { ink, normalize, searchTools, stage, useBook, useWide } from './ui'
 
 /*
  * The Toolbox: an illustrated guide to the real tools of an electronics
@@ -254,7 +254,7 @@ function Activity({
         'focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none active:translate-y-0',
       )}
     >
-      <span className="grid h-20 shrink-0 place-items-center overflow-hidden rounded-md sm:h-24 sm:w-36 lg:w-44" style={stage(color)}>
+      <span className="grid h-20 shrink-0 place-items-center overflow-hidden rounded-md sm:h-24 sm:w-32 lg:w-36" style={stage(color)}>
         <span className="transition-transform duration-200 ease-out group-hover:scale-[1.05]">{art}</span>
       </span>
       <span className="flex min-w-0 flex-1 items-center gap-2 px-1">
@@ -584,7 +584,7 @@ function TryOnBoard({ tool }: { tool: ToolId }) {
     <section
       className="space-y-3 rounded-xl border p-3.5"
       // the board's own dotted grid
-      style={{ background: 'radial-gradient(circle, var(--border) 0 1px, transparent 1.3px) 0 0 / 14px 14px, var(--card)' }}
+      style={{ background: 'radial-gradient(circle, color-mix(in oklch, var(--border) 70%, transparent) 0 1px, transparent 1.3px) 7px 7px / 14px 14px, var(--card)' }}
     >
       <div className="space-y-0.5">
         <h3 className="text-sm font-semibold">{book.board.title}</h3>
@@ -796,7 +796,8 @@ function useKeys() {
     // in the quiz, 1, 2 and 3 pick the tools in the order they are shown
     const { round, at, picks, answer } = useToolbox.getState()
     const question = view === 'quiz' && !tool && round && at < round.length && picks.length <= at ? round[at] : null
-    const n = Number(e.key)
+    // Persian and Arabic keyboards type ۱ and ١ for 1
+    const n = Number(normalize(e.key))
     if (question && !typing && n >= 1 && n <= question.choices.length && !e.altKey && !e.metaKey && !e.ctrlKey) {
       e.preventDefault()
       const choice = question.choices[n - 1]

@@ -52,6 +52,7 @@ import { PumpModel } from './models/Pump'
 import { SolenoidModel } from './models/Solenoid'
 import { TrafficLightModel } from './models/TrafficLight'
 import { ZenerModel } from './models/Zener'
+import { AiBoardModel } from './models/AiBoard'
 import { CoinCellModel, DynamoModel, LemonModel, PowerBankModel } from './models/Cells'
 import { ForceSensorModel, HallSensorModel, KnockSensorModel, PulseSensorModel } from './models/HandSensors'
 import { FlameSensorModel, IrSensorModel, LineSensorModel } from './models/InfraredSensors'
@@ -122,27 +123,37 @@ const FRAMING = {
   timer555: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
   // the newer components, outputs, chips and meters
   zener: { camera: [0, 0.4, 4.6], scale: 0.68, lift: 0 },
-  zenerUpright: { camera: [0, 0.4, 4.6], scale: 1.1, lift: 0 },
+  zenerUpright: { camera: [0, 0.4, 4.6], scale: 1, lift: 0.07 },
   mosfet: { camera: [0, 0.4, 4.6], scale: 0.84, lift: 0.1 },
   optocoupler: { camera: [0, 0.4, 4.6], scale: 0.6, lift: 0.09 },
   laser: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
   irLed: { camera: [0, 0.35, 4.2], scale: 1.15, lift: -0.13 },
-  solenoid: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
-  pump: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  solenoid: { camera: [0, 0.4, 4.6], scale: 0.88, lift: 0 },
+  pump: { camera: [0, 0.4, 4.6], scale: 0.95, lift: 0 },
   bell: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
-  barGraph: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
-  trafficLight: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  barGraph: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
+  trafficLight: { camera: [0, 0.4, 4.6], scale: 1.04, lift: 0 },
   fan: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
   latch: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
   counter: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
   comparator: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
   hBridge: { camera: [0, 0.4, 4.6], scale: 0.85, lift: 0 },
-  multimeter: { camera: [0, 0.4, 4.6], scale: 1.2, lift: -0.05 },
-  logicProbe: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  multimeter: { camera: [0, 0.4, 4.6], scale: 1.15, lift: -0.04 },
+  logicProbe: { camera: [0, 0.4, 4.6], scale: 1.03, lift: -0.17 },
+  aiBoard: { camera: [0, 0.4, 4.6], scale: 1.06, lift: -0.1 },
 } satisfies Record<string, Framing>
 
 /** The animated 3D preview of one part, driven by its simulation result. */
-export function PartScene({ data, result }: { data: PartData; result?: PartResult }) {
+export function PartScene({
+  data,
+  result,
+  thinking = false,
+}: {
+  data: PartData
+  result?: PartResult
+  /** the AI board is waiting for its model's answer */
+  thinking?: boolean
+}) {
   const level = result?.level ?? 0
   const status = result?.status ?? 'idle'
   const upright = data.rotation === 90 || data.rotation === 270
@@ -247,6 +258,16 @@ export function PartScene({ data, result }: { data: PartData; result?: PartResul
             variant={data.type}
             levels={BOARDS[data.type].pins.map((pin) => result?.pins?.[pin] ?? 0)}
             powered={result !== undefined}
+          />
+        </Stage>
+      )
+    case 'aiBoard':
+      return (
+        <Stage {...FRAMING.aiBoard}>
+          <AiBoardModel
+            levels={BOARDS.aiBoard.pins.map((pin) => result?.pins?.[pin] ?? 0)}
+            powered={result !== undefined}
+            thinking={thinking}
           />
         </Stage>
       )

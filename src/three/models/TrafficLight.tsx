@@ -88,10 +88,23 @@ function Light({ y, lit, off, level }: { y: number; lit: string; off: string; le
 export function TrafficLightModel({ r, y, g }: { r: number; y: number; g: number }) {
   const levels = { r, y, g }
   return (
-    <group position={[0.02, 0.04, 0]} rotation={[-0.3, -0.45, 0]}>
+    <group position={[0.02, 0.09, 0]} rotation={[-0.42, -0.6, 0]}>
       <RoundedBox args={[0.82, 2 * HALF, BOARD_T]} radius={0.03} smoothness={2}>
-        <meshStandardMaterial color="#111113" roughness={0.55} metalness={0.1} />
+        <meshStandardMaterial color="#141518" roughness={0.45} metalness={0.15} />
       </RoundedBox>
+      {/* the silkscreen line round the edge of the board */}
+      {[1, -1].map((side) => (
+        <group key={side}>
+          <mesh position={[side * 0.37, 0, FACE + 0.002]}>
+            <boxGeometry args={[0.012, 2 * HALF - 0.08, 0.004]} />
+            <meshStandardMaterial {...SILK} />
+          </mesh>
+          <mesh position={[0, side * (HALF - 0.04), FACE + 0.002]}>
+            <boxGeometry args={[0.752, 0.012, 0.004]} />
+            <meshStandardMaterial {...SILK} />
+          </mesh>
+        </group>
+      ))}
       {/* the mounting hole at the top */}
       <group position={[0, HALF - 0.12, FACE + 0.001]}>
         <mesh>
@@ -114,8 +127,8 @@ export function TrafficLightModel({ r, y, g }: { r: number; y: number; g: number
       </mesh>
       {PINS.map(({ x, mark }, i) => (
         <group key={x} position={[x, 0, 0]}>
-          <mesh position={[0, -HALF - 0.04, FACE + 0.05]}>
-            <boxGeometry args={[0.035, 0.3, 0.035]} />
+          <mesh position={[0, -HALF - 0.02, FACE + 0.05]}>
+            <boxGeometry args={[0.035, 0.26, 0.035]} />
             <meshStandardMaterial {...GOLD} />
           </mesh>
           {i === 0 ? (

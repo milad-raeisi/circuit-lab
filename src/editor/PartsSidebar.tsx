@@ -55,7 +55,8 @@ function DragTile({ type }: { type: PartType }) {
             size={46}
             className="transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-105"
           />
-          <span className="w-full truncate text-[12.5px] leading-tight font-semibold">{t.parts[type].name}</span>
+          {/* long names wrap onto a second line instead of being cut short */}
+          <span className="line-clamp-2 w-full text-[12.5px] leading-tight font-semibold text-balance">{t.parts[type].name}</span>
         </button>
       </TooltipTrigger>
       <TooltipContent side={dir === 'rtl' ? 'left' : 'right'} className="max-w-56 leading-snug">
@@ -79,7 +80,7 @@ function TapTile({ type, onPicked }: { type: PartType; onPicked: () => void }) {
       }}
     >
       <PartArt partType={type} size={48} />
-      <span className="w-full truncate text-[13px] leading-tight font-semibold">{t.parts[type].name}</span>
+      <span className="line-clamp-2 w-full text-[13px] leading-tight font-semibold text-balance">{t.parts[type].name}</span>
     </button>
   )
 }

@@ -32,7 +32,7 @@ function Segment({ x, lit, off, on }: { x: number; lit: string; off: string; on:
     // LEDs snap on and off
     level.current = damp(level.current, on ? 1 : 0, 30, dt)
     if (material.current) material.current.emissiveIntensity = level.current * 1.25
-    glow.current = level.current * 0.55
+    glow.current = level.current * 0.45
   })
   return (
     <group position={[x, 0, BLOCK_H]}>
@@ -40,7 +40,7 @@ function Segment({ x, lit, off, on }: { x: number; lit: string; off: string; on:
         <boxGeometry args={[0.088, 0.38, 0.008]} />
         <meshStandardMaterial ref={material} color={off} emissive={lit} emissiveIntensity={0} roughness={0.32} toneMapped={false} />
       </mesh>
-      <Halo color={lit} intensity={glow} position={[0, 0, 0.06]} scale={0.5} />
+      <Halo color={lit} intensity={glow} position={[0, 0, 0.06]} scale={0.45} />
     </group>
   )
 }
@@ -54,7 +54,7 @@ export function BarGraphModel({ bars, powered }: { bars: number; powered: boolea
   const n = powered && Number.isFinite(bars) ? Math.round(bars) : 0
 
   return (
-    <group position={[0.04, 0, 0]} rotation={MODULE_TILT}>
+    <group position={[0.08, 0, 0]} rotation={MODULE_TILT}>
       <RoundedBox args={[2.2, 1.25, BOARD_T]} radius={0.03} smoothness={2}>
         <meshStandardMaterial color="#1d3f8f" roughness={0.55} metalness={0.1} />
       </RoundedBox>
@@ -163,13 +163,6 @@ export function BarGraphModel({ bars, powered }: { bars: number; powered: boolea
         <boxGeometry args={[0.05, 0.014, 0.004]} />
         <meshStandardMaterial {...SILK} />
       </mesh>
-      {/* silk frame round the bar graph */}
-      {[1, -1].map((side) => (
-        <mesh key={side} position={[0, BLOCK_Y + side * 0.33, FACE + 0.002]}>
-          <boxGeometry args={[COUNT * PITCH + 0.2, 0.014, 0.004]} />
-          <meshStandardMaterial {...SILK} />
-        </mesh>
-      ))}
     </group>
   )
 }

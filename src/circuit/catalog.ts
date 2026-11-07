@@ -185,7 +185,8 @@ export const ELECTRICAL = {
     testResistance: 1000,
     beepBelow: 30,
     openAbove: 4e7,
-    maxAmps: 10,
+    /** more than this on A: it was put straight across a battery */
+    maxAmps: 2,
   },
   /** logic probe: HIGH above 70 % of its supply, LOW below 30 %; a change lights PULSE for a moment */
   logicProbe: { minVoltage: 3, supplyResistance: 2000, biasResistance: 1e6, high: 0.7, low: 0.3, pulseTime: 0.3 },
@@ -218,7 +219,16 @@ export const METER_DIALS = ['volts', 'amps', 'ohms', 'beep'] as const satisfies 
 /** how many outputs the counter chip steps through */
 export const COUNTER_OUTPUTS = 5
 
-export type BoardType = 'arduino' | 'nano' | 'mega' | 'esp32' | 'esp8266' | 'pico' | 'microbit' | 'raspberrypi'
+export type BoardType =
+  | 'arduino'
+  | 'nano'
+  | 'mega'
+  | 'esp32'
+  | 'esp8266'
+  | 'pico'
+  | 'microbit'
+  | 'raspberrypi'
+  | 'aiBoard'
 
 /** What a microcontroller board offers. Every board shows six output pins, its supply, GND and one input. */
 export type BoardSpec = {
@@ -243,6 +253,7 @@ export type BoardSpec = {
 }
 
 const ARDUINO_HEADER = ['D13', 'D12', 'D11', 'D10', 'D9', 'D8'] as const
+const AI_PINS = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'] as const
 const drop = (prefix: string) => (pin: string) => pin.slice(prefix.length)
 const all = (pins: readonly string[]) => new Set(pins)
 
@@ -316,6 +327,20 @@ export const BOARDS: Record<BoardType, BoardSpec> = {
     language: 'python',
     codeName: drop('GPIO'),
     label: drop('GPIO'),
+  },
+  // the AI board: a 5 V board whose pin programs are picked by a language model
+  // from what the child asks for. Every pin can fade, and IN reads a sensor.
+  aiBoard: {
+    voltage: 5,
+    supply: '5V',
+    pins: AI_PINS,
+    pwm: all(AI_PINS),
+    input: 'IN',
+    adcMax: 1023,
+    // the details panel shows the Arduino code for the program the AI chose
+    language: 'arduino',
+    codeName: (pin) => pin,
+    label: (pin) => pin,
   },
 }
 
@@ -395,6 +420,7 @@ export const PART_ORDER: PartType[] = [
   'pico',
   'microbit',
   'raspberrypi',
+  'aiBoard',
   'switch',
   'button',
   'slideSwitch',
@@ -609,6 +635,7 @@ export const PARTS: Record<PartType, PartDef> = {
   pico: board('pico', '#16a34a'),
   microbit: board('microbit', '#7c3aed'),
   raspberrypi: board('raspberrypi', '#c51a4a'),
+  aiBoard: board('aiBoard', '#6d5bd0'),
   switch: { category: 'control', accent: '#6366f1', terminals: twoWay, defaults: { closed: false } },
   button: { category: 'control', accent: '#ec4899', terminals: twoWay, defaults: {} },
   dimmer: { category: 'control', accent: '#14b8a6', terminals: twoWay, defaults: { level: 0.7 } },

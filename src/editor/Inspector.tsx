@@ -64,6 +64,12 @@ import { DisplaySettings } from './DisplaySettings'
 import { PartArt } from './PartArt'
 import { STATUS_STYLE, partStatus } from './PartNode'
 import { TruthTable } from './TruthTable'
+import { LabExtras, LabSettings } from './LabInspector'
+import { LAB_WITHOUT_SETTINGS, labTip } from './labRules'
+import { useAiChat } from '@/ai/store'
+import { useAiBook } from '@/i18n/ai'
+import { AiChat } from './AiChat'
+import { aiCodeHeader, useLastRequest } from '@/ai/code'
 
 type Tip = { text: string; tone: 'warn' | 'info' | 'danger' }
 
@@ -78,6 +84,9 @@ function tipFor(data: PartData, result: PartResult | undefined, status: PartStat
     const reads = (data.type === 'segment' && data.mode === 'volts') || (data.type === 'oled' && data.mode === 'graph')
     return reads && result.level < 0.02 ? { text: t.tips.displaySignal, tone: 'info' } : null
   }
+  // the Zener, MOSFET, chips, multimeter … have their tips in LabInspector
+  const lab = labTip(data, result, status, t)
+  if (lab !== undefined) return lab
   const w = t.workshop.tips
   if (isGate(data.type) || data.type === 'timer555') {
     // a chip needs its supply before anything else
@@ -153,6 +162,9 @@ function tipFor(data: PartData, result: PartResult | undefined, status: PartStat
       return Object.values(data.pins ?? {}).some((mode) => SENSOR_MODES.includes(mode))
         ? { text: t.tips.followHint, tone: 'info' }
         : null
+    case 'aiBoard':
+      // the chat right below explains the rest
+      return status === 'over' ? { text: t.tips.arduinoPin, tone: 'warn' } : null
     case 'solar':
       return (data.light ?? 0.8) < 0.15 ? { text: t.tips.solarDark, tone: 'info' } : null
     case 'voltmeter':
@@ -257,6 +269,7 @@ function PartSettings({ node }: { node: SelectedPart }) {
   const { id, data } = node
   // screens have many settings of their own
   if (isDisplay(data.type)) return <DisplaySettings node={node} />
+  if (data.type === 'multimeter' || data.type === 'irLed') return <LabSettings node={node} />
 
   switch (data.type) {
     case 'battery':
@@ -442,6 +455,7 @@ function PartSettings({ node }: { node: SelectedPart }) {
     case 'pico':
     case 'microbit':
     case 'raspberrypi':
+    case 'aiBoard':
       return <BoardProgram node={node} />
     case 'powerSupply': {
       const { voltage, limit } = supplySettings(data)
@@ -775,6 +789,8 @@ function boardCode(type: BoardType, pins: Record<string, PinMode>): string {
 
 function BoardProgram({ node }: { node: SelectedPart }) {
   const { t } = useI18n()
+  const ai = useAiBook()
+  const lastRequest = useLastRequest(node.id)
   const updatePart = useCircuit((s) => s.updatePart)
   const a0 = useSimulation((s) => s.result.inputs[node.id])
   const levels = useSimulation((s) => s.result.parts[node.id]?.pins)
@@ -831,12 +847,13 @@ function BoardProgram({ node }: { node: SelectedPart }) {
         </div>
       )}
       <div className="space-y-1.5">
-        <p className="text-xs font-semibold text-muted-foreground">{t.inspector.code}</p>
+        <p className="text-xs font-semibold text-muted-foreground">{type === 'aiBoard' ? ai.codeTitle : t.inspector.code}</p>
         <pre
           dir="ltr"
           className="max-w-full overflow-x-auto rounded-xl bg-zinc-950 p-3 font-mono text-[11px] leading-relaxed text-zinc-100 shadow-inner"
         >
-          <code>{boardCode(type, pins)}</code>
+          {/* the AI board's code starts with the words that made it */}
+          <code>{(type === 'aiBoard' ? aiCodeHeader(ai.codeFrom, lastRequest) : '') + boardCode(type, pins)}</code>
         </pre>
       </div>
     </div>
@@ -873,6 +890,7 @@ function PartInspector({ node }: { node: SelectedPart }) {
     'andGate',
     'orGate',
     'xorGate',
+    ...LAB_WITHOUT_SETTINGS,
   ].includes(data.type)
 
   return (
@@ -927,6 +945,9 @@ function PartInspector({ node }: { node: SelectedPart }) {
           {t.inspector.repair}
         </Button>
       )}
+
+      {/* the AI board is something you talk to first */}
+      {data.type === 'aiBoard' && <AiChat boardId={node.id} />}
 
       <Section title={t.inspector.readings}>
         <div className="grid grid-cols-3 gap-2">
@@ -992,6 +1013,7 @@ function PartInspector({ node }: { node: SelectedPart }) {
         <PartLesson type={data.type} result={running ? result : undefined} />
         {data.type === 'resistor' && <ResistorColorCode ohms={data.resistance ?? 100} />}
         {isGate(data.type) && <TruthTable type={data.type} channels={running ? result?.channels : undefined} />}
+        <LabExtras data={data} channels={running ? result?.channels : undefined} />
       </Section>
       <BasicsLesson result={running ? result : undefined} />
     </div>
@@ -1088,6 +1110,13 @@ export function InspectorPanel() {
   if (selectedId !== lastSelected) {
     setLastSelected(selectedId)
     if (selectedId) setTab('inspector')
+  }
+  // so does an AI board's "Ask" button, even when the board was already picked
+  const askRequest = useAiChat((s) => s.openRequest?.n ?? 0)
+  const [lastAsk, setLastAsk] = useState(askRequest)
+  if (askRequest !== lastAsk) {
+    setLastAsk(askRequest)
+    setTab('inspector')
   }
 
   return (

@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { PARTS, alarmBeat, partHeight, partWidth, pinModesFor, pinOutput, terminalIds } from './catalog'
 import { PRESET_CATEGORIES, PRESET_INFO, PRESET_ORDER, buildPreset, type PresetId } from './presets'
 import { DEFAULT_STEP, solveCircuit, type NetPart, type NetWire, type SimResult } from './solver'
-import type { PartData } from './types'
+import type { PartData, PinMode } from './types'
+import { describeBoard } from '@/ai/plan'
 // this file's own text: every example must be named in one of its tests
 import thisFile from './examples.test.ts?raw'
 
@@ -1058,6 +1059,86 @@ describe('screens and signs, second batch', () => {
     expect(lit(1.5)).toEqual(['b2', 'b5'])
     expect(lit(2.5)).toEqual(['b3', 'b6'])
     expect(at('cinemaSign', 0.5).sign.status).toBe('on')
+  })
+})
+
+/** An AI board's pins after the model's answer: every pin off except the ones given. */
+const aiPins = (pins: Record<string, PinMode>): Partial<PartData> => ({
+  pins: { P1: 'off', P2: 'off', P3: 'off', P4: 'off', P5: 'off', P6: 'off', ...pins },
+})
+
+describe('talk to the AI board', () => {
+  it('talking smart home: the lamp waits for the dark; the fan and the bell start when the AI sets their pins', () => {
+    const night = run('aiSmartHome').last
+    expect(on(night, 'lamp')).toBe(true)
+    expect(night.parts.fan.level).toBe(0)
+    expect(night.parts.bell.level).toBe(0)
+    expect(run('aiSmartHome', 0.3, { ldr: { light: 1 } }).last.parts.lamp.level).toBe(0)
+    // "turn on the fan and ring the bell"
+    const asked = run('aiSmartHome', 0.5, { board: aiPins({ P1: 'on', P2: 'invert', P3: 'on' }) }).last
+    expect(Math.abs(asked.parts.fan.level)).toBeGreaterThan(0.3)
+    expect(on(asked, 'bell')).toBe(true)
+    expect(asked.parts.board.status).not.toBe('over')
+  })
+
+  it('AI traffic light: red, then green, then yellow; and a flashing yellow when asked', () => {
+    const lit = (t: number, set = {}) => ['red', 'yellow', 'green'].filter((key) => at('aiTrafficLight', t, set)[key].status === 'on')
+    expect(lit(0.5)).toEqual(['red'])
+    expect(lit(1.5)).toEqual(['green'])
+    expect(lit(2.5)).toEqual(['yellow'])
+    // "flash the yellow light like at night"
+    const night = { board: aiPins({ P2: 'blink' }) }
+    expect(lit(0.25, night)).toEqual(['yellow'])
+    expect(lit(0.75, night)).toEqual([])
+  })
+
+  it('AI party lights: three lights run one after another and the gold one breathes', () => {
+    expect(at('aiPartyLights', 0.5).red.status).toBe('on')
+    expect(at('aiPartyLights', 0.5).green.level).toBe(0)
+    expect(at('aiPartyLights', 1.5).green.status).toBe('on')
+    expect(at('aiPartyLights', 2.5).blue.status).toBe('on')
+    expect(at('aiPartyLights', 1).gold.status).toBe('on')
+    expect(at('aiPartyLights', 0.02).gold.level).toBeLessThan(at('aiPartyLights', 1).gold.level)
+  })
+
+  it('AI plant helper: dry soil runs the pump with the red light; wet soil rests it with the green light', () => {
+    const dry = run('aiPlantHelper').last
+    expect(Math.abs(dry.parts.pump.level)).toBeGreaterThan(0.3)
+    expect(on(dry, 'thirsty')).toBe(true)
+    expect(dry.parts.happy.level).toBe(0)
+    const wet = run('aiPlantHelper', 0.5, { sensor: { sense: 0.9 } }).last
+    expect(wet.parts.pump.level).toBe(0)
+    expect(on(wet, 'happy')).toBe(true)
+  })
+
+  it('AI robot pet: the tail wags and the eyes shine; taught to beep, it beeps only while touched', () => {
+    const { steps } = run('aiRobotPet', 2)
+    const tail = steps.map((r) => r.parts.tail.level)
+    expect(Math.max(...tail) - Math.min(...tail)).toBeGreaterThan(0.5)
+    expect(on(steps.at(-1)!, 'eyeL')).toBe(true)
+    expect(on(steps.at(-1)!, 'eyeR')).toBe(true)
+    expect(steps.every((r) => r.parts.voice.level === 0)).toBe(true)
+    // "beep when I touch you"
+    const taught = aiPins({ P1: 'fade', P3: 'on', P4: 'on', P5: 'alarm' })
+    expect(run('aiRobotPet', 1, { board: taught }).steps.every((r) => r.parts.voice.level === 0)).toBe(true)
+    expect(pulses(run('aiRobotPet', 1, { board: taught, sensor: { sense: 1 } }).steps, 'voice')).toBe(true)
+  })
+
+  it('shows the model what every AI example wires to each pin and to IN', () => {
+    const info = (id: PresetId) => {
+      const { nodes, edges } = buildPreset(id)
+      const board = nodes.find((n) => n.data.type === 'aiBoard')!
+      return describeBoard(board.id, nodes, edges)!
+    }
+    const home = info('aiSmartHome')
+    const drives = (pin: string) => home.pins.find((p) => p.pin === pin)!.devices.map((d) => d.type)
+    expect(drives('P1')).toEqual(['motor'])
+    expect(drives('P2')).toEqual(['led'])
+    expect(drives('P3')).toEqual(['buzzer'])
+    expect(home.input).toMatchObject({ high: 'it is bright', low: 'it is dark' })
+    expect(info('aiPlantHelper').input?.sensor?.type).toBe('soilSensor')
+    expect(info('aiRobotPet').pins[0].devices[0].type).toBe('servo')
+    expect(info('aiTrafficLight').pins.slice(0, 3).map((p) => p.devices[0].color)).toEqual(['green', 'yellow', 'red'])
   })
 })
 
