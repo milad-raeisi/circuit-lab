@@ -158,7 +158,7 @@ export function EmptyState() {
           transition={{ type: 'spring', stiffness: 260, damping: 26 }}
           className="pointer-events-none absolute inset-0 z-[5] grid place-items-center p-5"
         >
-          <div className="pointer-events-auto flex w-full max-w-sm flex-col items-center gap-5 rounded-3xl border bg-card/95 px-6 pt-7 pb-6 text-center shadow-[var(--shadow-float)] backdrop-blur">
+          <div className="pointer-events-auto flex w-full max-w-sm flex-col items-center gap-5 rounded-3xl border bg-card px-6 pt-7 pb-6 text-center shadow-[var(--shadow-float)]">
             <FirstCircuit />
             <div className="space-y-1.5">
               <h2 className="text-xl font-semibold tracking-tight text-balance">{t.empty.title}</h2>

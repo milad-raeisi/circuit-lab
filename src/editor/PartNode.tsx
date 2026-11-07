@@ -1,8 +1,7 @@
-import { View } from '@react-three/drei'
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from '@xyflow/react'
 import { Minus, Plus, RotateCcw, RotateCw, Wrench } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { memo, useEffect, type ReactNode } from 'react'
+import { lazy, memo, Suspense, useEffect, type ReactNode } from 'react'
 import { Switch } from '@/components/ui/switch'
 import { Slider } from '@/components/ui/slider'
 import {
@@ -21,8 +20,9 @@ import { playClick } from '@/lib/sound'
 import { cn } from '@/lib/utils'
 import { NODE_WIDTH, useCircuit } from '@/store/circuit'
 import { useSimulation } from '@/store/simulation'
-import { PartScene } from '@/three/PartScene'
-import { VIEW_PRIORITY } from '@/three/SceneCanvas'
+
+// three.js is the biggest library in the app: load it after the first paint
+const PartView = lazy(() => import('@/three/PartView'))
 
 const POSITION: Record<Side, Position> = {
   left: Position.Left,
@@ -378,9 +378,9 @@ function PartNodeComponent({ id, data, selected }: NodeProps<PartNodeType>) {
         </div>
         {/* the 3D model is drawn only inside this framed window */}
         <div className="part-node__stage">
-          <View index={VIEW_PRIORITY} className="absolute inset-0">
-            <PartScene data={data} result={result} />
-          </View>
+          <Suspense fallback={null}>
+            <PartView data={data} result={result} />
+          </Suspense>
         </div>
         <div className="part-node__control">
           <NodeControl id={id} data={data} result={result} />

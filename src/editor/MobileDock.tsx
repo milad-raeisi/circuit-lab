@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { MISSION_IDS } from '@/circuit/missions'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
-import { selectSelectedPart, selectSelectedWire, useCircuit } from '@/store/circuit'
+import { selectSelectedWire, useCircuit, useSelectedPart } from '@/store/circuit'
 import { useSettings } from '@/store/settings'
 import { InspectorBody } from './Inspector'
 import { Missions } from './Missions'
@@ -59,7 +59,7 @@ function DockButton({
  */
 export function MobileDock() {
   const { t } = useI18n()
-  const part = useCircuit(selectSelectedPart)
+  const part = useSelectedPart()
   const wire = useCircuit(selectSelectedWire)
   const done = useSettings((s) => s.completed.length)
   const [open, setOpen] = useState(false)

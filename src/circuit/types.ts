@@ -2,26 +2,41 @@ import type { Edge, Node } from '@xyflow/react'
 
 export type PartType =
   | 'battery'
+  | 'solar'
+  | 'arduino'
   | 'switch'
   | 'button'
+  | 'dimmer'
+  | 'resistor'
+  | 'capacitor'
+  | 'diode'
+  | 'transistor'
+  | 'fuse'
   | 'lamp'
   | 'led'
   | 'motor'
   | 'buzzer'
-  | 'resistor'
-  | 'dimmer'
+  | 'ldr'
+  | 'voltmeter'
+  | 'ammeter'
 
 /** Clockwise rotation of a part on the board, in degrees. */
 export type Rotation = 0 | 90 | 180 | 270
 
-/** Every part has exactly two terminals. */
-export type TerminalId = 'a' | 'b'
+/**
+ * A connection point on a part. Simple parts have `a` and `b`; a transistor
+ * has `B`, `C` and `E`; the Arduino has one per pin (`5V`, `GND`, `D13` …).
+ */
+export type TerminalId = string
 
 export type Side = 'left' | 'top' | 'right' | 'bottom'
 
 export type LampColor = 'warm' | 'yellow' | 'red' | 'green' | 'blue'
 export type LedColor = 'red' | 'yellow' | 'green' | 'blue' | 'white'
 export type WireColor = 'red' | 'black' | 'blue' | 'yellow' | 'green' | 'white'
+
+/** What an Arduino pin does: stay low, stay high, blink, or fade up and down (PWM pins only). */
+export type PinMode = 'off' | 'on' | 'blink' | 'fade'
 
 /**
  * Data stored on a React Flow node. It is a `type` (not an `interface`) so it
@@ -42,7 +57,15 @@ export type PartData = {
   resistance?: number
   /** dimmer: knob position 0..1 */
   level?: number
-  /** lamp / led: destroyed by too much power */
+  /** capacitor: microfarads */
+  capacitance?: number
+  /** fuse: amps it can carry before it blows */
+  rating?: number
+  /** light sensor / solar panel: how much light falls on it, 0..1 */
+  light?: number
+  /** arduino: the "program" of each output pin */
+  pins?: Record<string, PinMode>
+  /** lamp / led / diode / fuse / transistor: destroyed by too much power */
   burnt?: boolean
 }
 

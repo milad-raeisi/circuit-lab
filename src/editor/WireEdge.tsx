@@ -109,19 +109,22 @@ function WireEdgeComponent({
       {/* a highlight stripe makes the wire read as a round cable */}
       <path d={path} fill="none" stroke="white" strokeOpacity={0.28} strokeWidth={1.5} strokeLinecap="round" transform="translate(0,-1.2)" />
       {overloaded && <path d={path} fill="none" className="wire-hot" strokeLinecap="round" />}
-      {flowing && (
-        <path
-          d={path}
-          fill="none"
-          className="wire-flow"
-          strokeLinecap="round"
-          style={{
-            strokeDasharray: `1 ${DASH - 1}`,
-            animationDuration: `${DASH / flowSpeed(current)}s`,
-            animationDirection: current > 0 ? 'normal' : 'reverse',
-          }}
-        />
-      )}
+      {flowing &&
+        // a wide, faint copy under the dots gives them a glow without a costly SVG filter
+        ['wire-flow wire-glow', 'wire-flow'].map((className) => (
+          <path
+            key={className}
+            d={path}
+            fill="none"
+            className={className}
+            strokeLinecap="round"
+            style={{
+              strokeDasharray: `1 ${DASH - 1}`,
+              animationDuration: `${DASH / flowSpeed(current)}s`,
+              animationDirection: current > 0 ? 'normal' : 'reverse',
+            }}
+          />
+        ))}
       <EdgeLabelRenderer>
         <AnimatePresence>
           {selected && <WireToolbar key="toolbar" id={id} x={labelX} y={labelY} color={color} />}

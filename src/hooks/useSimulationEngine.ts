@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { MISSION_IDS, evaluateMissions, type MissionMemory } from '@/circuit/missions'
-import { EMPTY_RESULT, solveCircuit } from '@/circuit/solver'
+import { EMPTY_RESULT, solveCircuit, type PartResult, type SimResult } from '@/circuit/solver'
 import type { PartNode, WireEdge } from '@/circuit/types'
 import {
   playPop,
@@ -30,6 +30,53 @@ function electricalKey(nodes: PartNode[], edges: WireEdge[]) {
   return `${parts.join(';')}|${wires.join(';')}`
 }
 
+const close = (a: number, b: number, tolerance: number) => Math.abs(a - b) <= tolerance
+
+function samePart(a: PartResult, b: PartResult) {
+  return (
+    a.status === b.status &&
+    a.damaged === b.damaged &&
+    close(a.voltage, b.voltage, 1e-4) &&
+    close(a.current, b.current, 1e-6) &&
+    close(a.power, b.power, 1e-6) &&
+    close(a.level, b.level, 1e-4)
+  )
+}
+
+/**
+ * Keeps the old object for every part and wire whose numbers did not change,
+ * so React only re-renders the cards and wires that really changed (and
+ * nothing at all when the whole result is the same).
+ */
+function reuseUnchanged(prev: SimResult, next: SimResult): SimResult {
+  let changed =
+    prev.shortCircuit !== next.shortCircuit ||
+    prev.hasBattery !== next.hasBattery ||
+    !close(prev.batteryCurrent, next.batteryCurrent, 1e-6) ||
+    Object.keys(prev.parts).length !== Object.keys(next.parts).length ||
+    Object.keys(prev.wires).length !== Object.keys(next.wires).length
+
+  const parts: SimResult['parts'] = {}
+  for (const [id, r] of Object.entries(next.parts)) {
+    const old = prev.parts[id]
+    if (old && samePart(old, r)) parts[id] = old
+    else {
+      parts[id] = r
+      changed = true
+    }
+  }
+  const wires: SimResult['wires'] = {}
+  for (const [id, amps] of Object.entries(next.wires)) {
+    const old = prev.wires[id]
+    if (old !== undefined && close(old, amps, 1e-6)) wires[id] = old
+    else {
+      wires[id] = amps
+      changed = true
+    }
+  }
+  return changed ? { ...next, parts, wires } : prev
+}
+
 export function useSimulationEngine() {
   const key = useCircuit((s) => electricalKey(s.nodes, s.edges))
   const running = useSimulation((s) => s.running)
@@ -51,11 +98,15 @@ export function useSimulationEngine() {
       return
     }
 
-    const result = solveCircuit(
-      nodes.map((n) => ({ id: n.id, data: n.data })),
-      edges,
+    const previous = useSimulation.getState().result
+    const result = reuseUnchanged(
+      previous,
+      solveCircuit(
+        nodes.map((n) => ({ id: n.id, data: n.data })),
+        edges,
+      ),
     )
-    useSimulation.setState({ result })
+    if (result !== previous) useSimulation.setState({ result })
 
     // parts that received too much power burn out (this re-runs the solver)
     for (const node of nodes) {

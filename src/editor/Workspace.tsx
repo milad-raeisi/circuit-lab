@@ -8,13 +8,15 @@ import {
   type Connection,
   type Edge,
 } from '@xyflow/react'
-import { useCallback, useEffect, useRef } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef } from 'react'
 import { PARTS } from '@/circuit/catalog'
 import type { PartNode as PartNodeType, WireEdge as WireEdgeType } from '@/circuit/types'
 import { playPlace } from '@/lib/sound'
 import { useCircuit } from '@/store/circuit'
 import { useSettings } from '@/store/settings'
-import { SceneCanvas } from '@/three/SceneCanvas'
+
+// the shared 3D canvas comes with three.js, so it loads after the first paint
+const SceneCanvas = lazy(() => import('@/three/SceneCanvas'))
 import { CanvasControls, DropZone, EmptyState, ShortCircuitAlert, WirePalette } from './CanvasOverlays'
 import { PartNode } from './PartNode'
 import { BoardStatusPill } from './StatusBar'
@@ -105,7 +107,9 @@ export function Workspace() {
         <WirePalette />
         <CanvasControls />
         <FitOnLoad />
-        <SceneCanvas />
+        <Suspense fallback={null}>
+          <SceneCanvas />
+        </Suspense>
         <EmptyState />
         <DropZone />
         <ShortCircuitAlert />

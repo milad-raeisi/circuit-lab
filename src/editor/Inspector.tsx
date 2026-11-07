@@ -27,11 +27,11 @@ import {
 } from '@/circuit/catalog'
 import { MISSION_IDS } from '@/circuit/missions'
 import type { PartResult, PartStatus } from '@/circuit/solver'
-import type { LampColor, LedColor, PartData, PartNode, WireColor, WireEdge } from '@/circuit/types'
+import type { LampColor, LedColor, PartData, WireColor, WireEdge } from '@/circuit/types'
 import { useI18n, type Dictionary } from '@/i18n'
 import { playClick } from '@/lib/sound'
 import { cn } from '@/lib/utils'
-import { selectSelectedPart, selectSelectedWire, useCircuit } from '@/store/circuit'
+import { selectSelectedWire, useCircuit, useSelectedPart, type SelectedPart } from '@/store/circuit'
 import { useSettings } from '@/store/settings'
 import { useSimulation } from '@/store/simulation'
 import { Missions } from './Missions'
@@ -135,7 +135,7 @@ function Swatches<T extends string>({
   )
 }
 
-function PartSettings({ node }: { node: PartNode }) {
+function PartSettings({ node }: { node: SelectedPart }) {
   const { t } = useI18n()
   const updatePart = useCircuit((s) => s.updatePart)
   const { id, data } = node
@@ -230,7 +230,7 @@ function PartSettings({ node }: { node: PartNode }) {
   }
 }
 
-function PartInspector({ node }: { node: PartNode }) {
+function PartInspector({ node }: { node: SelectedPart }) {
   const { t } = useI18n()
   const running = useSimulation((s) => s.running)
   const result = useSimulation((s) => s.result.parts[node.id])
@@ -405,7 +405,7 @@ function EmptyInspector() {
 
 /** Details of whatever is picked on the board: used by the side panel and the phone sheet. */
 export function InspectorBody() {
-  const part = useCircuit(selectSelectedPart)
+  const part = useSelectedPart()
   const wire = useCircuit(selectSelectedWire)
   const selectedId = part?.id ?? wire?.id ?? null
   return (
@@ -425,7 +425,7 @@ export function InspectorBody() {
 
 export function InspectorPanel() {
   const { t } = useI18n()
-  const part = useCircuit(selectSelectedPart)
+  const part = useSelectedPart()
   const wire = useCircuit(selectSelectedWire)
   const completed = useSettings((s) => s.completed.length)
   const [tab, setTab] = useState('inspector')

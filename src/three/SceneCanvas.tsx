@@ -1,8 +1,19 @@
 import { View } from '@react-three/drei'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, type RootState } from '@react-three/fiber'
+import { useStoreApi } from '@xyflow/react'
+import { useEffect, useRef } from 'react'
+import type { SimResult } from '@/circuit/solver'
+import type { PartNode } from '@/circuit/types'
+import { useCircuit } from '@/store/circuit'
+import { useSimulation } from '@/store/simulation'
 
 /** Views render at this priority; the clear pass runs just before them. */
 export const VIEW_PRIORITY = 2
+
+/** After any change, draw at full speed for this long so eased transitions stay smooth. */
+const SETTLE_MS = 1200
+/** Speed for parts that move on their own (spinning motor, battery sparkles, smoke). */
+const AMBIENT_FPS = 30
 
 /**
  * drei's <View> draws every view into its own scissor rectangle but never
@@ -18,6 +29,98 @@ function ClearPass() {
   return null
 }
 
+/** True while some part keeps moving by itself, so the canvas must keep drawing. */
+function hasAmbientMotion(nodes: PartNode[], result: SimResult) {
+  return nodes.some(({ id, data }) => {
+    if (data.burnt) return true // smoke
+    const r = result.parts[id]
+    if (!r) return false
+    switch (data.type) {
+      case 'battery':
+        return r.status === 'on' || r.status === 'short' // sparkles, smoke
+      case 'motor':
+        return Math.abs(r.level) > 0.02 || r.status === 'over'
+      case 'buzzer':
+        return r.level > 0
+      case 'resistor':
+      case 'dimmer':
+        return r.status === 'over' // smoke
+      default:
+        return false
+    }
+  })
+}
+
+/**
+ * Draws the canvas only when something changed, instead of on every screen
+ * refresh: an idle board costs nothing, a board with a spinning motor draws at
+ * AMBIENT_FPS, and for a moment after any change (new results, a moved part,
+ * panning, zooming, resizing) it draws at full speed.
+ */
+function useFrameScheduler(root: React.RefObject<RootState | null>) {
+  const flowStore = useStoreApi()
+
+  useEffect(() => {
+    let raf = 0
+    let busyUntil = 0
+    let lastDraw = 0
+    let ambient = false
+
+    const draw = (now: number) => {
+      const state = root.current
+      if (!state) return
+      // after a pause, restart the clock so eased animations do not jump
+      if (now - lastDraw > 100) state.clock.getDelta()
+      state.invalidate()
+      lastDraw = now
+    }
+
+    const loop = (now: number) => {
+      raf = 0
+      if (now < busyUntil) draw(now)
+      else if (ambient && now - lastDraw >= 1000 / AMBIENT_FPS - 2) draw(now)
+      if (now < busyUntil || ambient) raf = requestAnimationFrame(loop)
+    }
+
+    const wake = () => {
+      busyUntil = performance.now() + SETTLE_MS
+      if (!raf) raf = requestAnimationFrame(loop)
+    }
+
+    const updateAmbient = () => {
+      // a paused board is frozen: nothing needs drawing until something changes
+      const { running, result } = useSimulation.getState()
+      ambient = running && hasAmbientMotion(useCircuit.getState().nodes, result)
+      if (ambient && !raf) raf = requestAnimationFrame(loop)
+    }
+
+    const unsubscribers = [
+      useSimulation.subscribe(() => {
+        updateAmbient()
+        wake()
+      }),
+      useCircuit.subscribe((s, prev) => {
+        if (s.nodes === prev.nodes && s.edges === prev.edges) return
+        updateAmbient()
+        wake()
+      }),
+      // panning and zooming move every view
+      flowStore.subscribe((s, prev) => {
+        if (s.transform !== prev.transform) wake()
+      }),
+    ]
+    window.addEventListener('resize', wake)
+    updateAmbient()
+    wake()
+
+    return () => {
+      cancelAnimationFrame(raf)
+      unsubscribers.forEach((off) => off())
+      window.removeEventListener('resize', wake)
+    }
+  }, [root, flowStore])
+}
+
 /**
  * One shared WebGL canvas for the whole board. Every part node registers a
  * <View> that tracks its DOM box, so 40 parts still cost a single WebGL
@@ -29,9 +132,15 @@ function ClearPass() {
  * at 0,0. The side panels and bars are stacked above it, so 3D never shows
  * outside the board.
  */
-export function SceneCanvas() {
+export default function SceneCanvas() {
+  const root = useRef<RootState | null>(null)
+  useFrameScheduler(root)
   return (
     <Canvas
+      frameloop="demand"
+      onCreated={(state) => {
+        root.current = state
+      }}
       style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 4 }}
       gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
       dpr={[1, 2]}

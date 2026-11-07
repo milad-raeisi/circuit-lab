@@ -5,6 +5,9 @@
 @import "@fontsource-variable/vazirmatn";
 @import "@xyflow/react/dist/style.css" layer(base);
 
+/* the agent skill folder holds large script files with no app classes in them */
+@source not "../.claude";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -229,11 +232,11 @@ html[lang='ar'] {
 }
 
 /* floating panels on the board share one look */
+/* solid, not blurred: a backdrop blur over the live 3D canvas is re-computed every frame */
 .float-panel {
   border: 1px solid var(--border);
-  background: color-mix(in oklch, var(--card) 92%, transparent);
+  background: var(--card);
   box-shadow: var(--shadow-float);
-  backdrop-filter: blur(12px) saturate(1.4);
 }
 
 /* ── part cards ──
@@ -355,7 +358,16 @@ html[lang='ar'] {
     0 12px 28px -12px color-mix(in oklch, var(--part-accent) 55%, transparent);
 }
 
-.part-node--danger {
+/* the red pulse animates only opacity, which the GPU handles without repainting */
+.part-node--danger::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow:
+    0 0 0 4px oklch(0.63 0.24 27 / 0.8),
+    0 0 30px oklch(0.63 0.24 27 / 0.6);
+  pointer-events: none;
   animation: danger-pulse 0.8s ease-in-out infinite alternate;
 }
 
@@ -522,14 +534,21 @@ html[lang='ar'] {
   filter: drop-shadow(0 0 5px var(--primary));
 }
 
+/* the moving dots: no filter here, a filter would be re-rendered on every frame */
 .wire-flow {
   stroke: #fff7c2;
   stroke-width: 4px;
-  filter: drop-shadow(0 0 3px #facc15);
   animation-name: wire-flow;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
   pointer-events: none;
+}
+
+/* a wide, faint copy of the moving dots: their glow, without a per-frame filter */
+.wire-flow.wire-glow {
+  stroke: #facc15;
+  stroke-width: 10px;
+  opacity: 0.3;
 }
 
 .wire-hot {
@@ -562,12 +581,10 @@ html[lang='ar'] {
 
 @keyframes danger-pulse {
   from {
-    box-shadow: 0 0 0 2px oklch(0.63 0.24 27 / 0.4);
+    opacity: 0.35;
   }
   to {
-    box-shadow:
-      0 0 0 4px oklch(0.63 0.24 27 / 0.8),
-      0 0 30px oklch(0.63 0.24 27 / 0.6);
+    opacity: 1;
   }
 }
 
@@ -602,7 +619,8 @@ html[lang='ar'] {
   .wire-flow,
   .wire-drawing,
   .wire-hot,
-  .part-node--danger,
+  .part-node--danger::before,
+  .status-led--blink,
   .short-vignette {
     animation: none;
   }

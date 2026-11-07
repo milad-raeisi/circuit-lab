@@ -6,6 +6,7 @@ import {
   type NodeChange,
   type XYPosition,
 } from '@xyflow/react'
+import { useMemo } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware'
 import { PARTS, createPartData, nextRotation } from '@/circuit/catalog'
@@ -283,3 +284,16 @@ export const useCircuit = create<CircuitState>()(
 
 export const selectSelectedPart = (s: CircuitState) => s.nodes.find((n) => n.selected)
 export const selectSelectedWire = (s: CircuitState) => s.edges.find((e) => e.selected)
+
+export type SelectedPart = Pick<PartNode, 'id' | 'data'>
+
+/**
+ * The picked part's id and data. Panels use this instead of the whole node:
+ * a node object changes on every frame while it is dragged, its data does not,
+ * so the panels no longer re-render during a drag.
+ */
+export function useSelectedPart(): SelectedPart | undefined {
+  const id = useCircuit((s) => s.nodes.find((n) => n.selected)?.id)
+  const data = useCircuit((s) => (id === undefined ? undefined : s.nodes.find((n) => n.id === id)?.data))
+  return useMemo(() => (id && data ? { id, data } : undefined), [id, data])
+}
