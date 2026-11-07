@@ -1,11 +1,34 @@
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
+
+/**
+ * Writes the offline service worker (src/pwa/sw.js) to /sw.js, stamped with a
+ * fingerprint of this build's files so each release gets its own caches.
+ */
+function serviceWorker(): Plugin {
+  return {
+    name: 'circuit-lab-service-worker',
+    apply: 'build',
+    generateBundle(_options, bundle) {
+      const files = Object.keys(bundle).sort().join('\n')
+      const version = createHash('sha256').update(files).digest('hex').slice(0, 12)
+      // only the quoted value in the code, not the mention in the file's comment
+      const source = readFileSync(path.resolve(import.meta.dirname, 'src/pwa/sw.js'), 'utf8').replace(
+        "'__VERSION__'",
+        JSON.stringify(version),
+      )
+      this.emitFile({ type: 'asset', fileName: 'sw.js', source })
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), serviceWorker()],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),

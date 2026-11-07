@@ -1,11 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Circuit Lab, drawn bolder for browser tabs and other tiny sizes (see logo.svg for the full mark) -->
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fbbf24"/>
-      <stop offset="0.55" stop-color="#f97316"/>
-      <stop offset="1" stop-color="#ec4899"/>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6b5cff"/>
+      <stop offset="1" stop-color="#4330da"/>
     </linearGradient>
+    <radialGradient id="bulb" cx="0.38" cy="0.34" r="0.7">
+      <stop offset="0" stop-color="#fffbe6"/>
+      <stop offset="0.45" stop-color="#fde047"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </radialGradient>
   </defs>
-  <rect width="64" height="64" rx="16" fill="url(#g)"/>
-  <path d="M35 8 16 36h14l-3 20 21-30H34l1-18Z" fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+  <rect width="512" height="512" rx="112" fill="url(#tile)"/>
+  <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M200 196H206a70 70 0 0 0-70 70V268M136 336V350a70 70 0 0 0 70 70H318a70 70 0 0 0 70-70V266a70 70 0 0 0-70-70H328" stroke-width="48"/>
+    <path d="M84 268H188" stroke-width="22"/>
+    <path d="M110 336H162" stroke-width="38"/>
+  </g>
+  <g stroke="#fde047" stroke-width="22" stroke-linecap="round">
+    <path d="M264 104V74"/>
+    <path d="M330 136L354 118"/>
+    <path d="M198 136L174 118"/>
+  </g>
+  <circle cx="264" cy="196" r="66" fill="url(#bulb)"/>
 </svg>

@@ -2,11 +2,40 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Circuit Lab: drag, wire and power up simple electric circuits. A playful circuit simulator for kids." />
-    <meta name="theme-color" content="#6d5dfc" />
-    <title>Circuit Lab · Build it, power it up!</title>
+    <title>Circuit Lab · Build it. Light it up!</title>
+    <meta
+      name="description"
+      content="Circuit Lab is a playful circuit simulator for kids: wire real parts, watch them light, spin and beep, and learn electronics in English, Persian and Arabic. A product of SBC."
+    />
+    <meta name="author" content="SBC" />
+    <link rel="canonical" href="https://circuitlab.app/" />
+
+    <!-- the logo: browser tabs, home screens and installed app -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#5b4cf5" />
+    <meta name="application-name" content="Circuit Lab" />
+    <meta name="apple-mobile-web-app-title" content="Circuit Lab" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- how a shared link looks in chats and on social media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Circuit Lab" />
+    <meta property="og:url" content="https://circuitlab.app/" />
+    <meta property="og:title" content="Circuit Lab · Build it. Light it up!" />
+    <meta property="og:description" content="A playful circuit simulator for kids. Wire it, power it, light it up. A product of SBC." />
+    <meta property="og:image" content="https://circuitlab.app/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Circuit Lab logo: a loop of wire with a battery, closed by a glowing light bulb" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Circuit Lab · Build it. Light it up!" />
+    <meta name="twitter:description" content="A playful circuit simulator for kids. Wire it, power it, light it up." />
+    <meta name="twitter:image" content="https://circuitlab.app/og-image.jpg" />
+
     <script>
       // Apply the saved theme and language before the app renders (no flash).
       try {
@@ -19,9 +48,17 @@
         }
       } catch (e) {}
     </script>
+    <style>
+      /* shown only until the app starts: the logo, gently glowing */
+      .boot { position: fixed; inset: 0; display: grid; place-items: center; background: #fbfbfe; }
+      html.dark .boot { background: #14141d; }
+      .boot img { width: 76px; height: 76px; animation: boot-glow 1.2s ease-in-out infinite alternate; }
+      @keyframes boot-glow { to { transform: scale(1.05); filter: drop-shadow(0 0 18px rgba(253, 224, 71, 0.5)); } }
+      @media (prefers-reduced-motion: reduce) { .boot img { animation: none; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="boot" aria-hidden="true"><img src="/logo.svg" alt="" /></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

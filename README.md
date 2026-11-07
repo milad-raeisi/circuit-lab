@@ -1,4 +1,13 @@
-# Circuit Lab
+<p align="center">
+  <a href="https://circuitlab.app"><img src="public/logo.svg" width="112" alt="Circuit Lab logo: a loop of wire with a battery, closed by a glowing light bulb"></a>
+</p>
+
+<h1 align="center">Circuit Lab</h1>
+
+<p align="center">
+  <b>Build it. Light it up!</b><br>
+  <a href="https://circuitlab.app">circuitlab.app</a> · A product of SBC
+</p>
 
 A circuit simulator for kids. Drag parts from the parts box onto the board, wire their terminals together and watch the circuit come alive: lamps glow, LEDs light up, motors spin and buzzers beep, all animated in 3D with Three.js.
 
@@ -14,6 +23,23 @@ npm run build    # type-check + production build
 ```
 
 Requires Node.js 22.12 or later (the Animate UI CLI needs it).
+
+## Publishing (circuitlab.app)
+
+Every push to `main` runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml): it installs, type-checks, builds, runs all tests and publishes `dist/` to GitHub Pages. `public/CNAME` holds the domain.
+
+One-time setup:
+
+- **GitHub:** Settings → Pages → Source: **GitHub Actions**, custom domain `circuitlab.app`, then **Enforce HTTPS** once the certificate is ready.
+- **DNS** at the domain registrar:
+  - `A` records for `circuitlab.app` → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+  - `AAAA` records → `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
+  - `CNAME` for `www` → `milad-raeisi.github.io`
+- **Recommended:** verify the domain under your GitHub profile → Settings → Pages, so no one else can claim it.
+
+`.app` domains only work over HTTPS, so the site opens once GitHub has issued its certificate (usually minutes, at most a day after DNS is set).
+
+**Brand and app files** live in `public/`: `logo.svg` (the full logo), `favicon.svg` / `favicon.ico` (the bolder small-size drawing), `apple-touch-icon.png`, `icons/` (PWA and maskable icons), `og-image.jpg` (link previews) and `manifest.webmanifest`. The app can be installed and works offline: `src/pwa/sw.js` is written to `/sw.js` by the build, with a fresh cache for each release.
 
 ## What kids can do
 

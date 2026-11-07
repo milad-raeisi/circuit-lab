@@ -1,4 +1,5 @@
 import { CircleQuestionMark } from '@/components/animate-ui/icons/circle-question-mark'
+import { BrandLogo } from '@/components/BrandLogo'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -68,6 +69,19 @@ export function HelpDialog({
             ))}
           </dl>
         </div>
+        <footer className="flex items-center gap-3 border-t pt-4">
+          <BrandLogo className="size-10" />
+          <div className="min-w-0 leading-tight">
+            <p className="text-sm font-semibold">{t.app.title}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {t.app.madeBy}
+              <span aria-hidden className="mx-1.5">·</span>
+              <a href="https://circuitlab.app" dir="ltr" className="underline-offset-2 hover:text-foreground hover:underline">
+                circuitlab.app
+              </a>
+            </p>
+          </div>
+        </footer>
       </DialogContent>
     </Dialog>
   )

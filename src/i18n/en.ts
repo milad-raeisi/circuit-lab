@@ -18,7 +18,12 @@ import type {
 type PartText = { name: string; description: string; working: string }
 
 export type Dictionary = {
-  app: { title: string; subtitle: string }
+  app: {
+    title: string
+    subtitle: string
+    /** the maker's line under the logo in the help window */
+    madeBy: string
+  }
   parts: Record<PartType, PartText>
   /** the label of each sensor's control: what you change in the world around it */
   sense: Record<SensedPart, string>
@@ -368,7 +373,7 @@ export type Dictionary = {
 
 /** English: the default language. Short, everyday words a young child can read. */
 export const en: Dictionary = {
-  app: { title: 'Circuit Lab', subtitle: 'Build it. Light it up!' },
+  app: { title: 'Circuit Lab', subtitle: 'Build it. Light it up!', madeBy: 'A product of SBC' },
   parts: {
     battery: {
       name: 'Battery',

@@ -10,6 +10,7 @@ import { Sun } from '@/components/animate-ui/icons/sun'
 import { Trash2 } from '@/components/animate-ui/icons/trash-2'
 import { Undo2 } from '@/components/animate-ui/icons/undo-2'
 import { Volume2 } from '@/components/animate-ui/icons/volume-2'
+import { BrandLogo } from '@/components/BrandLogo'
 import { VolumeX } from '@/components/animate-ui/icons/volume-x'
 import {
   AlertDialog,
@@ -47,25 +48,6 @@ import { ExamplesGallery } from './ExamplesGallery'
 import { HelpDialog } from './HelpDialog'
 
 /** The app's mark: a closed loop with a battery on one side and a lit bulb on top. */
-function BrandMark() {
-  return (
-    <svg viewBox="0 0 36 36" className="size-9 shrink-0" aria-hidden>
-      <rect width="36" height="36" rx="10" fill="var(--primary)" />
-      <rect width="36" height="18" rx="10" fill="#fff" opacity="0.08" />
-      <path
-        d="M11 14.5V12a3 3 0 0 1 3-3h0.5M21.5 9H22a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-8a3 3 0 0 1-3-3v-2.5"
-        fill="none"
-        stroke="#fff"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path d="M7.5 16.2h7M9 19.6h4" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="18" cy="9" r="5.5" fill="#fde047" opacity="0.35" />
-      <circle cx="18" cy="9" r="3.4" fill="#fde047" />
-    </svg>
-  )
-}
-
 function ToolButton({
   label,
   onClick,
@@ -241,7 +223,7 @@ export function TopBar() {
   return (
     <header className="relative z-20 flex h-14 shrink-0 items-center gap-0.5 border-b bg-background px-2 sm:gap-1 sm:px-3">
       <div className="flex min-w-0 items-center gap-2.5 pe-1 sm:pe-2">
-        <BrandMark />
+        <BrandLogo className="size-9" />
         <div className="leading-tight max-sm:hidden">
           <p className="text-[15px] font-semibold tracking-tight">{t.app.title}</p>
           <p className="text-[11px] text-muted-foreground max-lg:hidden">{t.app.subtitle}</p>
