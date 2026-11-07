@@ -28,7 +28,7 @@ const GLASS: [number, number] = [1.32, 0.62]
 const DIAL_Y = -0.26
 const KNOB_R = 0.29
 const LEGEND_R = 0.5
-const JACK_Y = -0.9
+const JACK_Y = -0.86
 const JACK_X = 0.32
 const BOOT = '#f2b10a'
 const FACE = '#2a2e35'
@@ -43,8 +43,8 @@ const LCD_H = 272
 /** digit cells: a sign cell, then four digits */
 const SIGN_X = 16
 const CELL_X = 52
-const CELL_W = 86
-const PITCH = 102
+const CELL_W = 82
+const PITCH = 103
 const DIGIT_Y = 52
 const DIGIT_H = 172
 const T = 15
@@ -198,7 +198,7 @@ function drawLcd(ctx: CanvasRenderingContext2D, dial: MeterDial, text: string, u
   for (let i = 0; i < 4; i++) digitPath(ctx, CELL_X + i * PITCH, SEGMENTS['8'])
   segment(ctx, SIGN_X, DIGIT_Y + DIGIT_H / 2, SIGN_X + 28, DIGIT_Y + DIGIT_H / 2)
   ctx.fill()
-  for (const i of points) ctx.fillRect(CELL_X + i * PITCH + CELL_W + 1, DIGIT_Y + DIGIT_H - 12, 12, 12)
+  for (const i of points) ctx.fillRect(CELL_X + i * PITCH + CELL_W + 3, DIGIT_Y + DIGIT_H - 15, 15, 15)
   ctx.restore()
 
   // the reading, with the soft shadow a real LCD casts on its mirror behind
@@ -217,7 +217,7 @@ function drawLcd(ctx: CanvasRenderingContext2D, dial: MeterDial, text: string, u
   if (minus) segment(ctx, SIGN_X, DIGIT_Y + DIGIT_H / 2, SIGN_X + 28, DIGIT_Y + DIGIT_H / 2)
   ctx.fill()
   cells.forEach(({ point }, i) => {
-    if (point && i < 3) ctx.fillRect(CELL_X + i * PITCH + CELL_W + 1, DIGIT_Y + DIGIT_H - 12, 12, 12)
+    if (point && i < 3) ctx.fillRect(CELL_X + i * PITCH + CELL_W + 3, DIGIT_Y + DIGIT_H - 15, 15, 15)
   })
 
   // the unit, beside the last digit and sitting on the same line
@@ -380,17 +380,17 @@ function facePrint() {
     speakerIcon(ctx, -10, 0)
     ctx.restore()
 
-    // the jacks' names
+    // the jacks' names, under them so the plugs do not hide them
     ctx.font = `700 ${0.075 * ppu}px ${PRINT_FONT}`
     ctx.fillStyle = white
-    ctx.fillText('VΩA', X(-JACK_X), Y(JACK_Y + 0.2))
-    ctx.fillText('COM', X(JACK_X), Y(JACK_Y + 0.2))
+    ctx.fillText('VΩA', X(-JACK_X), Y(JACK_Y - 0.19))
+    ctx.fillText('COM', X(JACK_X), Y(JACK_Y - 0.19))
     // the warning triangle and the most it may measure, between the jacks
     ctx.strokeStyle = white
     ctx.lineWidth = 0.01 * ppu
     ctx.lineJoin = 'round'
     const tx = X(0)
-    const ty = Y(JACK_Y + 0.03)
+    const ty = Y(JACK_Y + 0.07)
     const s = 0.07 * ppu
     ctx.beginPath()
     ctx.moveTo(tx, ty - s * 0.6)
@@ -402,8 +402,8 @@ function facePrint() {
     ctx.fillText('!', tx, ty + s * 0.08)
     ctx.fillStyle = grey
     ctx.font = `700 ${0.04 * ppu}px ${PRINT_FONT}`
-    ctx.fillText('600V MAX', tx, Y(JACK_Y - 0.08))
-    ctx.fillText('CAT II', tx, Y(JACK_Y - 0.14))
+    ctx.fillText('600V MAX', tx, Y(JACK_Y - 0.04))
+    ctx.fillText('CAT II', tx, Y(JACK_Y - 0.1))
   })
 }
 
@@ -466,17 +466,17 @@ function Knob({ dial }: { dial: MeterDial }) {
       <group ref={knob}>
         <mesh position={[0, 0, 0.065]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[KNOB_R - 0.015, KNOB_R, 0.09, 48]} />
-          <meshStandardMaterial color="#131417" roughness={0.42} />
+          <meshStandardMaterial color="#1c1e22" roughness={0.42} />
         </mesh>
         <mesh geometry={knurl} position={[0, 0, 0.062]}>
-          <meshStandardMaterial color="#0d0e10" roughness={0.5} />
+          <meshStandardMaterial color="#111215" roughness={0.5} />
         </mesh>
         {/* the grip bar across the knob, and the white pointer on its end */}
         <RoundedBox args={[0.15, 0.56, 0.1]} radius={0.035} smoothness={3} position={[0, 0, 0.15]}>
-          <meshStandardMaterial color="#1f2125" roughness={0.38} />
+          <meshStandardMaterial color="#3a3e45" roughness={0.36} metalness={0.1} />
         </RoundedBox>
-        <mesh position={[0, 0.17, 0.201]}>
-          <planeGeometry args={[0.03, 0.17]} />
+        <mesh position={[0, 0.16, 0.201]}>
+          <planeGeometry args={[0.035, 0.2]} />
           <meshStandardMaterial color="#f8fafc" emissive="#f8fafc" emissiveIntensity={0.35} roughness={0.4} />
         </mesh>
         <mesh position={[0, KNOB_R - 0.035, 0.111]} rotation={[0, 0, Math.PI / 2]}>
@@ -660,7 +660,7 @@ export function MultimeterModel({
   const rim = useBuilt(rimGeometry)
   const print = facePrint()
   return (
-    <group position={[0, 0.02, 0]} rotation={[-0.55, 0.14, 0]}>
+    <group position={[0, 0.02, 0]} rotation={[-0.8, 0.14, 0]}>
       {/* the yellow boot, its raised rim and the moulding seam round its side */}
       <RoundedBox args={[W, H, D]} radius={0.1} smoothness={3}>
         <meshStandardMaterial color={BOOT} roughness={0.78} />

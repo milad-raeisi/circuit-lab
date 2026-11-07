@@ -52,6 +52,8 @@ function frameGeometry() {
   ])
 }
 
+/** tinned legs: full metalness looks black without an environment map */
+const TIN = { color: '#cfd3d9', metalness: 0.55, roughness: 0.32 } as const
 const BEAM_CORE = '#ff3d6e'
 const BEAM_OUTER = '#b05cff'
 
@@ -99,12 +101,12 @@ export function OptocouplerModel({
   })
 
   return (
-    <group position={[0, 0.1, 0]} rotation={[-0.62, 0.2, 0]}>
+    <group position={[0, 0.06, 0]} rotation={[-0.42, 0.22, 0]}>
       <mesh geometry={legs}>
-        <meshStandardMaterial {...METAL} />
+        <meshStandardMaterial {...TIN} />
       </mesh>
       <mesh geometry={frame}>
-        <meshStandardMaterial {...METAL} color={burnt ? '#57534e' : METAL.color} />
+        <meshStandardMaterial {...TIN} color={burnt ? '#57534e' : TIN.color} />
       </mesh>
 
       {/* the LED die in its little silver cup, turned toward the switch */}
@@ -169,10 +171,10 @@ export function OptocouplerModel({
       {/* the smoky case, drawn after everything inside it */}
       <RoundedBox args={[W, H, T]} radius={0.035} smoothness={2} renderOrder={5}>
         <meshStandardMaterial
-          color={burnt ? '#1c1310' : '#2a2730'}
+          color={burnt ? '#1c1310' : '#17141c'}
           transparent
-          opacity={burnt ? 0.88 : 0.4}
-          roughness={0.18}
+          opacity={burnt ? 0.92 : 0.7}
+          roughness={0.28}
           metalness={0.05}
           depthWrite={false}
         />

@@ -1,4 +1,5 @@
 import type {
+  BuzzerSound,
   LampColor,
   LedColor,
   MeterDial,
@@ -206,6 +207,8 @@ export const SUPPLY_LIMITS = [0.1, 0.5, 1, 2] as const
 export const POT_VALUES = [1000, 10000] as const
 /** the speaker's notes, hertz: a low, a middle and a high C */
 export const SPEAKER_NOTES = [262, 523, 1047] as const
+/** what a buzzer can play: a beep, or one of the siren chip's three sounds */
+export const BUZZER_SOUNDS: readonly BuzzerSound[] = ['beep', 'wail', 'yelp', 'hilo']
 /** 555 blinker speeds, blinks per second */
 export const TIMER_RATES = [0.5, 1, 2] as const
 /** oscilloscope screen widths, seconds */

@@ -388,6 +388,159 @@ export const enLearn: LearnBook = {
       like: 'It is like the screen of a phone: it knows your finger is there without being pushed down.',
       fact: 'Phone and tablet screens use the same idea. That is why most of them don’t work when you wear ordinary gloves.',
     },
+    flameSensor: {
+      about: [
+        'A flame sensor has a dark eye that sees infrared light, a kind of light our eyes can’t see. Fire gives off lots of it.',
+        'The bigger and closer the flame, the bigger the signal on S. Join + and − to power it, then read S with a board.',
+        'Only test it with a grown-up and a small candle, far from anything that can burn.',
+      ],
+      like: 'It is like a cat’s eyes that can see in the dark, but for warm, glowing things.',
+      fact: 'Factories use flame sensors like this, because they notice a fire even before there is much smoke.',
+    },
+    rainSensor: {
+      about: [
+        'A rain sensor has a plate with two combs of metal lines. Their teeth sit in between each other, but they never touch.',
+        'When a raindrop lands across two teeth, the water lets a little current through. More drops let more through, so the signal on S grows.',
+        'The little board next to the plate turns the wet plate into a signal a board can read.',
+      ],
+      like: 'It is like a bridge that gets a new plank with every drop, until lots of people can cross.',
+      fact: 'Many cars have a rain sensor on the windscreen that switches the wipers on all by themselves.',
+    },
+    waterSensor: {
+      about: [
+        'This sensor has long copper fingers side by side. Every other finger is joined to S, and the ones between are joined to −.',
+        'Water joins the fingers together. The higher the water climbs, the more of each finger it joins, and the bigger the signal.',
+        'Only dip the strip, never the part with the pins, and dry it after use so it does not rust.',
+      ],
+      like: 'It is like a ruler standing in a glass that tells you how full the glass is.',
+      fact: 'Sensors like this warn you when a fish tank, a plant tray or a rain barrel is getting too full.',
+    },
+    humiditySensor: {
+      about: [
+        'Air always has some water in it, in bits far too small to see. Humidity says how much: 0 % is very dry, and 100 % is as damp as a cloud.',
+        'Inside the blue box is a little part that soaks up water from the air, and that changes how easily current gets through it.',
+        'Join + and −, and S tells how damp the air is. After a hot shower, the air in a bathroom can reach 90 % or more!',
+      ],
+      like: 'It is like a sponge that feels how wet the air is.',
+      fact: 'Museums check the humidity all day long, because air that is too damp or too dry can crack old paintings.',
+    },
+    hallSensor: {
+      about: [
+        'A Hall sensor is a tiny chip that feels a magnet through the air, without touching it.',
+        'Bring a magnet close and S turns on. Take it away and S turns off. Nothing inside moves, so it never wears out.',
+        'Like the other sensor modules, it needs power on + and −.',
+      ],
+      like: 'It is like feeling a fridge magnet pull before it even touches the fridge.',
+      fact: 'A bike computer uses a Hall sensor and a small magnet on the wheel: it counts one turn every time the magnet passes. The sensor is named after Edwin Hall, who found out how it works in 1879.',
+    },
+    irSensor: {
+      about: [
+        'An obstacle sensor has two eyes. The clear one shines infrared light, which we can’t see. The dark one waits to catch it.',
+        'When something is in front, the light bounces off it, back into the dark eye, and S turns on.',
+        'Dark, dull things send back less light than white, shiny ones, so they have to come a little closer.',
+      ],
+      like: 'It is like shouting in a cave and hearing your echo come back.',
+      fact: 'Robot vacuum cleaners use sensors like this so they don’t fall down the stairs. A phone camera can see the light: point it at the clear eye!',
+    },
+    lineSensor: {
+      about: [
+        'A line sensor looks down at the floor. It shines a little light and checks how much of it bounces back.',
+        'White paper sends the light back up. A black line soaks it up, so no light comes back and S turns on.',
+        'Put two of them under a robot, one each side of a black line, and the robot can follow the line all by itself.',
+      ],
+      like: 'It is like walking along a path while you watch your feet.',
+      fact: 'Schools all over the world hold races for little robot cars that follow a black line.',
+    },
+    forceSensor: {
+      about: [
+        'A press sensor is a flat pad made of two thin layers. Pressing pushes them together, so more current can get through.',
+        'Press harder and the signal on S gets bigger. It can tell a soft touch from a hard squeeze.',
+        'It feels how hard you press, but it is not a kitchen scale: its numbers are only rough.',
+      ],
+      like: 'It is like a sponge: the harder you squeeze it, the more water comes out.',
+      fact: 'Some electronic drum pads have press sensors inside, so hitting harder plays a louder drum.',
+    },
+    pulseSensor: {
+      about: [
+        'Every time your heart beats, a little more blood rushes into your fingertip, and blood soaks up light.',
+        'The sensor shines its green light into your finger and measures how much comes back. With every beat the light dips, and S jumps up.',
+        'Slide the heart rate to try a slow, resting heart or a fast one after running. A child’s heart often beats 70 to 110 times a minute.',
+      ],
+      like: 'It is like watching waves pass a boat, but the waves are your blood.',
+      fact: 'Smart watches measure your pulse in just this way, with the little green lights on their back.',
+    },
+    knockSensor: {
+      about: [
+        'Inside the little can is a spring with a metal pin in its middle. A knock or a shake makes the spring wobble and touch the pin.',
+        'Each touch closes a tiny switch, so S turns on.',
+        'Use it to make a secret knock lock, or a box that knows when someone moves it.',
+      ],
+      like: 'It is like a jelly that wobbles when you tap the table.',
+      fact: 'Some car alarms have a shake sensor that sounds the alarm when someone bumps the car.',
+    },
+    slideSwitch: {
+      about: [
+        'A two-way switch has three legs. COM is always joined to one side: A or B.',
+        'Slide the knob and COM jumps from A to B. One of the two paths is always on.',
+        'Two of them can switch one stair light from the top and from the bottom. Join A to A and B to B between the switches. Then flip either one, and the light changes!',
+      ],
+      like: 'It is like the points on a railway that send the train down one track or the other.',
+      fact: 'Almost every house with stairs has a pair of these switches: one at the top and one at the bottom.',
+    },
+    microSwitch: {
+      about: [
+        'A micro switch is a tiny switch with a metal lever. Press the lever just a little and it clicks.',
+        'COM touches NC (normally closed) until you press. Then it jumps over to NO (normally open).',
+        'Robots use them as bumpers to feel a wall, and machines use them to know when a door is shut.',
+      ],
+      like: 'It is like the button inside a fridge door that turns the light off when you close it.',
+      fact: 'The click of a computer mouse comes from a micro switch under each button.',
+    },
+    joystick: {
+      about: [
+        'A joystick is two knobs in one. Pushing the stick left and right turns one knob, and pushing it up and down turns the other.',
+        'Join + and −. X gives more volts as you push right, and Y gives more volts as you push up. In the middle each one gives half.',
+        'Join X to a servo or to a board’s input, and the stick controls it.',
+      ],
+      like: 'It is like steering a car and pressing its pedals, all with one thumb.',
+      fact: 'The thumb sticks on game controllers work just like this one.',
+    },
+    lemon: {
+      about: [
+        'A lemon battery is a copper coin and a nail covered in zinc, pushed into a lemon. The sour juice lets tiny charged bits travel between the two metals.',
+        'One lemon gives about 0.9 V. Join the copper of one lemon to the nail of the next, and the volts add up: three lemons make about 2.7 V.',
+        'Lemons can only give a tiny current. That is enough to make a red LED glow, but never enough for a lamp or a motor.',
+      ],
+      like: 'It is like a team of very weak pushers: one can’t do much, but in a row they push much harder.',
+      fact: 'You can make a battery from potatoes, apples or even pickles. The metals do the work: the fruit just lets the charges travel.',
+    },
+    coinCell: {
+      about: [
+        'A coin cell is a flat 3 V battery, like the one in a watch, a car key or a computer.',
+        'It holds a lot of energy for its size, but it can only let it out slowly. A big load pulls its volts right down.',
+        'So it can light an LED for days, but it can’t spin a motor. Keep coin cells away from little children: swallowing one is very dangerous.',
+      ],
+      like: 'It is like a juice box with a very thin straw: lots inside, but it only comes out slowly.',
+      fact: 'The name CR2032 tells you its size: 20 mm across and 3.2 mm thick.',
+    },
+    dynamo: {
+      about: [
+        'A crank generator is a little motor that you turn by hand. Turning magnets past its coils of wire makes electricity.',
+        'The faster you turn the crank, the more volts it makes. Stop turning and the power stops too.',
+        'Gears inside make the little motor spin much faster than your hand does.',
+      ],
+      like: 'It is like a bicycle light that only shines while you pedal.',
+      fact: 'Big power stations work the same way, but steam, wind or water turns their giant generators instead of a hand.',
+    },
+    powerBank: {
+      about: [
+        'A power bank is a big battery in a box that you charge up. It gives a steady 5 V from its USB port, just like a phone charger.',
+        'Its lights show how full it is. It gives 2 A at most: if a part tries to take more, it holds the current back to stay safe.',
+        'It is a handy, safe way to power a board like the Arduino away from a computer.',
+      ],
+      like: 'It is like a water bottle you fill at home and drink from on a trip.',
+      fact: 'Most power banks have lithium cells inside, the same kind that power phones and electric cars.',
+    },
     voltmeter: {
       about: [
         'A voltmeter measures volts: how big the push is between two points.',

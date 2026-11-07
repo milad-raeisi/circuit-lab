@@ -16,6 +16,7 @@ import {
   SENSORS,
   SPEAKER_NOTES,
   TIMER_RATES,
+  BUZZER_SOUNDS,
   dynamoVoltage,
   formatAmps,
   formatOhms,
@@ -795,6 +796,20 @@ function NodeControl({ id, data, result }: { id: string; data: PartData; result?
     }
     case 'rgbLed':
       return <RgbBars channels={result?.channels} label={t.inspector.brightness} />
+    case 'buzzer':
+      // the four sounds by their place in BUZZER_SOUNDS: beep, siren, fast siren, two-tone
+      return (
+        <ChoiceTrack
+          options={[0, 1, 2, 3]}
+          value={Math.max(0, BUZZER_SOUNDS.indexOf(data.sound ?? 'beep'))}
+          labels={t.workshop.sounds}
+          label={t.workshop.sound}
+          onChange={(i) => {
+            updatePart(id, { sound: BUZZER_SOUNDS[i] })
+            playClick()
+          }}
+        />
+      )
     case 'speaker':
       return (
         <ChoiceTrack

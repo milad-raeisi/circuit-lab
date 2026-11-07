@@ -2148,9 +2148,9 @@ function Regulator({ id }: ArtProps) {
   )
 }
 
-/** The four gate symbols kids meet in every electronics book. */
+/** The gate symbols kids meet in every electronics book. `bubble` is where the NOT circle sits, if it has one. */
 const GATE_SHAPES = {
-  notGate: { body: 'M13 13 32 24 13 35z', inputs: [24], bubble: true, back: 13, tip: 37 },
+  notGate: { body: 'M13 13 32 24 13 35z', inputs: [24], bubble: 34.5, back: 13, tip: 37 },
   andGate: { body: 'M13 12h10a12 12 0 0 1 0 24H13z', inputs: [18, 30], bubble: false, back: 14, tip: 35 },
   orGate: {
     body: 'M11 12h9c7.5 0 12.5 4.5 16 12-3.5 7.5-8.5 12-16 12h-9c3-3.6 4.6-7.6 4.6-12S14 15.6 11 12z',
@@ -2166,6 +2166,15 @@ const GATE_SHAPES = {
     back: 17,
     tip: 38,
   },
+  // NAND and NOR: the AND and OR bodies moved left to make room for the bubble
+  nandGate: { body: 'M11 12h10a12 12 0 0 1 0 24H11z', inputs: [18, 30], bubble: 35.5, back: 12, tip: 38 },
+  norGate: {
+    body: 'M9 12h9c7.5 0 12.5 4.5 16 12-3.5 7.5-8.5 12-16 12H9c3-3.6 4.6-7.6 4.6-12S12 15.6 9 12z',
+    inputs: [18, 30],
+    bubble: 36.5,
+    back: 13,
+    tip: 39,
+  },
 } as const
 
 const GATE_COLORS = {
@@ -2173,6 +2182,8 @@ const GATE_COLORS = {
   andGate: ['#86efac', '#16a34a', '#14532d'],
   orGate: ['#93c5fd', '#2563eb', '#1e3a8a'],
   xorGate: ['#d8b4fe', '#9333ea', '#581c87'],
+  nandGate: ['#5eead4', '#0d9488', '#134e4a'],
+  norGate: ['#a5b4fc', '#4f46e5', '#312e81'],
 } as const
 
 function Gate({ id, kind }: ArtProps & { kind: keyof typeof GATE_SHAPES }) {
@@ -2203,7 +2214,7 @@ function Gate({ id, kind }: ArtProps & { kind: keyof typeof GATE_SHAPES }) {
       )}
       <path d={shape.body} fill={`url(#${id}g)`} stroke={dark} strokeWidth="1" strokeLinejoin="round" />
       <path d={shape.body} fill="none" stroke="#fff" strokeWidth="0.8" opacity="0.25" transform="translate(0.6 0.8) scale(0.97)" />
-      {shape.bubble && <circle cx="34.5" cy="24" r="2.5" fill="#fff" stroke={dark} strokeWidth="1.2" />}
+      {shape.bubble && <circle cx={shape.bubble} cy="24" r="2.5" fill="#fff" stroke={dark} strokeWidth="1.2" />}
     </>
   )
 }

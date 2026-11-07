@@ -182,7 +182,7 @@ export function CoinCellModel({ load }: { load: number }) {
 
   return (
     <group position={[0, -0.06, 0]} rotation={[0.82, 0, 0]}>
-      {/* the holder: a black ring with a cut-out at the front, and its two pins */}
+      {/* the holder: a black ring with a cut-out at the front */}
       <mesh position={[0, -0.03, 0]}>
         <cylinderGeometry args={[CELL_R + 0.12, CELL_R + 0.14, 0.1, 56, 1, false, 0.5, Math.PI * 2 - 1]} />
         <meshStandardMaterial color="#1c1c1f" roughness={0.5} side={THREE.DoubleSide} />
@@ -191,12 +191,6 @@ export function CoinCellModel({ load }: { load: number }) {
         <cylinderGeometry args={[CELL_R + 0.12, CELL_R + 0.12, 0.03, 56]} />
         <meshStandardMaterial color="#27272a" roughness={0.6} />
       </mesh>
-      {[-0.42, 0.42].map((x) => (
-        <mesh key={x} position={[x, -0.1, 0.62]}>
-          <boxGeometry args={[0.05, 0.03, 0.2]} />
-          <meshStandardMaterial {...METAL} />
-        </mesh>
-      ))}
       {/* the cell */}
       <mesh position={[0, 0.0, 0]}>
         <cylinderGeometry args={[CELL_R, CELL_R, CELL_T, 56]} />

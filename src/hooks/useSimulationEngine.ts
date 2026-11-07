@@ -10,7 +10,9 @@ import {
   playSuccess,
   setBuzzerLevel,
   setMotorLevel,
+  setSiren,
   setSizzle,
+  type SirenSound,
   setSpeakerTone,
   setSoundEnabled,
   stopContinuousSounds,
@@ -49,6 +51,8 @@ function electricalKey(nodes: PartNode[], edges: WireEdge[]) {
       // bench power supply limit, speaker note, 555 speed
       d.limit,
       d.pitch,
+      // a buzzer's beep or siren: not electrical, but the sounds follow each step
+      d.sound,
       d.rate,
       // lemons in a row, where the joystick is pushed
       d.cells,
@@ -196,6 +200,9 @@ export function useSimulationEngine() {
 
       // continuous sounds
       let buzz = 0
+      let siren = 0
+      let loudestSiren = 0
+      let sirenSound: SirenSound = 'wail'
       let hum = 0
       let tone = 0
       let pitch = 0
@@ -203,7 +210,18 @@ export function useSimulationEngine() {
       for (const node of nodes) {
         const r = result.parts[node.id]
         if (!r) continue
-        if (node.data.type === 'buzzer') buzz += r.level
+        if (node.data.type === 'buzzer') {
+          const sound = node.data.sound ?? 'beep'
+          if (sound === 'beep') buzz += r.level
+          else {
+            siren += r.level
+            // the loudest siren picks the sound
+            if (r.level > loudestSiren) {
+              loudestSiren = r.level
+              sirenSound = sound
+            }
+          }
+        }
         if (node.data.type === 'motor') hum = Math.max(hum, Math.abs(r.level))
         // a coin motor only buzzes softly
         if (node.data.type === 'vibration') hum = Math.max(hum, Math.abs(r.level) * 0.5)
@@ -217,6 +235,7 @@ export function useSimulationEngine() {
         }
       }
       setBuzzerLevel(buzz)
+      setSiren(siren, sirenSound)
       setMotorLevel(hum)
       setSpeakerTone(tone, pitch)
 

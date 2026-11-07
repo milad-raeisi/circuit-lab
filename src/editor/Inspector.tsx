@@ -41,6 +41,7 @@ import {
   isSensorModule,
   pinModesFor,
   SPEAKER_NOTES,
+  BUZZER_SOUNDS,
   SUPPLY_LIMITS,
   supplySettings,
   TIMER_RATES,
@@ -482,6 +483,22 @@ function PartSettings({ node }: { node: SelectedPart }) {
           />
         </div>
       )
+    case 'buzzer': {
+      // the four sounds by their place in BUZZER_SOUNDS: beep, siren, fast siren, two-tone
+      const sound = Math.max(0, BUZZER_SOUNDS.indexOf(data.sound ?? 'beep'))
+      return (
+        <div className="space-y-1.5">
+          <ChoiceRow
+            label={t.workshop.sound}
+            value={sound}
+            options={[0, 1, 2, 3]}
+            format={(i) => t.workshop.sounds[i]}
+            onChange={(i) => updatePart(id, { sound: BUZZER_SOUNDS[i] })}
+          />
+          <p className="text-xs text-muted-foreground">{t.workshop.soundHints[sound]}</p>
+        </div>
+      )
+    }
     case 'speaker':
       return (
         <ChoiceRow
@@ -842,7 +859,6 @@ function PartInspector({ node }: { node: SelectedPart }) {
     'coinCell',
     'powerBank',
     'motor',
-    'buzzer',
     'diode',
     'transistor',
     'voltmeter',

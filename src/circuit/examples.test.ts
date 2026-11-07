@@ -283,8 +283,10 @@ describe('boards and code', () => {
     expect(at('policeLights', 0.25).blue.level).toBe(0)
     expect(at('policeLights', 0.75).red.level).toBe(0)
     expect(at('policeLights', 0.75).blue.status).toBe('on')
-    const { steps } = run('policeLights', 2)
-    expect(pulses(steps, 'siren')).toBe(true)
+    // the siren chip wails without a break, like a real police car
+    const { steps, parts } = run('policeLights', 2)
+    expect(steps.every((r) => on(r, 'siren'))).toBe(true)
+    expect(parts.find((p) => p.id === 'siren')?.data.sound).toBe('wail')
   })
 
   it('party lights: three lights chase each other, a fourth breathes and the sign shines', () => {

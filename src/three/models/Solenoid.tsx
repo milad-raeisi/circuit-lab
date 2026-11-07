@@ -38,6 +38,9 @@ const SPRING_TURNS = 6
 
 /** The return spring: steel wire wound 1 long, squashed by scaling x. */
 class Coil extends THREE.Curve<THREE.Vector3> {
+  constructor() {
+    super()
+  }
   getPoint(s: number, target = new THREE.Vector3()) {
     const a = s * SPRING_TURNS * Math.PI * 2
     return target.set(s, Math.cos(a) * 0.16, Math.sin(a) * 0.16)

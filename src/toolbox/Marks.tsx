@@ -54,12 +54,12 @@ export function WarnSign({ kind = 'danger', size = 26, className }: { kind?: 'da
 /** Three tools fanned out like cards, and a tag with a question mark. */
 export function QuizScene({ tools, mark, size = 52 }: { tools: [ToolId, ToolId, ToolId]; mark: string; size?: number }) {
   const fan = [
-    { tool: tools[0], rotate: -14, x: -0.62, y: 0.08 },
-    { tool: tools[2], rotate: 13, x: 0.62, y: 0.08 },
+    { tool: tools[0], rotate: -14, x: -0.7, y: 0.08 },
+    { tool: tools[2], rotate: 13, x: 0.7, y: 0.08 },
     { tool: tools[1], rotate: 0, x: 0, y: -0.04 },
   ]
   return (
-    <span aria-hidden className="relative block" style={{ width: size * 2.3, height: size * 1.25 }}>
+    <span aria-hidden className="relative block" style={{ width: size * 2.45, height: size * 1.25 }}>
       {fan.map((f) => (
         <span
           key={f.tool}

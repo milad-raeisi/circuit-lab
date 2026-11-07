@@ -133,6 +133,12 @@ export type Side = 'left' | 'top' | 'right' | 'bottom'
 
 export type LampColor = 'warm' | 'yellow' | 'red' | 'green' | 'blue'
 export type LedColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'white' | 'pink'
+
+/**
+ * What a buzzer plays. `wail` is the slow up-and-down police siren, `yelp`
+ * the fast one police use in heavy traffic, `hilo` the two-tone nee-naw.
+ */
+export type BuzzerSound = 'beep' | 'wail' | 'yelp' | 'hilo'
 export type WireColor = 'red' | 'black' | 'blue' | 'yellow' | 'green' | 'white'
 
 /**
@@ -222,6 +228,8 @@ export type PartData = {
   limit?: number
   /** speaker: the note it plays, in hertz */
   pitch?: number
+  /** buzzer: a plain beep, or the siren chip inside it (police wail, fast yelp, two-tone) */
+  sound?: BuzzerSound
   /** 555 blinker: blinks per second */
   rate?: number
   /** oscilloscope: seconds shown across the screen */

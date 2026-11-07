@@ -247,6 +247,12 @@ export type Dictionary = {
     note: string
     /** low, middle and high */
     notes: [string, string, string]
+    /** what a buzzer plays */
+    sound: string
+    /** beep, police siren, fast siren, two-tone: short words that fit the card */
+    sounds: [string, string, string, string]
+    /** one line about each sound, in the details panel */
+    soundHints: [string, string, string, string]
     speed: string
     /** slow, medium and fast */
     speeds: [string, string, string]
@@ -496,7 +502,8 @@ export const en: Dictionary = {
     humiditySensor: {
       name: 'Humidity sensor',
       description: 'Feels how much water is in the air. Damp air gives a bigger signal.',
-      working: 'Sensing',
+      // short, so the long name still fits on the card next to it
+      working: 'On',
     },
     hallSensor: {
       name: 'Magnet sensor',
@@ -561,7 +568,7 @@ export const en: Dictionary = {
     powerBank: {
       name: 'Power bank',
       description: 'The battery you charge your phone with. It gives a steady 5 V, just like a USB port.',
-      working: 'Giving power',
+      working: 'On',
     },
     segment: {
       name: '7-segment display',
@@ -1267,6 +1274,14 @@ export const en: Dictionary = {
     wiper: 'W gives',
     note: 'Note',
     notes: ['Low', 'Middle', 'High'],
+    sound: 'Sound',
+    sounds: ['Beep', 'Siren', 'Fast', 'Hi-lo'],
+    soundHints: [
+      'A steady beep, like an alarm clock.',
+      'Slowly up and down, like a police car: wooo-iiii-ooo.',
+      'Up and down very fast. Police cars use it in busy traffic.',
+      'Two notes in turn: nee-naw, nee-naw.',
+    ],
     speed: 'Blink speed',
     speeds: ['Slow', 'Medium', 'Fast'],
     perSecond: (n) => (n < 1 ? `1 blink every ${1 / n} seconds` : n === 1 ? '1 blink a second' : `${n} blinks a second`),

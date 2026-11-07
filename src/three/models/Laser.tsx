@@ -103,7 +103,7 @@ function targetTexture() {
  */
 export function LaserModel({ level, burnt }: { level: number; burnt: boolean }) {
   const thread = useBuilt(threadGeometry)
-  const target = useMemo(targetTexture, [])
+  const target = useMemo(() => targetTexture(), [])
   useEffect(() => () => target.dispose(), [target])
   const bright = useRef(0)
   const dotGlow = useRef(0)

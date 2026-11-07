@@ -25,8 +25,14 @@ function QuizStart() {
   const startRound = useToolbox((s) => s.startRound)
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center gap-5 px-4 py-8 text-center sm:py-12">
-      <span className="grid h-36 w-full max-w-sm place-items-center rounded-lg" style={stage(QUIZ_COLOR)}>
-        <QuizScene tools={['multimeter', 'solderingIron', 'sideCutters']} mark={dir === 'rtl' ? '؟' : '?'} size={64} />
+      <span className="grid h-40 w-full max-w-sm place-items-center rounded-lg sm:h-44" style={stage(QUIZ_COLOR)}>
+        <QuizScene tools={['multimeter', 'solderingIron', 'sideCutters']} mark={dir === 'rtl' ? '؟' : '?'} size={78} />
+      </span>
+      {/* ten unlit lights: one for each question to come */}
+      <span aria-hidden className="flex items-center gap-1.5">
+        {Array.from({ length: ROUND }, (_, i) => (
+          <span key={i} className="size-2.5 rounded-full bg-foreground/12 shadow-[inset_0_1px_1px_oklch(0_0_0/0.2)]" />
+        ))}
       </span>
       <div className="space-y-1.5">
         <h2 className="text-2xl font-semibold tracking-tight">{book.quiz.title}</h2>

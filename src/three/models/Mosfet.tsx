@@ -17,7 +17,7 @@ const BACK = -BODY_D / 2
 const HOLE_Y = TAB_TOP - 0.18
 const PITCH = 0.163
 const LEG_Z = BACK + TAB_T * 0.6
-const LEG_END = -BODY_H / 2 - 0.8
+const LEG_END = -BODY_H / 2 - 0.56
 
 /** The metal tab: a plate with its mounting hole and the two little notches on its sides. */
 function tabGeometry() {

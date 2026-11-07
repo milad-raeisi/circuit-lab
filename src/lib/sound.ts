@@ -137,6 +137,145 @@ export function setSpeakerTone(level: number, pitch: number) {
   )
 }
 
+/** The three sounds of a buzzer's siren chip. */
+export type SirenSound = 'wail' | 'yelp' | 'hilo'
+
+/** A police siren sweeps between these pitches, in hertz. */
+const SIREN_LOW = 650
+const SIREN_HIGH = 1500
+/** The pitch curve's own sample rate: plenty for a pitch that moves a few times a second. */
+const CURVE_RATE = 22050
+
+type Siren = {
+  osc: OscillatorNode
+  sweep: AudioBufferSourceNode
+  gain: GainNode
+  sound: SirenSound
+  /** true while it is quiet, so the next start spins up from the bottom */
+  silent: boolean
+}
+let siren: Siren | null = null
+const sirenCurves = new Map<SirenSound, AudioBuffer>()
+
+/** 0 → 1, fast at first and slower near the top, like a siren motor spinning up. */
+const spinUp = (x: number, k: number) => (1 - Math.exp(-k * x)) / (1 - Math.exp(-k))
+
+/**
+ * One cycle of the siren's pitch in hertz:
+ * - wail: up in 2 s, down in 2.6 s — the long police "wooo-iiii-ooo"
+ * - yelp: the same sweep about three times a second, for busy traffic
+ * - hilo: two notes in turn, "nee-naw"
+ */
+function sirenCurve(sound: SirenSound) {
+  if (sound === 'hilo') {
+    const note = Math.round(0.6 * CURVE_RATE)
+    const glide = Math.round(0.015 * CURVE_RATE)
+    const curve = new Float32Array(note * 2)
+    for (let i = 0; i < curve.length; i++) {
+      const high = i < note
+      const [from, to] = high ? [770, 960] : [960, 770]
+      curve[i] = from + (to - from) * Math.min(1, (i % note) / glide)
+    }
+    return curve
+  }
+  const [up, down] = sound === 'wail' ? [2, 2.6] : [0.17, 0.13]
+  const curve = new Float32Array(Math.round((up + down) * CURVE_RATE))
+  const span = SIREN_HIGH - SIREN_LOW
+  for (let i = 0; i < curve.length; i++) {
+    const t = i / CURVE_RATE
+    curve[i] = t < up ? SIREN_LOW + span * spinUp(t / up, 2.4) : SIREN_HIGH - span * spinUp((t - up) / down, 1.2)
+  }
+  return curve
+}
+
+/**
+ * The pitch curve as a looping audio source. It feeds the oscillator's
+ * frequency directly, so the sweep stays perfectly smooth even when the
+ * page is busy.
+ */
+function sirenSweep(ac: AudioContext, sound: SirenSound) {
+  let buffer = sirenCurves.get(sound)
+  if (!buffer) {
+    const curve = sirenCurve(sound)
+    buffer = ac.createBuffer(1, curve.length, CURVE_RATE)
+    buffer.copyToChannel(curve, 0)
+    sirenCurves.set(sound, buffer)
+  }
+  const source = ac.createBufferSource()
+  source.buffer = buffer
+  source.loop = true
+  return source
+}
+
+/** A short street echo: a tail of reflections plus one clear bounce off a building. */
+function streetEcho(ac: AudioContext) {
+  const length = Math.floor(ac.sampleRate * 1.6)
+  const buffer = ac.createBuffer(2, length, ac.sampleRate)
+  for (let channel = 0; channel < 2; channel++) {
+    const data = buffer.getChannelData(channel)
+    for (let i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / ac.sampleRate / 0.3) * 0.5
+    data[Math.floor(ac.sampleRate * (channel ? 0.135 : 0.118))] += 0.7
+  }
+  return buffer
+}
+
+/**
+ * A buzzer with a siren chip inside, like a police car's: a square wave whose
+ * pitch sweeps up and down, shaped like a horn speaker (no deep bass, a bright
+ * bite around 2 kHz) and echoing a little, as it would down a street.
+ */
+export function setSiren(level: number, sound: SirenSound) {
+  const ac = ctx
+  if (!ac || !master) return
+  if (level <= 0) {
+    if (siren && !siren.silent) {
+      siren.gain.gain.setTargetAtTime(0, ac.currentTime, 0.06)
+      siren.silent = true
+    }
+    return
+  }
+  if (!siren) {
+    const osc = ac.createOscillator()
+    osc.type = 'square'
+    // the sweep adds the whole pitch on top of 0 Hz
+    osc.frequency.value = 0
+    const highpass = ac.createBiquadFilter()
+    highpass.type = 'highpass'
+    highpass.frequency.value = 420
+    const horn = ac.createBiquadFilter()
+    horn.type = 'peaking'
+    horn.frequency.value = 1900
+    horn.Q.value = 0.8
+    horn.gain.value = 6
+    const lowpass = ac.createBiquadFilter()
+    lowpass.type = 'lowpass'
+    lowpass.frequency.value = 5200
+    const gain = ac.createGain()
+    gain.gain.value = 0
+    osc.connect(highpass).connect(horn).connect(lowpass).connect(gain).connect(master)
+    const echo = ac.createConvolver()
+    echo.buffer = streetEcho(ac)
+    const wet = ac.createGain()
+    wet.gain.value = 0.25
+    gain.connect(echo).connect(wet).connect(master)
+    const sweep = sirenSweep(ac, sound)
+    sweep.connect(osc.frequency)
+    osc.start()
+    sweep.start()
+    siren = { osc, sweep, gain, sound, silent: false }
+  } else if (siren.silent || siren.sound !== sound) {
+    // a new sound, or switched on again: start the sweep from the bottom, like a real siren
+    siren.sweep.stop()
+    siren.sweep.disconnect()
+    siren.sweep = sirenSweep(ac, sound)
+    siren.sweep.connect(siren.osc.frequency)
+    siren.sweep.start()
+    siren.sound = sound
+  }
+  siren.silent = false
+  siren.gain.gain.setTargetAtTime(0.045 * Math.min(1.4, level), ac.currentTime, 0.03)
+}
+
 /** Crackling noise while a battery is short-circuited. */
 export function setSizzle(on: boolean) {
   const ac = ctx
@@ -223,6 +362,7 @@ export function playPlace() {
 
 export function stopContinuousSounds() {
   setBuzzerLevel(0)
+  setSiren(0, 'wail')
   setMotorLevel(0)
   setSpeakerTone(0, 0)
   setSizzle(false)

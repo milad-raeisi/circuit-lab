@@ -1,5 +1,6 @@
 import { BOARDS, createPartData, type BoardType } from './catalog'
 import type {
+  BuzzerSound,
   CircuitSnapshot,
   LedColor,
   PartData,
@@ -252,6 +253,8 @@ type Output = {
   color?: LedColor
   /** the speaker's note */
   pitch?: number
+  /** a buzzer's beep or siren */
+  sound?: BuzzerSound
   ohms: number
   wire: WireColor
 }
@@ -274,7 +277,7 @@ function branches(list: Branch[], ground: string, left = FIRST_COLUMN, top = RES
         x: left + i * COLUMN,
         y: top + OUTPUT_ROW - RESISTOR_ROW,
         rotation: 90,
-        data: o.color ? { color: o.color } : o.pitch ? { pitch: o.pitch } : undefined,
+        data: o.color ? { color: o.color } : o.pitch ? { pitch: o.pitch } : o.sound ? { sound: o.sound } : undefined,
       },
     ] satisfies PresetPart[]),
     wires: [
@@ -794,13 +797,13 @@ const PRESETS: Record<PresetId, Preset> = {
       { key: 'green', pin: 'GP15', type: 'led', color: 'green', ohms: 47, wire: 'green' },
     ]),
   ),
-  // red and blue take turns; the fading pin makes the buzzer rise and fall like a siren
+  // red and blue take turns while a buzzer with a siren chip wails, like a real police car
   policeLights: join(
-    { parts: [{ key: 'board', type: 'nano', x: 0, y: 0, data: program('nano', { D8: 'blink', D10: 'blink2', D11: 'fade' }) }], wires: [] },
+    { parts: [{ key: 'board', type: 'nano', x: 0, y: 0, data: program('nano', { D8: 'blink', D10: 'blink2', D11: 'on' }) }], wires: [] },
     outputs('board', [
       { key: 'red', pin: 'D8', type: 'led', color: 'red', ohms: 220, wire: 'white' },
       { key: 'blue', pin: 'D10', type: 'led', color: 'blue', ohms: 100, wire: 'blue' },
-      { key: 'siren', pin: 'D11', type: 'buzzer', ohms: 100, wire: 'yellow' },
+      { key: 'siren', pin: 'D11', type: 'buzzer', sound: 'wail', ohms: 100, wire: 'yellow' },
     ]),
   ),
   // three lights chase each other, a fourth breathes, and the sign sparkles
@@ -1638,29 +1641,30 @@ const PRESETS: Record<PresetId, Preset> = {
       { key: 'beeper', pin: 'D13', type: 'buzzer', ohms: 100, wire: 'blue' },
     ], 'sensor:GND'),
   ),
-  // dry soil: the pump (a motor on its own battery) runs through the transistor; wet soil: it rests
+  // dry soil: the pump (a motor on its own battery) runs through the transistor; wet soil: it rests.
+  // The top pin drives the pump, so no wire crosses another
   greenhouse: join(
     {
       parts: [
-        { key: 'board', type: 'arduino', x: 0, y: 0, data: program('arduino', { D8: 'invert', D12: 'invert', D13: 'follow' }) },
+        { key: 'board', type: 'arduino', x: 0, y: 0, data: program('arduino', { D8: 'invert', D12: 'follow', D13: 'invert' }) },
         { key: 'rb', type: 'resistor', x: 330, y: -250, data: { resistance: 1000 } },
         { key: 'q', type: 'transistor', x: 620, y: -250 },
         { key: 'pump', type: 'motor', x: 870, y: -520, rotation: 90 },
         { key: 'pumpBat', type: 'battery', x: 1110, y: -520, rotation: 270, data: { voltage: 3 } },
       ],
       wires: [
-        ['board:D8', 'rb:a', 'blue'],
+        ['board:D13', 'rb:a', 'blue'],
         ['rb:b', 'q:B', 'blue'],
         ['pumpBat:a', 'pump:a', 'red'],
         ['pump:b', 'q:C', 'yellow'],
         ['q:E', 'pumpBat:b', 'black'],
-        ['q:E', 'board:GND', 'black'],
+        ['pumpBat:b', 'happy:b', 'black'],
       ],
     },
     sensorFor('board', 'arduino', 'soilSensor', { sense: 0.25 }),
     outputs('board', [
-      { key: 'thirsty', pin: 'D12', type: 'led', color: 'red', ohms: 220, wire: 'white' },
-      { key: 'happy', pin: 'D13', type: 'led', color: 'green', ohms: 220, wire: 'green' },
+      { key: 'thirsty', pin: 'D8', type: 'led', color: 'red', ohms: 220, wire: 'white' },
+      { key: 'happy', pin: 'D12', type: 'led', color: 'green', ohms: 220, wire: 'green' },
     ], 'sensor:GND'),
   ),
 
@@ -1867,26 +1871,27 @@ const PRESETS: Record<PresetId, Preset> = {
   // The bench supply holds its 4.5 V while the motor runs, so the relay never lets go by itself
   conveyor: {
     parts: [
-      { key: 'bat', type: 'powerSupply', x: -40, y: 160, data: { voltage: 4.5, limit: 2 } },
-      { key: 'stop', type: 'switch', x: 270, y: -60, data: { closed: true } },
-      { key: 'start', type: 'button', x: 560, y: -60 },
-      { key: 'relay', type: 'relay', x: 850, y: 160 },
-      { key: 'belt', type: 'motor', x: 1140, y: 160, rotation: 90 },
-      { key: 'readyR', type: 'resistor', x: 270, y: 330, data: { resistance: 220 } },
-      { key: 'ready', type: 'led', x: 560, y: 330, rotation: 90, data: { color: 'green' } },
+      { key: 'ps', type: 'powerSupply', x: -40, y: -60, data: { voltage: 4.5, limit: 2 } },
+      { key: 'stop', type: 'switch', x: 250, y: -60, data: { closed: true } },
+      { key: 'start', type: 'button', x: 540, y: -60 },
+      // turned round, so its switch faces the buttons and its coil faces the motor
+      { key: 'relay', type: 'relay', x: 830, y: 160, rotation: 180 },
+      { key: 'belt', type: 'motor', x: 1120, y: 160, rotation: 90 },
+      { key: 'readyR', type: 'resistor', x: 250, y: 160, rotation: 90, data: { resistance: 220 } },
+      { key: 'ready', type: 'led', x: 250, y: 400, rotation: 90, data: { color: 'green' } },
     ],
     wires: [
-      ['bat:a', 'stop:a', 'red'],
+      ['ps:a', 'stop:a', 'red'],
       ['stop:b', 'start:a', 'red'],
-      ['start:b', 'relay:a', 'yellow'],
-      ['relay:b', 'bat:b', 'black'],
+      ['start:b', 'relay:NO', 'yellow'],
       ['stop:b', 'relay:COM', 'red'],
-      ['relay:NO', 'belt:a', 'yellow'],
-      ['belt:a', 'start:b', 'yellow'],
-      ['belt:b', 'relay:b', 'black'],
+      ['start:b', 'belt:a', 'yellow'],
+      ['belt:a', 'relay:a', 'yellow'],
+      ['relay:b', 'belt:b', 'black'],
       ['stop:b', 'readyR:a', 'red'],
       ['readyR:b', 'ready:a', 'yellow'],
-      ['ready:b', 'bat:b', 'black'],
+      ['relay:b', 'ready:b', 'black'],
+      ['ready:b', 'ps:b', 'black'],
     ],
   },
   // the pedal (a knob) drives the wheels through the transistor, and the screen shows how far it is pressed
@@ -1912,39 +1917,36 @@ const PRESETS: Record<PresetId, Preset> = {
       ['pedal:W', 'speed:S', 'yellow'],
     ],
   },
-  // far from the wall both wheels turn; closer they slow down, and at the wall they stop and it beeps
+  // far from the wall both wheels turn; closer they slow down, and at the wall they stop and it beeps.
+  // Each wheel has its own transistor on the wheel battery; the pins only steer them
   robotCar: join(
     {
       parts: [
-        { key: 'board', type: 'arduino', x: 0, y: 0, data: program('arduino', { D9: 'invert', D10: 'invert', D13: 'alarm' }) },
+        { key: 'board', type: 'arduino', x: 0, y: 0, data: program('arduino', { D8: 'alarm', D9: 'invert', D11: 'invert' }) },
         { key: 'rbL', type: 'resistor', x: 330, y: -250, data: { resistance: 470 } },
         { key: 'qL', type: 'transistor', x: 620, y: -250 },
-        { key: 'left', type: 'motor', x: 870, y: -520, rotation: 90 },
-        { key: 'rbR', type: 'resistor', x: 330, y: 250, data: { resistance: 470 } },
-        { key: 'qR', type: 'transistor', x: 620, y: 250 },
-        { key: 'right', type: 'motor', x: 870, y: 520, rotation: 90 },
-        { key: 'wheelBat', type: 'battery', x: 1130, y: 0, rotation: 270, data: { voltage: 4.5 } },
-        { key: 'beepR', type: 'resistor', x: 330, y: 0, data: { resistance: 100 } },
-        { key: 'beeper', type: 'buzzer', x: 620, y: 0 },
+        { key: 'left', type: 'motor', x: 900, y: -470, rotation: 90 },
+        { key: 'rbR', type: 'resistor', x: 330, y: 0, data: { resistance: 470 } },
+        { key: 'qR', type: 'transistor', x: 620, y: 0 },
+        { key: 'right', type: 'motor', x: 900, y: -210, rotation: 90 },
+        { key: 'wheelBat', type: 'battery', x: 1160, y: 0, rotation: 270, data: { voltage: 4.5 } },
       ],
       wires: [
-        ['board:D9', 'rbL:a', 'blue'],
+        ['board:D11', 'rbL:a', 'blue'],
         ['rbL:b', 'qL:B', 'blue'],
-        ['wheelBat:a', 'left:a', 'red'],
-        ['left:b', 'qL:C', 'yellow'],
-        ['qL:E', 'board:GND', 'black'],
-        ['board:D10', 'rbR:a', 'green'],
+        ['board:D9', 'rbR:a', 'green'],
         ['rbR:b', 'qR:B', 'green'],
+        ['wheelBat:a', 'left:a', 'red'],
         ['wheelBat:a', 'right:a', 'red'],
+        ['left:b', 'qL:C', 'yellow'],
         ['right:b', 'qR:C', 'yellow'],
-        ['qR:E', 'board:GND', 'black'],
-        ['wheelBat:b', 'qR:E', 'black'],
-        ['board:D13', 'beepR:a', 'white'],
-        ['beepR:b', 'beeper:a', 'white'],
-        ['beeper:b', 'qR:E', 'black'],
+        ['qL:E', 'qR:E', 'black'],
+        ['qR:E', 'wheelBat:b', 'black'],
+        ['qR:E', 'beeper:b', 'black'],
       ],
     },
     sensorFor('board', 'arduino', 'ultrasonic', { sense: 0.8 }),
+    outputs('board', [{ key: 'beeper', pin: 'D8', type: 'buzzer', ohms: 100, wire: 'white' }], 'sensor:GND'),
   ),
 
   // ── home and city ──
@@ -2128,33 +2130,25 @@ const PRESETS: Record<PresetId, Preset> = {
       'pull:b',
     ),
   ),
-  // dark: the board turns the transistor on, the transistor the relay, and the relay the big lamp on its own battery.
-  // The diode catches the kick the coil gives when it lets go
+  // dark: the light sensor pulls A low, NOT turns its output on, and that is enough to pull the relay in.
+  // The relay's switch runs the big lamp on its own battery
   gardenLamp: join(
+    chipOn({ key: 'not', type: 'notGate' }, battery(9), { x: -620, y: 0 }),
     {
       parts: [
-        { key: 'board', type: 'arduino', x: 0, y: 0, data: program('arduino', { D8: 'invert' }) },
-        { key: 'ldr', type: 'ldr', x: -330, y: -230, rotation: 90, data: { light: 0.15 } },
-        { key: 'div', type: 'resistor', x: -330, y: 30, rotation: 90, data: { resistance: 1000 } },
-        { key: 'rb', type: 'resistor', x: 330, y: 250, data: { resistance: 1000 } },
-        { key: 'q', type: 'transistor', x: 620, y: 250 },
-        { key: 'relay', type: 'relay', x: 620, y: -40 },
-        { key: 'd', type: 'diode', x: 330, y: -250, rotation: 270 },
-        { key: 'lamp', type: 'lamp', x: 910, y: -250 },
-        { key: 'lampBat', type: 'battery', x: 1200, y: -40, rotation: 270, data: { voltage: 3 } },
+        { key: 'ldr', type: 'ldr', ...INPUT_A, data: { light: 0.15 } },
+        { key: 'div', type: 'resistor', ...INPUT_B, rotation: 90, data: { resistance: 1000 } },
+        { key: 'relay', type: 'relay', x: 290, y: 0 },
+        { key: 'lamp', type: 'lamp', x: 580, y: -230 },
+        { key: 'lampBat', type: 'battery', x: 870, y: 0, rotation: 270, data: { voltage: 3 } },
       ],
       wires: [
-        ['board:5V', 'ldr:a', 'red'],
-        ['ldr:b', 'board:A0', 'yellow'],
-        ['ldr:b', 'div:a', 'yellow'],
-        ['div:b', 'board:GND', 'black'],
-        ['board:D8', 'rb:a', 'blue'],
-        ['rb:b', 'q:B', 'blue'],
-        ['board:5V', 'relay:a', 'red'],
-        ['relay:b', 'q:C', 'yellow'],
-        ['q:E', 'div:b', 'black'],
-        ['relay:a', 'd:b', 'red'],
-        ['d:a', 'relay:b', 'yellow'],
+        ['bat:a', 'ldr:a', 'red'],
+        ['ldr:b', 'not:A', 'yellow'],
+        ['not:A', 'div:a', 'yellow'],
+        ['div:b', 'bat:b', 'black'],
+        ['not:Y', 'relay:a', 'yellow'],
+        ['relay:b', 'div:b', 'black'],
         ['relay:COM', 'lamp:a', 'yellow'],
         ['lamp:b', 'lampBat:a', 'red'],
         ['lampBat:b', 'relay:NO', 'black'],
@@ -2186,7 +2180,7 @@ const PRESETS: Record<PresetId, Preset> = {
   quizBoard: {
     parts: [
       { key: 'bat', type: 'battery', x: 0, y: 160, rotation: 270, data: { voltage: 4.5 } },
-      { key: 'question', type: 'lcd', x: 260, y: -290, data: (texts) => ({ cols: 20, rows: 4, tint: 'blue', text: texts.quiz || undefined }) },
+      { key: 'question', type: 'lcd', x: 950, y: 0, data: (texts) => ({ cols: 20, rows: 4, tint: 'blue', text: texts.quiz || undefined }) },
       { key: 'a', type: 'button', x: 270, y: 0, rotation: 90 },
       { key: 'b', type: 'button', x: 490, y: 0, rotation: 90 },
       { key: 'c', type: 'button', x: 710, y: 0, rotation: 90 },
@@ -2200,8 +2194,8 @@ const PRESETS: Record<PresetId, Preset> = {
       ['bat:a', 'a:a', 'red'],
       ['a:a', 'b:a', 'red'],
       ['b:a', 'c:a', 'red'],
-      ['bat:a', 'question:VCC', 'red'],
-      ['question:GND', 'bat:b', 'black'],
+      ['c:a', 'question:VCC', 'red'],
+      ['question:GND', 'bell:b', 'black'],
       ['a:b', 'wrongR:a', 'white'],
       ['c:b', 'wrongR:a', 'white'],
       ['b:b', 'rightR:a', 'green'],
@@ -2353,7 +2347,7 @@ const PRESETS: Record<PresetId, Preset> = {
   elevator: {
     parts: [
       { key: 'bat', type: 'battery', x: 0, y: 160, rotation: 270, data: { voltage: 4.5 } },
-      { key: 'floor', type: 'segment', x: 270, y: -260, data: { digits: 1, mode: 'counter', tint: 'red' } },
+      { key: 'floor', type: 'segment', x: 270, y: -260, data: { digits: 2, mode: 'counter', tint: 'red' } },
       { key: 'screen', type: 'lcd', x: 500, y: -260, data: (texts) => ({ cols: 16, rows: 2, tint: 'green', text: texts.elevator || undefined }) },
       { key: 'call', type: 'button', x: 270, y: 30 },
       { key: 'ding', type: 'buzzer', x: 560, y: 160, rotation: 90 },
@@ -2582,7 +2576,7 @@ export const PRESET_INFO: Record<PresetId, PresetInfo> = {
   alarmClock: { category: 'home', level: 2, art: ['regulator', 'segment', 'timer555', 'buzzer'] },
   christmasTree: { category: 'home', level: 2, art: ['mega', 'led:green', 'rgbLed', 'matrix'] },
   crossing: { category: 'home', level: 2, art: ['button', 'arduino', 'led:red', 'led:green'] },
-  gardenLamp: { category: 'home', level: 3, art: ['ldr', 'arduino', 'relay', 'lamp'] },
+  gardenLamp: { category: 'home', level: 3, art: ['ldr', 'notGate', 'relay', 'lamp'] },
 
   stopwatch: { category: 'games', level: 1, art: ['battery', 'switch', 'segment'] },
   steadyHand: { category: 'games', level: 1, art: ['battery', 'tilt', 'buzzer'] },
