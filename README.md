@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Build it. Light it up!</b><br>
-  <a href="https://circuitlab.app">circuitlab.app</a> · A product of SBC
+  <a href="https://circuitlab.app">circuitlab.app</a> · A product of <a href="https://sbc.om">SBC</a>
 </p>
 
 A circuit simulator for kids. Drag parts from the parts box onto the board, wire their terminals together and watch the circuit come alive: lamps glow, LEDs light up, motors spin and buzzers beep, all animated in 3D with Three.js.
@@ -149,3 +149,9 @@ src/
 
 - **A language:** copy `src/i18n/en.ts` (the `Dictionary` type makes TypeScript list every missing string), then register it in `LANGUAGES` and `DICTIONARIES` in `src/i18n/index.ts`.
 - **A part:** add it to `PartType` (`src/circuit/types.ts`), `PARTS` and `PART_ORDER` (`catalog.ts`), the solver, a model in `src/three/models/` and its framing in `PartScene.tsx`, a tray drawing in `src/editor/PartArt.tsx`, a lesson in `src/i18n/learn/*` and the three dictionaries.
+
+## About
+
+Circuit Lab is a product of **SBC** · [sbc.om](https://sbc.om)
+
+آزمایشگاه مدار محصولی از **SBC** است · [sbc.om](https://sbc.om)
