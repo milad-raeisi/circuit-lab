@@ -17,33 +17,125 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import {
   BATTERY_VOLTAGES,
+  BOARDS,
+  CAPACITOR_VALUES,
+  FUSE_RATINGS,
   LAMP_COLORS,
   LED_COLORS,
   LED_FORWARD_VOLTAGE,
   PARTS,
+  POT_VALUES,
   RESISTOR_VALUES,
+  SCOPE_SPANS,
+  SENSORS,
+  SENSOR_MODES,
   WIRE_COLORS,
+  formatAmps,
+  formatFarads,
   formatOhms,
+  isGate,
+  isRotatable,
+  isSensorModule,
+  pinModesFor,
+  SPEAKER_NOTES,
+  SUPPLY_LIMITS,
+  supplySettings,
+  TIMER_RATES,
+  type BoardType,
+  type SensedPart,
 } from '@/circuit/catalog'
+import { isDisplay } from '@/circuit/display'
 import { MISSION_IDS } from '@/circuit/missions'
 import type { PartResult, PartStatus } from '@/circuit/solver'
-import type { LampColor, LedColor, PartData, WireColor, WireEdge } from '@/circuit/types'
+import type { LampColor, LedColor, PartData, PinMode, WireColor, WireEdge } from '@/circuit/types'
 import { useI18n, type Dictionary } from '@/i18n'
 import { playClick } from '@/lib/sound'
 import { cn } from '@/lib/utils'
 import { selectSelectedWire, useCircuit, useSelectedPart, type SelectedPart } from '@/store/circuit'
 import { useSettings } from '@/store/settings'
 import { useSimulation } from '@/store/simulation'
+import { BasicsLesson, PartLesson, ResistorColorCode } from './LearnPanel'
 import { Missions } from './Missions'
+import { DisplaySettings } from './DisplaySettings'
 import { PartArt } from './PartArt'
 import { STATUS_STYLE, partStatus } from './PartNode'
+import { TruthTable } from './TruthTable'
 
 type Tip = { text: string; tone: 'warn' | 'info' | 'danger' }
 
 function tipFor(data: PartData, result: PartResult | undefined, status: PartStatus, t: Dictionary, running: boolean): Tip | null {
-  if (status === 'burnt') return { text: t.tips.burnt, tone: 'danger' }
+  if (status === 'burnt') return { text: data.type === 'fuse' ? t.tips.fuseBlown : t.tips.burnt, tone: 'danger' }
   if (!running || !result) return null
+  if (isSensorModule(data.type)) return status === 'on' ? null : { text: t.tips.sensorPower, tone: 'info' }
+  if (isDisplay(data.type)) {
+    if (status === 'reverse') return { text: t.tips.displayReverse, tone: 'warn' }
+    if (status === 'weak') return { text: t.tips.displayWeak, tone: 'info' }
+    if (status !== 'on') return { text: t.tips.displayPower, tone: 'info' }
+    const reads = (data.type === 'segment' && data.mode === 'volts') || (data.type === 'oled' && data.mode === 'graph')
+    return reads && result.level < 0.02 ? { text: t.tips.displaySignal, tone: 'info' } : null
+  }
+  const w = t.workshop.tips
+  if (isGate(data.type) || data.type === 'timer555') {
+    // a chip needs its supply before anything else
+    if (status === 'reverse') return { text: w.chipReverse, tone: 'warn' }
+    if (status === 'weak') return { text: data.type === 'timer555' ? w.timerWeak : w.chipWeak, tone: 'info' }
+    return result.voltage < 0.5 ? { text: w.chipPower, tone: 'info' } : null
+  }
   switch (data.type) {
+    case 'powerSupply':
+      if (status === 'over') return { text: w.supplyLimit, tone: 'warn' }
+      return status === 'idle' ? { text: t.tips.batteryIdle, tone: 'info' } : null
+    case 'potentiometer':
+      if (status === 'over') return { text: w.potHot, tone: 'warn' }
+      return Math.abs(result.voltage) < 0.05 ? { text: w.potHint, tone: 'info' } : null
+    case 'relay':
+      if (status === 'weak') return { text: w.relayWeak, tone: 'info' }
+      return status === 'idle' ? { text: w.relayHint, tone: 'info' } : null
+    case 'rgbLed':
+      if (status === 'reverse') return { text: t.tips.ledReverse, tone: 'warn' }
+      if (status === 'over') return { text: t.tips.ledOver, tone: 'warn' }
+      return status === 'idle' ? { text: w.rgbHint, tone: 'info' } : null
+    case 'speaker':
+      return status === 'over' ? { text: w.speakerOver, tone: 'warn' } : null
+    case 'vibration':
+      if (status === 'weak') return { text: t.tips.motorWeak, tone: 'info' }
+      return status === 'over' ? { text: t.tips.motorOver, tone: 'warn' } : null
+    case 'electromagnet':
+      return status === 'over' ? { text: w.magnetHot, tone: 'warn' } : null
+    case 'regulator':
+      if (status === 'reverse') return { text: w.chipReverse, tone: 'warn' }
+      if (status === 'over') return { text: w.regulatorHot, tone: 'warn' }
+      if (status === 'weak') return { text: w.regulatorLow, tone: 'info' }
+      return status === 'idle' ? { text: w.regulatorHint, tone: 'info' } : null
+    case 'oscilloscope':
+      return status === 'idle' ? { text: w.scopeHint, tone: 'info' } : null
+    case 'fuse':
+      return status === 'over' ? { text: t.tips.fuseNear, tone: 'warn' } : null
+    case 'capacitor':
+      return status === 'reverse' ? { text: t.tips.capacitorReverse, tone: 'warn' } : null
+    case 'diode':
+      return result.voltage < -0.5 ? { text: t.tips.diodeReverse, tone: 'info' } : null
+    case 'transistor':
+      return status === 'idle' ? { text: t.tips.transistorBase, tone: 'info' } : null
+    case 'arduino':
+    case 'nano':
+    case 'mega':
+    case 'esp32':
+    case 'esp8266':
+    case 'pico':
+    case 'microbit':
+    case 'raspberrypi':
+      if (status === 'over') return { text: t.tips.arduinoPin, tone: 'warn' }
+      return Object.values(data.pins ?? {}).some((mode) => SENSOR_MODES.includes(mode))
+        ? { text: t.tips.followHint, tone: 'info' }
+        : null
+    case 'solar':
+      return (data.light ?? 0.8) < 0.15 ? { text: t.tips.solarDark, tone: 'info' } : null
+    case 'voltmeter':
+    case 'ammeter':
+      return status === 'reverse' ? { text: t.tips.meterReverse, tone: 'warn' } : null
+    case 'servo':
+      return status === 'on' ? null : { text: t.tips.servoPower, tone: 'info' }
     case 'battery':
       if (status === 'short') return { text: t.tips.short, tone: 'danger' }
       if (status === 'idle') return { text: t.tips.batteryIdle, tone: 'info' }
@@ -139,6 +231,8 @@ function PartSettings({ node }: { node: SelectedPart }) {
   const { t } = useI18n()
   const updatePart = useCircuit((s) => s.updatePart)
   const { id, data } = node
+  // screens have many settings of their own
+  if (isDisplay(data.type)) return <DisplaySettings node={node} />
 
   switch (data.type) {
     case 'battery':
@@ -225,9 +319,427 @@ function PartSettings({ node }: { node: SelectedPart }) {
           />
         </label>
       )
-    default:
-      return null
+    case 'capacitor':
+      return (
+        <ChoiceRow
+          label={t.inspector.capacitance}
+          value={data.capacitance ?? 2200}
+          options={CAPACITOR_VALUES}
+          format={formatFarads}
+          onChange={(capacitance) => updatePart(id, { capacitance })}
+        />
+      )
+    case 'fuse':
+      return (
+        <ChoiceRow
+          label={t.inspector.rating}
+          value={data.rating ?? 0.5}
+          options={FUSE_RATINGS}
+          format={formatAmps}
+          onChange={(rating) => updatePart(id, { rating })}
+        />
+      )
+    case 'solar':
+    case 'ldr':
+      return (
+        <SliderBox
+          label={t.inspector.light}
+          value={data.light ?? 0.6}
+          text={`${Math.round((data.light ?? 0.6) * 100)}%`}
+          onChange={(light) => updatePart(id, { light }, { history: false })}
+        />
+      )
+    case 'arduino':
+    case 'nano':
+    case 'mega':
+    case 'esp32':
+    case 'esp8266':
+    case 'pico':
+    case 'microbit':
+    case 'raspberrypi':
+      return <BoardProgram node={node} />
+    case 'powerSupply': {
+      const { voltage, limit } = supplySettings(data)
+      return (
+        <div className="space-y-3">
+          <SliderBox
+            label={t.workshop.voltage}
+            value={voltage / 12}
+            steps={120}
+            text={`${voltage.toFixed(1)} V`}
+            onChange={(v) => updatePart(id, { voltage: Math.round(v * 120) / 10 }, { history: false })}
+          />
+          <ChoiceRow
+            label={t.workshop.limit}
+            value={limit as (typeof SUPPLY_LIMITS)[number]}
+            options={SUPPLY_LIMITS}
+            format={formatAmps}
+            onChange={(next) => updatePart(id, { limit: next })}
+          />
+          <p className="text-xs leading-relaxed text-muted-foreground">{t.workshop.limitHint}</p>
+        </div>
+      )
+    }
+    case 'potentiometer':
+      return (
+        <div className="space-y-3">
+          <SliderBox
+            label={t.inspector.knob}
+            value={data.level ?? 0.5}
+            text={`${Math.round((data.level ?? 0.5) * 100)}%`}
+            onChange={(level) => updatePart(id, { level }, { history: false })}
+          />
+          <ChoiceRow
+            label={t.workshop.knobSize}
+            value={(data.resistance ?? 1000) as (typeof POT_VALUES)[number]}
+            options={POT_VALUES}
+            format={formatOhms}
+            onChange={(resistance) => updatePart(id, { resistance })}
+          />
+        </div>
+      )
+    case 'speaker':
+      return (
+        <ChoiceRow
+          label={t.workshop.note}
+          value={(data.pitch ?? 523) as (typeof SPEAKER_NOTES)[number]}
+          options={SPEAKER_NOTES}
+          format={(pitch) => t.workshop.notes[SPEAKER_NOTES.indexOf(pitch)]}
+          onChange={(pitch) => updatePart(id, { pitch })}
+        />
+      )
+    case 'timer555': {
+      const rate = (data.rate ?? 1) as (typeof TIMER_RATES)[number]
+      return (
+        <div className="space-y-1.5">
+          <ChoiceRow
+            label={t.workshop.speed}
+            value={rate}
+            options={TIMER_RATES}
+            format={(r) => t.workshop.speeds[TIMER_RATES.indexOf(r)]}
+            onChange={(next) => updatePart(id, { rate: next })}
+          />
+          <p className="text-xs text-muted-foreground">{t.workshop.perSecond(rate)}</p>
+        </div>
+      )
+    }
+    case 'oscilloscope':
+      return (
+        <ChoiceRow
+          label={t.workshop.span}
+          value={(data.span ?? 5) as (typeof SCOPE_SPANS)[number]}
+          options={SCOPE_SPANS}
+          format={t.workshop.seconds}
+          onChange={(span) => updatePart(id, { span })}
+        />
+      )
+    default: {
+      const sensor = SENSORS[data.type]
+      if (!sensor) return null
+      const type = data.type as SensedPart
+      const sense = data.sense ?? 0
+      if (sensor.control === 'slider') {
+        return (
+          <SliderBox
+            label={t.sense[type]}
+            value={sense}
+            text={sensor.format?.(sense) ?? `${Math.round(sense * 100)}%`}
+            onChange={(v) => updatePart(id, { sense: v }, { history: false })}
+          />
+        )
+      }
+      return (
+        <label className="flex cursor-pointer items-center justify-between rounded-xl border p-3 text-sm font-semibold">
+          {t.sense[type]}
+          <Switch
+            checked={sense > 0.5}
+            onCheckedChange={(on) => {
+              updatePart(id, { sense: on ? 1 : 0 })
+              playClick(on)
+            }}
+          />
+        </label>
+      )
+    }
   }
+}
+
+/** A labelled row of choices: capacitor sizes, fuse sizes … */
+function ChoiceRow<T extends number>({
+  label,
+  value,
+  options,
+  format,
+  onChange,
+}: {
+  label: string
+  value: T
+  options: readonly T[]
+  format: (v: T) => string
+  onChange: (v: T) => void
+}) {
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        className="w-full"
+        dir="ltr"
+        value={String(value)}
+        onValueChange={(v) => v && onChange(Number(v) as T)}
+      >
+        {options.map((option) => (
+          <ToggleGroupItem key={option} value={String(option)} className="flex-1 font-semibold tabular-nums">
+            {format(option)}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+    </div>
+  )
+}
+
+function SliderBox({
+  label,
+  value,
+  text,
+  steps = 100,
+  onChange,
+}: {
+  label: string
+  value: number
+  text: string
+  /** how many stops the slider has between 0 and 1 */
+  steps?: number
+  onChange: (v: number) => void
+}) {
+  return (
+    <div className="space-y-2 rounded-xl border p-3">
+      <div className="flex justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-semibold tabular-nums" dir="ltr">
+          {text}
+        </span>
+      </div>
+      <div dir="ltr">
+        <Slider
+          min={0}
+          max={steps}
+          step={1}
+          aria-label={label}
+          value={[Math.round(value * steps)]}
+          onValueChange={([v]) => onChange(v / steps)}
+          onValueCommit={() => useCircuit.getState().checkpoint()}
+        />
+      </div>
+    </div>
+  )
+}
+
+/** Raspberry Pi: the gpiozero call for each pin program … */
+const PI_PROGRAM: Partial<Record<PinMode, string>> = {
+  on: 'on()',
+  blink: 'blink(on_time=0.5, off_time=0.5)',
+  blink2: 'blink(on_time=0.5, off_time=0.5)',
+  step1: 'blink(on_time=1, off_time=2)',
+  step2: 'blink(on_time=1, off_time=2)',
+  step3: 'blink(on_time=1, off_time=2)',
+  fade: 'pulse(fade_in_time=1, fade_out_time=1)',
+}
+
+/** … and how many seconds after the others it starts, so pins take turns. */
+const PI_START: Partial<Record<PinMode, number>> = { blink2: 0.5, step2: 1, step3: 2 }
+
+/**
+ * The program a real board needs to do what its pins are set to, in the
+ * language that board uses: Arduino C++, MicroPython (Pico, micro:bit) or
+ * Python with gpiozero (Raspberry Pi). Real code kids can copy.
+ */
+function boardCode(type: BoardType, pins: Record<string, PinMode>): string {
+  const spec = BOARDS[type]
+  const used = spec.pins.filter((p) => (pins[p] ?? 'off') !== 'off')
+  const pick = (...modes: PinMode[]) => used.filter((p) => modes.includes(pins[p]))
+  const n = spec.codeName
+  const input = spec.input ? spec.codeName(spec.input) : ''
+  const sensing = pick(...SENSOR_MODES).length > 0
+  const stepping = pick('step1', 'step2', 'step3')
+  /** 0, 1 or 2: the second of the 3-second loop in which a step pin is on */
+  const stepOf = (p: string) => Number(pins[p].slice(4)) - 1
+  /** a pin that copies the sensor smoothly needs PWM */
+  const smooth = (p: string) => pins[p] === 'fade' || ((pins[p] === 'follow' || pins[p] === 'invert') && spec.pwm.has(p))
+
+  switch (spec.language) {
+    case 'arduino': {
+      const max = spec.adcMax
+      const half = Math.round(max / 2)
+      const scale = Math.round((max + 1) / 256)
+      const lines = ['void setup() {', ...used.map((p) => `  pinMode(${n(p)}, OUTPUT);`), '}', '', 'void loop() {']
+      if (used.length === 0) lines.push('  // every pin is off')
+      if (sensing) lines.push(`  int reading = analogRead(${input});  // 0 … ${max}`)
+      for (const p of pick('on')) lines.push(`  digitalWrite(${n(p)}, HIGH);`)
+      for (const p of pick('follow')) {
+        lines.push(
+          spec.pwm.has(p)
+            ? `  analogWrite(${n(p)}, reading / ${scale});`
+            : `  digitalWrite(${n(p)}, reading > ${half} ? HIGH : LOW);`,
+        )
+      }
+      for (const p of pick('invert')) {
+        lines.push(
+          spec.pwm.has(p)
+            ? `  analogWrite(${n(p)}, 255 - reading / ${scale});`
+            : `  digitalWrite(${n(p)}, reading > ${half} ? LOW : HIGH);`,
+        )
+      }
+      if (pick('alarm').length > 0) {
+        lines.push(`  int beat = map(reading, ${half}, ${max}, 600, 200);  // faster when higher`)
+        for (const p of pick('alarm')) {
+          lines.push(`  digitalWrite(${n(p)}, reading > ${half} && millis() % beat < beat / 2 ? HIGH : LOW);`)
+        }
+      }
+      if (pick('blink', 'blink2').length > 0) {
+        lines.push('  bool blink = millis() % 1000 < 500;')
+        for (const p of pick('blink')) lines.push(`  digitalWrite(${n(p)}, blink ? HIGH : LOW);`)
+        for (const p of pick('blink2')) lines.push(`  digitalWrite(${n(p)}, blink ? LOW : HIGH);`)
+      }
+      if (stepping.length > 0) {
+        lines.push('  int step = millis() / 1000 % 3;  // 0, 1, 2, 0, 1, 2 …')
+        for (const p of stepping) lines.push(`  digitalWrite(${n(p)}, step == ${stepOf(p)} ? HIGH : LOW);`)
+      }
+      if (pick('fade').length > 0) {
+        lines.push('  int level = (1 - cos(PI * millis() / 1000.0)) * 127.5;')
+        for (const p of pick('fade')) lines.push(`  analogWrite(${n(p)}, level);`)
+      }
+      lines.push('}')
+      return lines.join('\n')
+    }
+    case 'micropython-pico': {
+      const lines = ['from machine import Pin, PWM, ADC', 'import time, math', '']
+      for (const p of used) {
+        lines.push(smooth(p) ? `p${n(p)} = PWM(Pin(${n(p)})); p${n(p)}.freq(1000)` : `p${n(p)} = Pin(${n(p)}, Pin.OUT)`)
+      }
+      if (sensing) lines.push(`sensor = ADC(${input})`)
+      lines.push('', 'while True:', '    t = time.ticks_ms()')
+      if (used.length === 0) lines.push('    pass  # every pin is off')
+      if (sensing) lines.push('    r = sensor.read_u16()  # 0 … 65535')
+      for (const p of pick('on')) lines.push(`    p${n(p)}.value(1)`)
+      for (const p of pick('blink')) lines.push(`    p${n(p)}.value(t % 1000 < 500)`)
+      for (const p of pick('blink2')) lines.push(`    p${n(p)}.value(t % 1000 >= 500)`)
+      if (stepping.length > 0) lines.push('    step = t // 1000 % 3')
+      for (const p of stepping) lines.push(`    p${n(p)}.value(step == ${stepOf(p)})`)
+      for (const p of pick('fade')) lines.push(`    p${n(p)}.duty_u16(int((1 - math.cos(math.pi * t / 1000)) * 32767))`)
+      for (const p of pick('follow')) lines.push(smooth(p) ? `    p${n(p)}.duty_u16(r)` : `    p${n(p)}.value(r > 32768)`)
+      for (const p of pick('invert')) lines.push(smooth(p) ? `    p${n(p)}.duty_u16(65535 - r)` : `    p${n(p)}.value(r <= 32768)`)
+      if (pick('alarm').length > 0) lines.push('    beat = 600 - (r - 32768) * 400 // 32767')
+      for (const p of pick('alarm')) lines.push(`    p${n(p)}.value(r > 32768 and t % beat < beat // 2)`)
+      return lines.join('\n')
+    }
+    case 'micropython-microbit': {
+      const lines = ['from microbit import *', 'import math', '', 'while True:', '    t = running_time()']
+      if (used.length === 0) lines.push('    pass  # every pin is off')
+      if (sensing) lines.push(`    r = ${input}.read_analog()  # 0 … 1023`)
+      for (const p of pick('on')) lines.push(`    ${n(p)}.write_digital(1)`)
+      for (const p of pick('blink')) lines.push(`    ${n(p)}.write_digital(1 if t % 1000 < 500 else 0)`)
+      for (const p of pick('blink2')) lines.push(`    ${n(p)}.write_digital(0 if t % 1000 < 500 else 1)`)
+      if (stepping.length > 0) lines.push('    step = t // 1000 % 3')
+      for (const p of stepping) lines.push(`    ${n(p)}.write_digital(1 if step == ${stepOf(p)} else 0)`)
+      for (const p of pick('fade')) lines.push(`    ${n(p)}.write_analog(int((1 - math.cos(math.pi * t / 1000)) * 511))`)
+      for (const p of pick('follow')) lines.push(`    ${n(p)}.write_analog(r)`)
+      for (const p of pick('invert')) lines.push(`    ${n(p)}.write_analog(1023 - r)`)
+      if (pick('alarm').length > 0) lines.push('    beat = 600 - (r - 512) * 400 // 511')
+      for (const p of pick('alarm')) lines.push(`    ${n(p)}.write_digital(1 if r > 512 and t % beat < beat // 2 else 0)`)
+      return lines.join('\n')
+    }
+    case 'python': {
+      // gpiozero blinks and fades by itself: pins that take turns simply start later
+      const order = [...used].sort((a, b) => (PI_START[pins[a]] ?? 0) - (PI_START[pins[b]] ?? 0))
+      const waits = order.some((p) => (PI_START[pins[p]] ?? 0) > 0)
+      const lines = ['from gpiozero import LED, PWMLED', 'from signal import pause', ...(waits ? ['from time import sleep'] : []), '']
+      for (const p of order) lines.push(`led${n(p)} = ${pins[p] === 'fade' ? 'PWMLED' : 'LED'}(${n(p)})`)
+      lines.push(used.length === 0 ? '# every pin is off' : '')
+      let now = 0
+      for (const p of order) {
+        const start = PI_START[pins[p]] ?? 0
+        if (start > now) {
+          lines.push(`sleep(${start - now})  # wait for its turn`)
+          now = start
+        }
+        lines.push(`led${n(p)}.${PI_PROGRAM[pins[p]] ?? 'off()'}`)
+      }
+      lines.push('', 'pause()')
+      return lines.join('\n')
+    }
+  }
+}
+
+function BoardProgram({ node }: { node: SelectedPart }) {
+  const { t } = useI18n()
+  const updatePart = useCircuit((s) => s.updatePart)
+  const a0 = useSimulation((s) => s.result.inputs[node.id])
+  const levels = useSimulation((s) => s.result.parts[node.id]?.pins)
+  const type = node.data.type as BoardType
+  const spec = BOARDS[type]
+  const pins = node.data.pins ?? {}
+  return (
+    <div className="space-y-4">
+      <div className="space-y-1.5">
+        <p className="text-xs text-muted-foreground">{t.inspector.programHint}</p>
+        {spec.pins.map((pin) => {
+          const mode = pins[pin] ?? 'off'
+          return (
+            <div key={pin} className="flex items-center gap-2.5 rounded-xl border bg-card py-1 ps-3 pe-1">
+              {/* the pin's output right now */}
+              <span
+                aria-hidden
+                className="size-2.5 shrink-0 rounded-full bg-teal-500 shadow-[0_0_6px_var(--color-teal-400)] transition-opacity duration-150"
+                style={{ opacity: mode === 'off' ? 0.15 : 0.2 + (levels?.[pin] ?? 0) * 0.8 }}
+              />
+              <span className="min-w-8 text-sm font-semibold tabular-nums" dir="ltr">
+                {spec.label(pin)}
+              </span>
+              <Select
+                value={mode}
+                onValueChange={(next) => {
+                  updatePart(node.id, { pins: { ...pins, [pin]: next as PinMode } })
+                  playClick(next !== 'off')
+                }}
+              >
+                <SelectTrigger className="ms-auto h-8 w-44 min-w-0" aria-label={spec.label(pin)}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {pinModesFor(type, pin).map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {t.inspector.pinModes[option]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )
+        })}
+      </div>
+      {a0 !== undefined && spec.input && (
+        <div className="flex items-center justify-between rounded-xl border bg-card px-3 py-2 text-sm">
+          <span className="text-muted-foreground">
+            {t.inspector.a0} ({spec.input})
+          </span>
+          <span dir="ltr" className="font-mono font-semibold tabular-nums">
+            {a0.toFixed(2)} {t.units.volt}
+          </span>
+        </div>
+      )}
+      <div className="space-y-1.5">
+        <p className="text-xs font-semibold text-muted-foreground">{t.inspector.code}</p>
+        <pre
+          dir="ltr"
+          className="max-w-full overflow-x-auto rounded-xl bg-zinc-950 p-3 font-mono text-[11px] leading-relaxed text-zinc-100 shadow-inner"
+        >
+          <code>{boardCode(type, pins)}</code>
+        </pre>
+      </div>
+    </div>
+  )
 }
 
 function PartInspector({ node }: { node: SelectedPart }) {
@@ -240,13 +752,31 @@ function PartInspector({ node }: { node: SelectedPart }) {
   const tip = tipFor(data, result, status, t, running)
   const accent = PARTS[data.type].accent
   const showLevel = ['lamp', 'led', 'motor', 'buzzer'].includes(data.type)
-  const hasSettings = !['button', 'motor', 'buzzer'].includes(data.type)
+  const hasSettings = ![
+    'button',
+    'motor',
+    'buzzer',
+    'diode',
+    'transistor',
+    'voltmeter',
+    'ammeter',
+    'servo',
+    'relay',
+    'rgbLed',
+    'vibration',
+    'electromagnet',
+    'regulator',
+    'notGate',
+    'andGate',
+    'orGate',
+    'xorGate',
+  ].includes(data.type)
 
   return (
     <div className="space-y-5 p-4">
       <header className="flex items-center gap-3">
         <span
-          className="grid size-14 shrink-0 place-items-center rounded-2xl border"
+          className="grid size-14 shrink-0 place-items-center rounded-lg border"
           style={{ background: `color-mix(in oklch, ${accent} 9%, var(--card))` }}
         >
           <PartArt partType={data.type} size={44} />
@@ -301,6 +831,10 @@ function PartInspector({ node }: { node: SelectedPart }) {
           <CurrentReading label={t.inspector.current} amps={result?.current ?? 0} />
           <Reading label={t.inspector.power} value={Math.abs(result?.power ?? 0)} unit={t.units.watt} decimals={2} />
         </div>
+        {/* a relay's tiny coil current switches a much bigger one */}
+        {data.type === 'relay' && (
+          <CurrentReading label={t.workshop.contactCurrent} amps={result?.channels?.contact ?? 0} />
+        )}
         {showLevel && (
           <div className="flex items-center gap-2 rounded-xl border p-2.5">
             <span className="text-xs text-muted-foreground">
@@ -325,7 +859,12 @@ function PartInspector({ node }: { node: SelectedPart }) {
       )}
 
       <div className="grid grid-cols-3 gap-2">
-        <Button variant="outline" className="h-auto flex-col gap-1 py-2 text-xs" onClick={() => rotatePart(node.id)}>
+        <Button
+          variant="outline"
+          className="h-auto flex-col gap-1 py-2 text-xs"
+          disabled={!isRotatable(data.type)}
+          onClick={() => rotatePart(node.id)}
+        >
           <RotateCcw size={16} animateOnHover className="-scale-x-100" />
           {t.inspector.rotate}
         </Button>
@@ -340,8 +879,11 @@ function PartInspector({ node }: { node: SelectedPart }) {
       </div>
 
       <Section title={t.inspector.whatItDoes}>
-        <p className="rounded-xl bg-muted/60 p-3 text-sm leading-relaxed">{t.parts[data.type].description}</p>
+        <PartLesson type={data.type} result={running ? result : undefined} />
+        {data.type === 'resistor' && <ResistorColorCode ohms={data.resistance ?? 100} />}
+        {isGate(data.type) && <TruthTable type={data.type} channels={running ? result?.channels : undefined} />}
       </Section>
+      <BasicsLesson result={running ? result : undefined} />
     </div>
   )
 }
@@ -354,7 +896,7 @@ function WireInspector({ edge }: { edge: WireEdge }) {
     <div className="space-y-5 p-4">
       <header className="flex items-center gap-3">
         <span
-          className="grid size-12 place-items-center rounded-2xl text-white shadow-inner"
+          className="grid size-12 place-items-center rounded-lg text-white shadow-inner"
           style={{ background: WIRE_COLORS[edge.data?.color ?? 'blue'] }}
         >
           <Unplug size={24} animateOnHover />
@@ -384,7 +926,7 @@ function EmptyInspector() {
   const { t } = useI18n()
   return (
     <div className="flex flex-col items-center gap-3 p-8 text-center">
-      <span className="grid size-14 place-items-center rounded-2xl bg-muted text-muted-foreground">
+      <span className="grid size-14 place-items-center rounded-lg bg-muted text-muted-foreground">
         <Unplug size={28} animate loop />
       </span>
       <h3 className="font-semibold">{t.inspector.empty}</h3>

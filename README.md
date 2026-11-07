@@ -17,11 +17,17 @@ Requires Node.js 22.12 or later (the Animate UI CLI needs it).
 
 ## What kids can do
 
-- **Parts:** battery (1.5 / 3 / 4.5 / 9 V), switch, push button, dimmer, resistor, lamp, LED, motor and buzzer.
+- **Power:** battery (1.5 / 3 / 4.5 / 9 V) and a solar panel with a sunlight slider.
+- **Arduino Uno:** pins 13 … 8 can be off, on, blinking, fading (PWM pins ~9, ~10, ~11) or following the sensor on A0; 5V and GND power other parts. The details panel shows the real Arduino code for the chosen program.
+- **Switches and knobs:** switch, push button, dimmer.
+- **Electronic parts:** resistor, capacitor (charges and discharges over time), diode, NPN transistor (B, C, E) and fuse (blows to protect the rest).
+- **Light, sound and motion:** lamp, LED, motor, buzzer and a servo motor whose arm follows its signal.
+- **Sensors:** light sensor (LDR), thermistor, tilt switch, magnet (reed) switch, and + / − / S modules for temperature, distance (ultrasonic), motion (PIR), sound, smoke/gas, soil moisture and touch. Each has a slider, hold button or toggle on its card.
+- **Meters:** voltmeter and ammeter with a needle and an LCD readout.
 - **Wiring:** drag from a coloured terminal dot to another part. Red is `+`, black is `−`. Wires show moving dots whose speed and direction follow the real current.
-- **Things that go wrong, safely:** 9 V burns out a lamp, an LED without a resistor burns out, a direct wire across the battery causes a short circuit (the battery heats up and the board warns), and a reversed LED stays dark.
-- **Examples menu:** flashlight, fan, doorbell, LED, series vs. parallel lamps, night light with a dimmer, and a short circuit.
-- **Missions:** eight challenges, such as "build a flashlight" and "spin the motor both ways", with confetti when one is completed.
+- **Things that go wrong, safely:** 9 V burns out a lamp, an LED without a resistor burns out, a direct wire across the battery causes a short circuit (the battery heats up and the board warns), a reversed LED stays dark, a transistor without a base resistor burns, and a fuse blows before the lamp it protects.
+- **Examples menu:** flashlight, fan, doorbell, LED, series vs. parallel lamps, night light, short circuit, Arduino blink, transistor switch, capacitor light, solar fan, measuring with meters, servo sweep and a motion light.
+- **Missions:** fourteen challenges, from "build a flashlight" to "blink an LED with the Arduino" and "let a sensor switch on a light", with confetti when one is completed.
 - **Comfort:** undo/redo, the board saved in the browser, dark mode (a "dark room" where lights really shine), sound effects, keyboard shortcuts, and touch support (tap a part to add it).
 
 ## Tech stack

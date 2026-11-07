@@ -73,11 +73,14 @@ export function Halo({
   intensity,
   scale = 2.6,
   position = [0, 0, 0],
+  tint,
 }: {
   color: string
   intensity: { current: number }
   scale?: number
   position?: [number, number, number]
+  /** a colour that changes while it glows (the RGB LED); overrides `color` */
+  tint?: { current: THREE.Color }
 }) {
   const sprite = useRef<THREE.Sprite>(null)
   useFrame(() => {
@@ -86,7 +89,9 @@ export function Halo({
     const v = intensity.current
     s.visible = v > 0.01
     s.scale.setScalar(scale * (0.45 + 0.75 * Math.min(1.6, v)))
-    ;(s.material as THREE.SpriteMaterial).opacity = Math.min(1, v * 0.95)
+    const material = s.material as THREE.SpriteMaterial
+    material.opacity = Math.min(1, v * 0.95)
+    if (tint) material.color.copy(tint.current)
   })
   return (
     <sprite ref={sprite} position={position} renderOrder={10}>

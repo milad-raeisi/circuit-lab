@@ -80,7 +80,7 @@ export function Missions() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-pink-500 p-4 text-sm font-semibold text-white shadow-lg"
+          className="flex items-center gap-3 rounded-lg bg-gradient-to-br from-amber-400 via-orange-500 to-pink-500 p-4 text-sm font-semibold text-white shadow-lg"
         >
           <PartyPopper size={28} animate loop />
           {t.missions.allDone}

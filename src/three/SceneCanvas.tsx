@@ -2,6 +2,7 @@ import { View } from '@react-three/drei'
 import { Canvas, useFrame, type RootState } from '@react-three/fiber'
 import { useStoreApi } from '@xyflow/react'
 import { useEffect, useRef } from 'react'
+import { isTimeDependent } from '@/circuit/catalog'
 import type { SimResult } from '@/circuit/solver'
 import type { PartNode } from '@/circuit/types'
 import { useCircuit } from '@/store/circuit'
@@ -33,17 +34,27 @@ function ClearPass() {
 function hasAmbientMotion(nodes: PartNode[], result: SimResult) {
   return nodes.some(({ id, data }) => {
     if (data.burnt) return true // smoke
+    // blinking pins and charging capacitors change many times a second
+    if (isTimeDependent(data)) return true
     const r = result.parts[id]
     if (!r) return false
     switch (data.type) {
+      case 'gasSensor':
+        return r.status === 'on' && (data.sense ?? 0) > 0.3 // smoke puffs
       case 'battery':
         return r.status === 'on' || r.status === 'short' // sparkles, smoke
       case 'motor':
         return Math.abs(r.level) > 0.02 || r.status === 'over'
       case 'buzzer':
-        return r.level > 0
+      case 'speaker':
+        return r.level > 0 // sound rings, a pumping cone
+      case 'vibration':
+        return Math.abs(r.level) > 0.02 || r.status === 'over' // shaking, smoke
+      case 'electromagnet':
+        return Math.abs(r.level) > 0.05 // dots running along the field lines
       case 'resistor':
       case 'dimmer':
+      case 'regulator':
         return r.status === 'over' // smoke
       default:
         return false
@@ -95,9 +106,11 @@ function useFrameScheduler(root: React.RefObject<RootState | null>) {
     }
 
     const unsubscribers = [
-      useSimulation.subscribe(() => {
+      useSimulation.subscribe((s, prev) => {
         updateAmbient()
-        wake()
+        // ticking boards are already drawn at the ambient rate; a full-speed
+        // window on every tick would never end
+        if (s.running !== prev.running || (s.result !== prev.result && !ambient)) wake()
       }),
       useCircuit.subscribe((s, prev) => {
         if (s.nodes === prev.nodes && s.edges === prev.edges) return

@@ -60,7 +60,7 @@ function StatusPill({ className }: { className?: string }) {
         transition={{ type: 'spring', stiffness: 420, damping: 32 }}
         role="status"
         className={cn(
-          'flex min-w-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold whitespace-nowrap',
+          'flex min-w-0 items-center gap-1.5 rounded-md px-2.5 py-1 font-semibold whitespace-nowrap',
           TONE[state],
           className,
         )}
@@ -112,7 +112,7 @@ export function BoardStatusPill() {
   const { state, milliamps } = useBoardStatus()
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-3 z-[6] flex justify-center px-16 text-xs lg:hidden">
-      <div className="float-panel flex max-w-full min-w-0 items-center gap-2 rounded-full p-1">
+      <div className="float-panel flex max-w-full min-w-0 items-center gap-2 rounded-lg p-1">
         <StatusPill />
         {state === 'complete' && (
           <span dir="ltr" className="flex shrink-0 items-baseline gap-0.5 pe-2 font-mono font-semibold tabular-nums">

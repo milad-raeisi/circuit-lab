@@ -10,7 +10,17 @@ import { useDrag } from '@/store/drag'
 import { usePlacePart } from './DragGhost'
 import { PartArt } from './PartArt'
 
-const CATEGORIES: PartCategory[] = ['power', 'control', 'output']
+const CATEGORIES: PartCategory[] = [
+  'power',
+  'board',
+  'control',
+  'component',
+  'logic',
+  'output',
+  'display',
+  'sensor',
+  'meter',
+]
 
 const tileClass = cn(
   'group relative flex w-full flex-col items-center gap-1 rounded-xl border border-transparent bg-muted/60 px-1.5 pt-2.5 pb-2 text-center select-none',
@@ -131,7 +141,7 @@ function PartSearch({ value, onChange, shortcut }: { value: string; onChange: (v
         autoComplete="off"
         spellCheck={false}
         className={cn(
-          'h-10 w-full rounded-xl border border-border bg-muted ps-9 pe-10 text-sm text-foreground outline-none',
+          'h-10 w-full rounded-md border border-border bg-muted ps-9 pe-10 text-sm text-foreground outline-none',
           'shadow-[inset_0_1px_2px_oklch(0_0_0/0.05)] transition-[background-color,border-color,box-shadow]',
           'placeholder:text-muted-foreground hover:border-foreground/20',
           'focus-visible:border-primary focus-visible:bg-card focus-visible:shadow-none focus-visible:ring-4 focus-visible:ring-primary/15',

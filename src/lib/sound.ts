@@ -10,6 +10,7 @@ let master: GainNode | null = null
 let enabled = true
 let buzzer: Voice | null = null
 let motor: Voice | null = null
+let speaker: Voice | null = null
 let sizzle: { source: AudioBufferSourceNode; gain: GainNode } | null = null
 
 function context(): AudioContext | null {
@@ -113,6 +114,29 @@ export function setMotorLevel(level: number) {
   )
 }
 
+/** Speaker: a clear, round note at `pitch` hertz, louder with more power. */
+export function setSpeakerTone(level: number, pitch: number) {
+  speaker = continuousVoice(
+    speaker,
+    level,
+    (ac) => {
+      const osc = ac.createOscillator()
+      // a triangle wave sounds like a soft flute: kind to small ears
+      osc.type = 'triangle'
+      osc.frequency.value = pitch
+      const gain = ac.createGain()
+      gain.gain.value = 0
+      osc.connect(gain).connect(master!)
+      osc.start()
+      return { osc, gain }
+    },
+    (voice, value, ac) => {
+      voice.osc.frequency.setTargetAtTime(pitch, ac.currentTime, 0.02)
+      voice.gain.gain.setTargetAtTime(0.07 * Math.min(1.5, value), ac.currentTime, 0.02)
+    },
+  )
+}
+
 /** Crackling noise while a battery is short-circuited. */
 export function setSizzle(on: boolean) {
   const ac = ctx
@@ -200,5 +224,6 @@ export function playPlace() {
 export function stopContinuousSounds() {
   setBuzzerLevel(0)
   setMotorLevel(0)
+  setSpeakerTone(0, 0)
   setSizzle(false)
 }

@@ -2,7 +2,6 @@ import { Ellipsis } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { LiquidButton } from '@/components/animate-ui/buttons/liquid'
 import { ThemeTogglerButton, ThemeTogglerButtonIcon } from '@/components/animate-ui/buttons/theme-toggler'
-import { BookOpen } from '@/components/animate-ui/icons/book-open'
 import { Globe } from '@/components/animate-ui/icons/globe'
 import { Moon } from '@/components/animate-ui/icons/moon'
 import { Pause } from '@/components/animate-ui/icons/pause'
@@ -36,13 +35,15 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { PRESET_ORDER, buildPreset, type PresetId } from '@/circuit/presets'
+import { buildPreset, type PresetId } from '@/circuit/presets'
 import { LANGUAGES, useI18n, type Lang } from '@/i18n'
 import { unlockAudio } from '@/lib/sound'
 import { cn } from '@/lib/utils'
 import { useCircuit } from '@/store/circuit'
 import { useSettings } from '@/store/settings'
 import { useSimulation } from '@/store/simulation'
+import { ToolboxButton } from '@/toolbox/ToolboxButton'
+import { ExamplesGallery } from './ExamplesGallery'
 import { HelpDialog } from './HelpDialog'
 
 /** The app's mark: a closed loop with a battery on one side and a lit bulb on top. */
@@ -223,9 +224,12 @@ export function TopBar() {
   const { undo, redo, load, clear } = useCircuit.getState()
   const [pending, setPending] = useState<Pending>(null)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [galleryOpen, setGalleryOpen] = useState(false)
 
   const loadPreset = (id: PresetId) => {
-    load(buildPreset(id))
+    // screens in some examples show words in the chosen language
+    load(buildPreset(id, { ...t.gallery.screens, citySign: t.display.samples.citySign }))
+    setGalleryOpen(false)
   }
 
   const confirm = () => {
@@ -246,28 +250,15 @@ export function TopBar() {
 
       <Separator orientation="vertical" className="mx-1 !h-6 max-sm:hidden" />
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="lg" className="gap-2 px-2.5 font-medium" aria-label={t.toolbar.examples}>
-            <BookOpen size={18} animateOnHover />
-            <span className="max-sm:hidden">{t.toolbar.examples}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-72 max-w-[calc(100vw-1rem)]">
-          <DropdownMenuLabel>{t.toolbar.examples}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {PRESET_ORDER.map((id) => (
-            <DropdownMenuItem
-              key={id}
-              className="flex-col items-start gap-0.5 py-2"
-              onSelect={() => (hasParts ? setPending({ kind: 'preset', id }) : loadPreset(id))}
-            >
-              <span className="font-medium">{t.presets[id].name}</span>
-              <span className="text-xs text-muted-foreground">{t.presets[id].description}</span>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ExamplesGallery
+        open={galleryOpen}
+        onOpenChange={setGalleryOpen}
+        // an empty board opens the example at once; a full one asks first, over the gallery
+        onPick={(id) => (hasParts ? setPending({ kind: 'preset', id }) : loadPreset(id))}
+      />
+
+      {/* phones open the Toolbox from the bottom dock instead */}
+      <ToolboxButton className="max-md:hidden" />
 
       <ToolButton label={t.toolbar.undo} onClick={undo} disabled={!canUndo}>
         <Undo2 size={18} animateOnHover />

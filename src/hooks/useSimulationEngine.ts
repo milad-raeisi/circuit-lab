@@ -1,18 +1,21 @@
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { MISSION_IDS, evaluateMissions, type MissionMemory } from '@/circuit/missions'
-import { EMPTY_RESULT, solveCircuit, type PartResult, type SimResult } from '@/circuit/solver'
-import type { PartNode, WireEdge } from '@/circuit/types'
+import { isTimeDependent } from '@/circuit/catalog'
+import { DEFAULT_STEP, EMPTY_RESULT, solveCircuit, type PartResult, type SimResult } from '@/circuit/solver'
+import type { PartNode, PartType, WireEdge } from '@/circuit/types'
 import {
+  playClick,
   playPop,
   playSuccess,
   setBuzzerLevel,
   setMotorLevel,
   setSizzle,
+  setSpeakerTone,
   setSoundEnabled,
   stopContinuousSounds,
 } from '@/lib/sound'
-import { currentDictionary } from '@/i18n'
+import { currentDictionary, type Dictionary } from '@/i18n'
 import { useCircuit } from '@/store/circuit'
 import { useSettings } from '@/store/settings'
 import { useSimulation } from '@/store/simulation'
@@ -24,7 +27,31 @@ import { useSimulation } from '@/store/simulation'
  */
 function electricalKey(nodes: PartNode[], edges: WireEdge[]) {
   const parts = nodes.map(({ id, data: d }) =>
-    [id, d.type, d.voltage, d.closed, d.pressed, d.resistance, d.level, d.burnt, d.color].join(','),
+    [
+      id,
+      d.type,
+      d.voltage,
+      d.closed,
+      d.pressed,
+      d.resistance,
+      d.level,
+      d.burnt,
+      d.color,
+      d.capacitance,
+      d.rating,
+      d.light,
+      d.sense,
+      // a screen's size and brightness set how much current it takes
+      d.cols,
+      d.rows,
+      d.digits,
+      d.brightness,
+      // bench power supply limit, speaker note, 555 speed
+      d.limit,
+      d.pitch,
+      d.rate,
+      d.pins ? Object.values(d.pins).join('') : '',
+    ].join(','),
   )
   const wires = edges.map((e) => [e.id, e.source, e.sourceHandle, e.target, e.targetHandle].join(','))
   return `${parts.join(';')}|${wires.join(';')}`
@@ -32,8 +59,15 @@ function electricalKey(nodes: PartNode[], edges: WireEdge[]) {
 
 const close = (a: number, b: number, tolerance: number) => Math.abs(a - b) <= tolerance
 
+const sameNumbers = (a: Record<string, number> = {}, b: Record<string, number> = {}, tolerance: number) =>
+  Object.keys(a).length === Object.keys(b).length &&
+  Object.entries(a).every(([k, value]) => b[k] !== undefined && close(value, b[k], tolerance))
+
 function samePart(a: PartResult, b: PartResult) {
   return (
+    sameNumbers(a.pins, b.pins, 1e-3) &&
+    sameNumbers(a.pinCurrents, b.pinCurrents, 1e-5) &&
+    sameNumbers(a.channels, b.channels, 1e-4) &&
     a.status === b.status &&
     a.damaged === b.damaged &&
     close(a.voltage, b.voltage, 1e-4) &&
@@ -77,79 +111,145 @@ function reuseUnchanged(prev: SimResult, next: SimResult): SimResult {
   return changed ? { ...next, parts, wires } : prev
 }
 
+/** How often the board is re-solved while something changes over time. */
+const TICK_MS = 50
+
+function burntMessage(type: PartType, t: Dictionary) {
+  if (type === 'led') return t.toasts.ledBurnt
+  if (type === 'lamp') return t.toasts.lampBurnt
+  if (type === 'fuse') return t.toasts.fuseBlown
+  return t.toasts.partBurnt
+}
+
 export function useSimulationEngine() {
   const key = useCircuit((s) => electricalKey(s.nodes, s.edges))
   const running = useSimulation((s) => s.running)
   const sound = useSettings((s) => s.sound)
   const wasShort = useRef(false)
   const memory = useRef<MissionMemory>({ motorForward: false, motorBackward: false })
+  /** simulated seconds: drives the Arduino programs */
+  const clock = useRef(0)
+  /** each capacitor's voltage, carried from one step to the next */
+  const charge = useRef<Record<string, number>>({})
+  /** what each Arduino read on A0 in the last step */
+  const readings = useRef<Record<string, number>>({})
+  /** relays, logic chips and power supplies: the state they were left in */
+  const switches = useRef<Record<string, number>>({})
 
   useEffect(() => setSoundEnabled(sound), [sound])
   useEffect(() => stopContinuousSounds, [])
 
   useEffect(() => {
-    const { nodes, edges, updatePart } = useCircuit.getState()
-    const t = currentDictionary()
-
     if (!running) {
       useSimulation.setState({ result: EMPTY_RESULT })
       stopContinuousSounds()
       wasShort.current = false
+      charge.current = {}
+      readings.current = {}
+      switches.current = {}
       return
     }
 
-    const previous = useSimulation.getState().result
-    const result = reuseUnchanged(
-      previous,
-      solveCircuit(
+    const step = (dt: number) => {
+      const { nodes, edges, updatePart } = useCircuit.getState()
+      const t = currentDictionary()
+
+      const fresh = solveCircuit(
         nodes.map((n) => ({ id: n.id, data: n.data })),
         edges,
-      ),
-    )
-    if (result !== previous) useSimulation.setState({ result })
+        { time: clock.current, dt, capacitors: charge.current, inputs: readings.current, states: switches.current },
+      )
+      charge.current = fresh.capacitors
+      readings.current = fresh.inputs
+      switches.current = fresh.states
+      const previous = useSimulation.getState().result
+      const result = reuseUnchanged(previous, fresh)
+      if (result !== previous) useSimulation.setState({ result })
 
-    // parts that received too much power burn out (this re-runs the solver)
-    for (const node of nodes) {
-      if (!result.parts[node.id]?.damaged || node.data.burnt) continue
-      updatePart(node.id, { burnt: true }, { history: false })
-      playPop()
-      toast.error(node.data.type === 'led' ? t.toasts.ledBurnt : t.toasts.lampBurnt, {
-        id: `burnt-${node.id}`,
-      })
+      // a relay clicks when its switch moves
+      for (const node of nodes) {
+        if (node.data.type !== 'relay') continue
+        const before = previous.parts[node.id]?.level ?? 0
+        const now = result.parts[node.id]?.level ?? 0
+        if (before !== now) playClick(now === 1)
+      }
+
+      // parts that received too much power burn out (this re-runs the solver).
+      // A blown fuse cuts the power first, so it protects everything else.
+      const damaged = nodes.filter((n) => result.parts[n.id]?.damaged && !n.data.burnt)
+      const fuses = damaged.filter((n) => n.data.type === 'fuse')
+      for (const node of fuses.length > 0 ? fuses : damaged) {
+        updatePart(node.id, { burnt: true }, { history: false })
+        playPop()
+        toast.error(burntMessage(node.data.type, t), { id: `burnt-${node.id}` })
+      }
+
+      if (result.shortCircuit && !wasShort.current) {
+        toast.warning(t.toasts.short, { id: 'short-circuit' })
+      }
+      wasShort.current = result.shortCircuit
+      setSizzle(result.shortCircuit)
+
+      // continuous sounds
+      let buzz = 0
+      let hum = 0
+      let tone = 0
+      let pitch = 0
+      let loudest = 0
+      for (const node of nodes) {
+        const r = result.parts[node.id]
+        if (!r) continue
+        if (node.data.type === 'buzzer') buzz += r.level
+        if (node.data.type === 'motor') hum = Math.max(hum, Math.abs(r.level))
+        // a coin motor only buzzes softly
+        if (node.data.type === 'vibration') hum = Math.max(hum, Math.abs(r.level) * 0.5)
+        if (node.data.type === 'speaker' && !node.data.burnt) {
+          tone += r.level
+          // the loudest speaker picks the note
+          if (r.level > loudest) {
+            loudest = r.level
+            pitch = node.data.pitch ?? 523
+          }
+        }
+      }
+      setBuzzerLevel(buzz)
+      setMotorLevel(hum)
+      setSpeakerTone(tone, pitch)
+
+      // missions
+      for (const node of nodes) {
+        if (node.data.type !== 'motor') continue
+        const level = result.parts[node.id]?.level ?? 0
+        if (level > 0.3) memory.current.motorForward = true
+        if (level < -0.3) memory.current.motorBackward = true
+      }
+      const { completed, completeMission } = useSettings.getState()
+      const done = evaluateMissions(nodes, result, memory.current)
+      for (const id of MISSION_IDS) {
+        if (!done.has(id) || completed.includes(id)) continue
+        completeMission(id)
+        playSuccess()
+        toast.success(t.toasts.mission, { description: t.missions.items[id], id: `mission-${id}` })
+      }
     }
 
-    if (result.shortCircuit && !wasShort.current) {
-      toast.warning(t.toasts.short, { id: 'short-circuit' })
-    }
-    wasShort.current = result.shortCircuit
-    setSizzle(result.shortCircuit)
+    step(DEFAULT_STEP)
 
-    // continuous sounds
-    let buzz = 0
-    let hum = 0
-    for (const node of nodes) {
-      const r = result.parts[node.id]
-      if (!r) continue
-      if (node.data.type === 'buzzer') buzz += r.level
-      if (node.data.type === 'motor') hum = Math.max(hum, Math.abs(r.level))
-    }
-    setBuzzerLevel(buzz)
-    setMotorLevel(hum)
-
-    // missions
-    for (const node of nodes) {
-      if (node.data.type !== 'motor') continue
-      const level = result.parts[node.id]?.level ?? 0
-      if (level > 0.3) memory.current.motorForward = true
-      if (level < -0.3) memory.current.motorBackward = true
-    }
-    const { completed, completeMission } = useSettings.getState()
-    const done = evaluateMissions(nodes, result, memory.current)
-    for (const id of MISSION_IDS) {
-      if (!done.has(id) || completed.includes(id)) continue
-      completeMission(id)
-      playSuccess()
-      toast.success(t.toasts.mission, { description: t.missions.items[id], id: `mission-${id}` })
-    }
+    // only boards with blinking pins or capacitors need a clock
+    if (!useCircuit.getState().nodes.some((n) => isTimeDependent(n.data))) return
+    let last = performance.now()
+    const timer = window.setInterval(() => {
+      const now = performance.now()
+      // a hidden tab does no work; time simply waits for it
+      if (document.visibilityState === 'hidden') {
+        last = now
+        return
+      }
+      const dt = Math.min(0.1, (now - last) / 1000)
+      last = now
+      clock.current += dt
+      step(dt)
+    }, TICK_MS)
+    return () => window.clearInterval(timer)
   }, [key, running])
 }

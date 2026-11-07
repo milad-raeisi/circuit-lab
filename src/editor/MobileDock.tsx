@@ -6,6 +6,8 @@ import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { selectSelectedWire, useCircuit, useSelectedPart } from '@/store/circuit'
 import { useSettings } from '@/store/settings'
+import { useToolbox } from '@/toolbox/store'
+import { ToolboxIcon } from '@/toolbox/ToolboxIcon'
 import { InspectorBody } from './Inspector'
 import { Missions } from './Missions'
 import { PartArt } from './PartArt'
@@ -62,6 +64,7 @@ export function MobileDock() {
   const part = useSelectedPart()
   const wire = useCircuit(selectSelectedWire)
   const done = useSettings((s) => s.completed.length)
+  const openToolbox = useToolbox((s) => s.setOpen)
   const [open, setOpen] = useState(false)
   // kept after closing so the sheet does not go blank while it slides away
   const [panel, setPanel] = useState<Panel>('parts')
@@ -82,7 +85,7 @@ export function MobileDock() {
 
   return (
     <>
-      <nav className="pb-safe relative z-20 grid shrink-0 grid-cols-3 gap-1 border-t bg-background px-2 pt-1 md:grid-cols-2 lg:hidden">
+      <nav className="pb-safe relative z-20 grid shrink-0 grid-cols-4 gap-1 border-t bg-background px-2 pt-1 md:grid-cols-2 lg:hidden">
         <DockButton
           className="md:hidden"
           label={t.sidebar.title}
@@ -95,6 +98,13 @@ export function MobileDock() {
           badge={`${done}/${MISSION_IDS.length}`}
           onClick={() => show('missions')}
         />
+        {/* wider screens have the Toolbox button in the top bar */}
+        <DockButton
+          className="md:hidden"
+          label={t.toolbar.toolbox}
+          icon={<ToolboxIcon size={20} />}
+          onClick={() => openToolbox(true)}
+        />
         <DockButton
           label={picked ?? t.inspector.tab}
           active={!!picked}
@@ -106,7 +116,7 @@ export function MobileDock() {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side="bottom"
-          className="max-h-[85dvh] gap-0 rounded-t-3xl p-0"
+          className="max-h-[85dvh] gap-0 rounded-t-xl p-0"
           // focusing the search box would pop the phone keyboard up over the parts
           onOpenAutoFocus={(e) => e.preventDefault()}
         >

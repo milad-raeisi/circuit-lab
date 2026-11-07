@@ -1,13 +1,42 @@
-import { ELECTRICAL, LAMP_COLORS, LED_COLORS } from '@/circuit/catalog'
+import { BOARDS, ELECTRICAL, LAMP_COLORS, LED_COLORS, supplySettings } from '@/circuit/catalog'
 import type { PartResult } from '@/circuit/solver'
 import type { LampColor, LedColor, PartData } from '@/circuit/types'
 import { Stage, type Framing } from './helpers'
 import { BatteryModel } from './models/Battery'
 import { BuzzerModel } from './models/Buzzer'
 import { ButtonModel, DimmerModel, ResistorModel, SwitchModel } from './models/Controls'
+import { ArduinoModel } from './models/Arduino'
+import { BoardModel } from './models/Boards'
+import { CapacitorModel } from './models/Capacitor'
+import { DiodeModel } from './models/Diode'
+import { FuseModel } from './models/Fuse'
 import { LampModel } from './models/Lamp'
+import { LdrModel } from './models/Ldr'
 import { LedModel } from './models/Led'
+import { MeterModel } from './models/Meter'
 import { MotorModel } from './models/Motor'
+import {
+  GasSensorModel,
+  PirModel,
+  SoilSensorModel,
+  SoundSensorModel,
+  TempSensorModel,
+  TouchSensorModel,
+  UltrasonicModel,
+} from './models/Sensors'
+import { ServoModel } from './models/Servo'
+import { SolarModel } from './models/Solar'
+import { ReedModel, TiltModel } from './models/Switches'
+import { ThermistorModel } from './models/Thermistor'
+import { TransistorModel } from './models/Transistor'
+import { LogicGateModel, RegulatorModel, Timer555Model } from './models/Chips'
+import { ElectromagnetModel } from './models/Electromagnet'
+import { PotentiometerModel } from './models/Potentiometer'
+import { PowerSupplyModel } from './models/PowerSupply'
+import { RelayModel } from './models/Relay'
+import { RgbLedModel } from './models/RgbLed'
+import { SpeakerModel } from './models/Speaker'
+import { VibrationMotorModel } from './models/Vibration'
 
 /*
  * Camera framing for every model, measured so each one sits in the middle of
@@ -27,6 +56,31 @@ const FRAMING = {
   led: { camera: [0, 0.35, 4.2], scale: 1.15, lift: -0.13 },
   motor: { camera: [0, 0.5, 4.8], scale: 1.08, lift: -0.34 },
   buzzer: { camera: [0, 0.55, 4.6], scale: 0.82, lift: -0.26 },
+  solar: { camera: [0, 0.4, 4.6], scale: 0.93, lift: -0.04 },
+  arduino: { camera: [0, 0.4, 4.6], scale: 1.24, lift: -0.1 },
+  capacitor: { camera: [0, 0.4, 4.6], scale: 1.01, lift: -0.07 },
+  diode: { camera: [0, 0.4, 4.6], scale: 0.76, lift: 0 },
+  diodeUpright: { camera: [0, 0.4, 4.6], scale: 1.24, lift: 0 },
+  transistor: { camera: [0, 0.4, 4.6], scale: 0.91, lift: -0.03 },
+  fuse: { camera: [0, 0.4, 4.6], scale: 0.67, lift: 0 },
+  fuseUpright: { camera: [0, 0.4, 4.6], scale: 1.08, lift: 0 },
+  ldr: { camera: [0, 0.4, 4.6], scale: 0.82, lift: 0 },
+  meter: { camera: [0, 0.4, 4.6], scale: 1.09, lift: -0.07 },
+  servo: { camera: [0, 0.4, 4.6], scale: 0.8, lift: -0.09 },
+  thermistor: { camera: [0, 0.4, 4.6], scale: 0.76, lift: 0 },
+  tilt: { camera: [0, 0.4, 4.6], scale: 0.78, lift: 0 },
+  reed: { camera: [0, 0.4, 4.6], scale: 0.72, lift: 0 },
+  module: { camera: [0, 0.4, 4.6], scale: 0.95, lift: 0 },
+  powerSupply: { camera: [0, 0.4, 4.6], scale: 1.08, lift: -0.15 },
+  potentiometer: { camera: [0, 0.4, 4.6], scale: 1.1, lift: -0.1 },
+  relay: { camera: [0, 0.4, 4.6], scale: 1.1, lift: -0.15 },
+  rgbLed: { camera: [0, 0.35, 4.2], scale: 1.2, lift: -0.13 },
+  speaker: { camera: [0, 0.4, 4.6], scale: 1.02, lift: 0.05 },
+  vibration: { camera: [0, 0.4, 4.6], scale: 0.8, lift: -0.13 },
+  electromagnet: { camera: [0, 0.4, 4.6], scale: 0.85, lift: 0 },
+  regulator: { camera: [0, 0.4, 4.6], scale: 1.05, lift: -0.12 },
+  gate: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
+  timer555: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
 } satisfies Record<string, Framing>
 
 /** The animated 3D preview of one part, driven by its simulation result. */
@@ -107,5 +161,214 @@ export function PartScene({ data, result }: { data: PartData; result?: PartResul
           <DimmerModel level={data.level ?? 0.7} />
         </Stage>
       )
+    case 'solar':
+      return (
+        <Stage {...FRAMING.solar}>
+          <SolarModel
+            light={data.light ?? 0.8}
+            output={Math.min(1, Math.max(0, (result?.current ?? 0) / (ELECTRICAL.solar.voltage / ELECTRICAL.solar.resistance)))}
+          />
+        </Stage>
+      )
+    case 'arduino':
+      return (
+        <Stage {...FRAMING.arduino}>
+          <ArduinoModel pins={result?.pins ?? {}} powered={result !== undefined} />
+        </Stage>
+      )
+    case 'nano':
+    case 'mega':
+    case 'esp32':
+    case 'esp8266':
+    case 'pico':
+    case 'microbit':
+    case 'raspberrypi':
+      return (
+        <Stage {...FRAMING.arduino}>
+          <BoardModel
+            variant={data.type}
+            levels={BOARDS[data.type].pins.map((pin) => result?.pins?.[pin] ?? 0)}
+            powered={result !== undefined}
+          />
+        </Stage>
+      )
+    case 'capacitor':
+      return (
+        <Stage {...FRAMING.capacitor}>
+          <CapacitorModel
+            charge={Math.min(1, Math.abs(level) / 9)}
+            capacitance={data.capacitance ?? 2200}
+            reversed={status === 'reverse'}
+          />
+        </Stage>
+      )
+    case 'diode':
+      return (
+        <Stage {...(upright ? FRAMING.diodeUpright : FRAMING.diode)}>
+          <DiodeModel current={result?.current ?? 0} burnt={!!data.burnt} rotation={data.rotation} />
+        </Stage>
+      )
+    case 'transistor':
+      return (
+        <Stage {...FRAMING.transistor}>
+          <TransistorModel on={Math.min(1, (result?.current ?? 0) / 0.1)} burnt={!!data.burnt} />
+        </Stage>
+      )
+    case 'fuse':
+      return (
+        <Stage {...(upright ? FRAMING.fuseUpright : FRAMING.fuse)}>
+          <FuseModel blown={!!data.burnt} load={level} rotation={data.rotation} />
+        </Stage>
+      )
+    case 'ldr':
+      return (
+        <Stage {...FRAMING.ldr}>
+          <LdrModel light={data.light ?? 0.6} />
+        </Stage>
+      )
+    case 'voltmeter':
+    case 'ammeter':
+      return (
+        <Stage {...FRAMING.meter}>
+          <MeterModel
+            kind={data.type === 'voltmeter' ? 'volt' : 'amp'}
+            value={level}
+            fullScale={data.type === 'voltmeter' ? 10 : 0.5}
+          />
+        </Stage>
+      )
+    case 'servo':
+      return (
+        <Stage {...FRAMING.servo}>
+          <ServoModel angle={level} powered={status === 'on'} />
+        </Stage>
+      )
+    case 'thermistor':
+      return (
+        <Stage {...FRAMING.thermistor}>
+          <ThermistorModel heat={data.sense ?? 0.42} />
+        </Stage>
+      )
+    case 'tilt':
+      return (
+        <Stage {...FRAMING.tilt}>
+          <TiltModel tilted={(data.sense ?? 0) > 0.5} />
+        </Stage>
+      )
+    case 'reed':
+      return (
+        <Stage {...FRAMING.reed}>
+          <ReedModel closed={(data.sense ?? 0) > 0.5} />
+        </Stage>
+      )
+    case 'powerSupply': {
+      const { voltage, limit } = supplySettings(data)
+      return (
+        <Stage {...FRAMING.powerSupply}>
+          <PowerSupplyModel
+            on={result !== undefined}
+            volts={Math.max(0, result?.voltage ?? 0)}
+            amps={result?.current ?? 0}
+            setting={voltage / ELECTRICAL.supply.maxVoltage}
+            // the current knob runs from 0.1 A to 2 A
+            limit={Math.log(limit / 0.1) / Math.log(20)}
+            limiting={status === 'over'}
+          />
+        </Stage>
+      )
+    }
+    case 'potentiometer':
+      return (
+        <Stage {...FRAMING.potentiometer}>
+          <PotentiometerModel level={data.level ?? 0.5} powered={Math.abs(result?.voltage ?? 0) > 0.05} />
+        </Stage>
+      )
+    case 'relay':
+      return (
+        <Stage {...FRAMING.relay}>
+          <RelayModel
+            closed={level > 0.5}
+            coil={Math.abs(result?.voltage ?? 0) / ELECTRICAL.relay.pullIn}
+            contact={result?.channels?.contact ?? 0}
+          />
+        </Stage>
+      )
+    case 'rgbLed':
+      return (
+        <Stage {...FRAMING.rgbLed}>
+          <RgbLedModel
+            r={result?.channels?.R ?? 0}
+            g={result?.channels?.G ?? 0}
+            b={result?.channels?.B ?? 0}
+            burnt={!!data.burnt}
+          />
+        </Stage>
+      )
+    case 'speaker':
+      return (
+        <Stage {...FRAMING.speaker}>
+          <SpeakerModel level={level} pitch={data.pitch ?? 523} burnt={!!data.burnt} />
+        </Stage>
+      )
+    case 'vibration':
+      return (
+        <Stage {...FRAMING.vibration}>
+          <VibrationMotorModel speed={level} hot={status === 'over'} />
+        </Stage>
+      )
+    case 'electromagnet':
+      return (
+        <Stage {...FRAMING.electromagnet}>
+          <ElectromagnetModel strength={level} hot={status === 'over'} />
+        </Stage>
+      )
+    case 'regulator':
+      return (
+        <Stage {...FRAMING.regulator}>
+          <RegulatorModel
+            heat={(result?.power ?? 0) / ELECTRICAL.regulator.ratedPower}
+            regulating={status === 'on' || status === 'over'}
+          />
+        </Stage>
+      )
+    case 'notGate':
+    case 'andGate':
+    case 'orGate':
+    case 'xorGate':
+      return (
+        <Stage {...FRAMING.gate}>
+          <LogicGateModel
+            kind={data.type}
+            inputs={[result?.channels?.A ?? 0, result?.channels?.B ?? 0]}
+            output={result?.channels?.Y ?? 0}
+            powered={status !== 'reverse' && (result?.voltage ?? 0) >= ELECTRICAL.logic.minVoltage}
+          />
+        </Stage>
+      )
+    case 'timer555':
+      return (
+        <Stage {...FRAMING.timer555}>
+          <Timer555Model output={level} powered={status === 'on'} />
+        </Stage>
+      )
+    default: {
+      // the 3-pin sensor modules share their props
+      const props = { sense: data.sense ?? 0, level, powered: status === 'on' }
+      const Model = {
+        tempSensor: TempSensorModel,
+        ultrasonic: UltrasonicModel,
+        pir: PirModel,
+        soundSensor: SoundSensorModel,
+        gasSensor: GasSensorModel,
+        soilSensor: SoilSensorModel,
+        touchSensor: TouchSensorModel,
+      }[data.type as string]
+      if (!Model) return null
+      return (
+        <Stage {...FRAMING.module}>
+          <Model {...props} />
+        </Stage>
+      )
+    }
   }
 }

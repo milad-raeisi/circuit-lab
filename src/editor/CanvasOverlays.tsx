@@ -80,7 +80,7 @@ export function WirePalette() {
       <div
         role="radiogroup"
         aria-label={t.wirePalette}
-        className="float-panel flex items-center gap-1 rounded-full py-1 ps-1 pe-1 sm:ps-3"
+        className="float-panel flex items-center gap-1 rounded-lg py-1 ps-1 pe-1 sm:ps-3"
       >
         <span className="pe-1 text-xs font-medium text-muted-foreground max-sm:hidden">{t.wirePalette}</span>
         {options.map((c) => (
@@ -133,7 +133,7 @@ function FirstCircuit() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 + i * 0.08, type: 'spring', stiffness: 300, damping: 24 }}
-          className="relative grid size-16 place-items-center rounded-2xl border bg-card shadow-[var(--shadow-card)]"
+          className="relative grid size-16 place-items-center rounded-lg border bg-card shadow-[var(--shadow-card)]"
         >
           <PartArt partType={type} size={44} />
         </motion.span>
@@ -158,7 +158,7 @@ export function EmptyState() {
           transition={{ type: 'spring', stiffness: 260, damping: 26 }}
           className="pointer-events-none absolute inset-0 z-[5] grid place-items-center p-5"
         >
-          <div className="pointer-events-auto flex w-full max-w-sm flex-col items-center gap-5 rounded-3xl border bg-card px-6 pt-7 pb-6 text-center shadow-[var(--shadow-float)]">
+          <div className="pointer-events-auto flex w-full max-w-sm flex-col items-center gap-5 rounded-xl border bg-card px-6 pt-7 pb-6 text-center shadow-[var(--shadow-float)]">
             <FirstCircuit />
             <div className="space-y-1.5">
               <h2 className="text-xl font-semibold tracking-tight text-balance">{t.empty.title}</h2>
@@ -191,7 +191,7 @@ export function DropZone() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className={cn(
-            'pointer-events-none absolute inset-2 z-[5] grid place-items-center rounded-2xl border-2 border-dashed transition-colors',
+            'pointer-events-none absolute inset-2 z-[5] grid place-items-center rounded-lg border-2 border-dashed transition-colors',
             over ? 'border-primary bg-primary/5' : 'border-muted-foreground/30',
           )}
         >
@@ -229,7 +229,7 @@ export function ShortCircuitAlert() {
             animate={{ y: 0 }}
             exit={{ y: -40 }}
             transition={{ type: 'spring', stiffness: 400, damping: 26 }}
-            className="absolute inset-x-3 top-16 mx-auto flex w-fit max-w-md items-start gap-2 rounded-2xl bg-red-600 px-4 py-2.5 text-sm leading-snug font-medium text-white shadow-lg shadow-red-600/30 sm:top-3"
+            className="absolute inset-x-3 top-16 mx-auto flex w-fit max-w-md items-start gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm leading-snug font-medium text-white shadow-lg shadow-red-600/30 sm:top-3"
           >
             <TriangleAlert size={18} animate loop className="mt-px shrink-0" />
             <span>{t.tips.short}</span>

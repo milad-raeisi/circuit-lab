@@ -9,7 +9,7 @@ import {
 import { useMemo } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware'
-import { PARTS, createPartData, nextRotation } from '@/circuit/catalog'
+import { PARTS, createPartData, isRotatable, nextRotation } from '@/circuit/catalog'
 import type {
   CircuitSnapshot,
   PartData,
@@ -62,8 +62,8 @@ function wireColorFor(nodes: PartNode[], c: Connection): WireColor {
   if (preferred !== 'auto') return preferred
   const polarityOf = (nodeId: string, handle: string | null) => {
     const node = nodes.find((n) => n.id === nodeId)
-    if (!node || (handle !== 'a' && handle !== 'b')) return undefined
-    return PARTS[node.data.type].terminals[handle].polarity
+    if (!node || !handle) return undefined
+    return PARTS[node.data.type].terminals[handle]?.polarity
   }
   const polarities = [polarityOf(c.source, c.sourceHandle), polarityOf(c.target, c.targetHandle)]
   if (polarities.includes('+')) return 'red'
@@ -191,7 +191,10 @@ export const useCircuit = create<CircuitState>()(
 
         rotatePart: (id) => {
           const node = get().nodes.find((n) => n.id === id)
-          if (node) get().updatePart(id, { rotation: nextRotation(node.data.rotation) })
+          // the Arduino's pins only make sense the right way up
+          if (node && isRotatable(node.data.type)) {
+            get().updatePart(id, { rotation: nextRotation(node.data.rotation) })
+          }
         },
 
         duplicatePart: (id) => {

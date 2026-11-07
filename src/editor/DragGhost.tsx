@@ -2,12 +2,12 @@ import { useReactFlow } from '@xyflow/react'
 import { AnimatePresence, motion, useMotionValue } from 'motion/react'
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { PARTS } from '@/circuit/catalog'
+import { PARTS, partHeight, partWidth } from '@/circuit/catalog'
 import type { PartType } from '@/circuit/types'
 import { useI18n } from '@/i18n'
 import { playPlace } from '@/lib/sound'
 import { cn } from '@/lib/utils'
-import { NODE_HEIGHT, NODE_WIDTH, useCircuit } from '@/store/circuit'
+import { useCircuit } from '@/store/circuit'
 import { useDrag } from '@/store/drag'
 import { PartArt } from './PartArt'
 
@@ -26,7 +26,8 @@ export function usePlacePart() {
   const placeAt = useCallback(
     (type: PartType, clientX: number, clientY: number) => {
       const p = screenToFlowPosition({ x: clientX, y: clientY })
-      addPart(type, { x: p.x - NODE_WIDTH / 2, y: p.y - NODE_HEIGHT / 2 })
+      // centred under the pointer; screens have bigger cards than the other parts
+      addPart(type, { x: p.x - partWidth(type) / 2, y: p.y - partHeight(type) / 2 })
       playPlace()
     },
     [addPart, screenToFlowPosition],
@@ -117,7 +118,7 @@ export function DragGhost() {
             exit={{ opacity: 0, scale: 0.4 }}
             transition={{ type: 'spring', stiffness: 520, damping: 28 }}
             className={cn(
-              '-translate-x-1/2 -translate-y-1/2 flex items-center gap-2 rounded-2xl border bg-card/95 py-2 ps-2 pe-4 shadow-2xl backdrop-blur',
+              '-translate-x-1/2 -translate-y-1/2 flex items-center gap-2 rounded-lg border bg-card/95 py-2 ps-2 pe-4 shadow-2xl backdrop-blur',
               overBoard && 'border-primary ring-4 ring-primary/20',
             )}
           >
