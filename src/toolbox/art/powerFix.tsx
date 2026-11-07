@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react'
-import type { ToolId } from '../catalog'
-import { Cell, H, R, r2, Readout, Shadow, STEEL, STEEL_ROUND, url, V, type ArtProps } from './kit'
+import { Cell, H, R, Readout, Shadow, V } from './kit'
+import { r2, STEEL, STEEL_ROUND, url, type ArtProps } from './palette'
 
 /* ───────────────────────── Power and fix: the newer tools ───────────────────────── */
 
@@ -350,11 +349,4 @@ function HotAir({ id }: ArtProps) {
   )
 }
 
-export const POWER_FIX_ART = {
-  coinCells: CoinCells,
-  charger: Charger,
-  wallAdapter: WallAdapter,
-  flux: Flux,
-  alcoholBrush: AlcoholBrush,
-  hotAir: HotAir,
-} satisfies Partial<Record<ToolId, (p: ArtProps) => ReactNode>>
+export { CoinCells, Charger, WallAdapter, Flux, AlcoholBrush, HotAir }

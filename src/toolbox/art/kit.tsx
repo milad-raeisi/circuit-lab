@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { r2, SEGMENTS, STEEL, url, type Stop } from './palette'
 
 /*
  * The shared hand of every tool drawing: gradients lit from the top left,
@@ -7,14 +8,7 @@ import type { ReactNode } from 'react'
  * Every drawing is a 48 × 48 box.
  */
 
-export type ArtProps = { id: string }
-/** a colour, or [offset, colour] or [offset, colour, opacity] */
-export type Stop = string | [number, string] | [number, string, number]
-
-export const r2 = (n: number) => Math.round(n * 100) / 100
-export const url = (id: string) => `url(#${id})`
-
-export function stopsOf(stops: Stop[]) {
+function stopsOf(stops: Stop[]) {
   return stops.map((s, i) => {
     const [offset, color, opacity] =
       typeof s === 'string' ? [stops.length === 1 ? 0 : i / (stops.length - 1), s, undefined] : s
@@ -53,14 +47,7 @@ export function Shadow({ cx = 24, y = 42, rx = 14 }: { cx?: number; y?: number; 
   return <ellipse cx={cx} cy={y} rx={rx} ry="2.2" fill="currentColor" opacity="0.12" />
 }
 
-export const STEEL: Stop[] = ['#fafafa', '#d4d4d8', '#a1a1aa', '#71717a']
-export const STEEL_ROUND: Stop[] = ['#71717a', '#e4e4e7', '#a1a1aa', '#52525b']
-export const LCD: Stop[] = ['#e3ebd5', '#b9c8a2']
-export const COPPER: Stop[] = ['#fcd34d', '#d97706', '#92400e']
-
 /* ── seven-segment numbers, for the meters and screens ── */
-
-export const SEGMENTS = ['abcdef', 'bc', 'abdeg', 'abcdg', 'bcfg', 'acdfg', 'acdefg', 'abc', 'abcdefg', 'abcdfg']
 
 export function Readout({
   x,
@@ -211,8 +198,4 @@ export function Cell({ id, x, y, flip }: { id: string; x: number; y: number; fli
       <rect x={x + 1.5} y={y + 1} width="21.8" height="1.1" rx="0.55" fill="#fff" opacity="0.22" />
     </g>
   )
-}
-/** Stands in for a drawing that is still being made. */
-export function Pending(_: ArtProps) {
-  return <rect x="10" y="10" width="28" height="28" rx="3" fill="none" stroke="currentColor" strokeWidth="0.6" strokeDasharray="2 2" opacity="0.4" />
 }

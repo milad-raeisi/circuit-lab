@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react'
-import type { ToolId } from '../catalog'
-import { Clip, H, LCD, R, r2, Readout, Shadow, STEEL, STEEL_ROUND, url, V, type ArtProps, type Stop } from './kit'
+import { Clip, H, R, Readout, Shadow, V } from './kit'
+import { LCD, r2, STEEL, STEEL_ROUND, url, type ArtProps, type Stop } from './palette'
 
 /* ───────────────────────── Measure: the newer tools ───────────────────────── */
 
@@ -457,13 +456,4 @@ function Loupe({ id }: ArtProps) {
   )
 }
 
-export const MEASURE_ART = {
-  continuityTester: ContinuityTester,
-  clampMeter: ClampMeter,
-  usbMeter: UsbMeter,
-  irThermometer: IrThermometer,
-  logicProbe: LogicProbe,
-  logicAnalyzer: LogicAnalyzer,
-  tapeMeasure: TapeMeasure,
-  loupe: Loupe,
-} satisfies Partial<Record<ToolId, (p: ArtProps) => ReactNode>>
+export { ContinuityTester, ClampMeter, UsbMeter, IrThermometer, LogicProbe, LogicAnalyzer, TapeMeasure, Loupe }

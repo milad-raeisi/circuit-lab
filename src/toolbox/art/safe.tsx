@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react'
-import type { ToolId } from '../catalog'
-import { Clip, H, R, Shadow, STEEL, url, V, type ArtProps, type Stop } from './kit'
+import { Clip, H, R, Shadow, V } from './kit'
+import { STEEL, url, type ArtProps, type Stop } from './palette'
 
 /* ───────────────────────── Stay safe: the newer tools ───────────────────────── */
 
@@ -294,9 +293,4 @@ function Extinguisher({ id }: ArtProps) {
   )
 }
 
-export const SAFE_ART = {
-  gloves: Gloves,
-  esdMat: EsdMat,
-  firstAid: FirstAid,
-  extinguisher: Extinguisher,
-} satisfies Partial<Record<ToolId, (p: ArtProps) => ReactNode>>
+export { Gloves, EsdMat, FirstAid, Extinguisher }

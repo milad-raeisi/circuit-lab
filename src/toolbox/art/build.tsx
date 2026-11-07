@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react'
-import type { ToolId } from '../catalog'
-import { COPPER, H, R, r2, Shadow, STEEL, url, V, type ArtProps, type Stop } from './kit'
+import { H, R, Shadow, V } from './kit'
+import { COPPER, r2, STEEL, url, type ArtProps, type Stop } from './palette'
 
 /* ───────────────────────── Build: the newer tools ───────────────────────── */
 
@@ -598,13 +597,4 @@ function ElectricalTape({ id }: ArtProps) {
   )
 }
 
-export const BUILD_ART = {
-  dupont: Dupont,
-  headerPins: HeaderPins,
-  perfboard: Perfboard,
-  pcb: Pcb,
-  screwTerminal: ScrewTerminal,
-  wireSpool: WireSpool,
-  crimper: Crimper,
-  electricalTape: ElectricalTape,
-} satisfies Partial<Record<ToolId, (p: ArtProps) => ReactNode>>
+export { Dupont, HeaderPins, Perfboard, Pcb, ScrewTerminal, WireSpool, Crimper, ElectricalTape }

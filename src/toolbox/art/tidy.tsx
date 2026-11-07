@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react'
-import type { ToolId } from '../catalog'
-import { LCD, R, r2, Shadow, STEEL, url, V, type ArtProps, type Stop } from './kit'
+import { R, Shadow, V } from './kit'
+import { LCD, r2, STEEL, url, type ArtProps, type Stop } from './palette'
 
 /* ───────────────────────── Keep it tidy: the newer tools ───────────────────────── */
 
@@ -418,10 +417,4 @@ function CableTies({ id }: ArtProps) {
   )
 }
 
-export const TIDY_ART = {
-  partsBox: PartsBox,
-  labelMaker: LabelMaker,
-  magneticTray: MagneticTray,
-  staticBags: StaticBags,
-  cableTies: CableTies,
-} satisfies Partial<Record<ToolId, (p: ArtProps) => ReactNode>>
+export { PartsBox, LabelMaker, MagneticTray, StaticBags, CableTies }

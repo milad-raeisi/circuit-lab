@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react'
-import type { ToolId } from '../catalog'
-import { H, r2, Shadow, STEEL, url, V, type ArtProps } from './kit'
+import { H, Shadow, V } from './kit'
+import { r2, STEEL, url, type ArtProps } from './palette'
 
 /* ───────────────────────── Program and connect: the newer tools ───────────────────────── */
 
@@ -424,10 +423,4 @@ function SdCard({ id }: ArtProps) {
   )
 }
 
-export const CODE_ART = {
-  usbCable: UsbCable,
-  laptop: Laptop,
-  usbSerial: UsbSerial,
-  programmer: Programmer,
-  sdCard: SdCard,
-} satisfies Partial<Record<ToolId, (p: ArtProps) => ReactNode>>
+export { UsbCable, Laptop, UsbSerial, Programmer, SdCard }

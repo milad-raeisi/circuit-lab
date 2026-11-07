@@ -45,7 +45,14 @@ function DipChip({ width, height, pins, position }: { width: number; height: num
 
 /* ---------------------------------------------------------- logic gates */
 
-const GATE_BOARD = { notGate: '#9a3412', andGate: '#166534', orGate: '#1e3a8a', xorGate: '#581c87' } as const
+const GATE_BOARD = {
+  notGate: '#9a3412',
+  andGate: '#166534',
+  orGate: '#1e3a8a',
+  xorGate: '#581c87',
+  nandGate: '#115e59',
+  norGate: '#3730a3',
+} as const
 
 /** The gate's symbol, as the flat white print on top of the chip (about 0.32 tall). */
 function symbolGeometry(kind: GateType) {
@@ -60,15 +67,20 @@ function symbolGeometry(kind: GateType) {
       body.closePath()
       break
     case 'andGate':
-      body.moveTo(-0.15, -h)
-      body.lineTo(0, -h)
-      body.absarc(0, 0, h, -Math.PI / 2, Math.PI / 2, false)
-      body.lineTo(-0.15, h)
+    case 'nandGate': {
+      // NAND sits a little to the left to make room for its bubble
+      const x = kind === 'nandGate' ? -0.03 : 0
+      body.moveTo(-0.15 + x, -h)
+      body.lineTo(x, -h)
+      body.absarc(x, 0, h, -Math.PI / 2, Math.PI / 2, false)
+      body.lineTo(-0.15 + x, h)
       body.closePath()
       break
+    }
     case 'orGate':
-    case 'xorGate': {
-      const x = kind === 'xorGate' ? 0.03 : 0
+    case 'xorGate':
+    case 'norGate': {
+      const x = kind === 'xorGate' ? 0.03 : kind === 'norGate' ? -0.03 : 0
       body.moveTo(-0.16 + x, h)
       body.quadraticCurveTo(0.04 + x, h, 0.16 + x, 0)
       body.quadraticCurveTo(0.04 + x, -h, -0.16 + x, -h)
@@ -87,10 +99,11 @@ function symbolGeometry(kind: GateType) {
     arc.closePath()
     shapes.push(arc)
   }
-  if (kind === 'notGate') {
+  if (kind === 'notGate' || kind === 'nandGate' || kind === 'norGate') {
     // the little circle that means "the opposite"
-    const bubble = new THREE.Shape().absarc(0.135, 0, 0.035, 0, Math.PI * 2, false)
-    bubble.holes.push(new THREE.Path().absarc(0.135, 0, 0.018, 0, Math.PI * 2, true))
+    const at = kind === 'notGate' ? 0.135 : kind === 'nandGate' ? 0.155 : 0.165
+    const bubble = new THREE.Shape().absarc(at, 0, 0.035, 0, Math.PI * 2, false)
+    bubble.holes.push(new THREE.Path().absarc(at, 0, 0.018, 0, Math.PI * 2, true))
     shapes.push(bubble)
   }
   return new THREE.ShapeGeometry(shapes, 16)
@@ -115,8 +128,8 @@ export function LogicGateModel({
 }) {
   const symbol = useBuiltWith(symbolGeometry, kind)
   const ins = kind === 'notGate' ? [0] : [0.2, -0.2]
-  const backX = kind === 'notGate' ? -0.14 : kind === 'andGate' ? -0.15 : kind === 'orGate' ? -0.125 : -0.095
-  const tipX = kind === 'notGate' ? 0.17 : kind === 'xorGate' ? 0.19 : 0.16
+  const backX = { notGate: -0.14, andGate: -0.15, orGate: -0.125, xorGate: -0.095, nandGate: -0.18, norGate: -0.155 }[kind]
+  const tipX = { notGate: 0.17, andGate: 0.16, orGate: 0.16, xorGate: 0.19, nandGate: 0.19, norGate: 0.2 }[kind]
   return (
     <group position={[0.06, 0, 0]} rotation={TILT}>
       <RoundedBox args={[2.1, 1.25, BOARD_T]} radius={0.03} smoothness={2}>

@@ -19,13 +19,13 @@ export const FACE = BOARD_T / 2
 export const PITCH = 0.126
 const UP = new THREE.Vector3(0, 1, 0)
 /** modules lean back a little and turn to show their edge */
-export const MODULE_TILT: [number, number, number] = [-0.3, 0.25, 0]
+const MODULE_TILT: [number, number, number] = [-0.3, 0.25, 0]
 
-export const metal = { color: '#d4d4d8', metalness: 0.9, roughness: 0.25 } as const
+const metal = { color: '#d4d4d8', metalness: 0.9, roughness: 0.25 } as const
 /** for big metal faces: without an environment map full metalness looks black */
-export const brushed = { color: '#d9dde3', metalness: 0.5, roughness: 0.32 } as const
-export const silk = { color: '#f1f5f9', roughness: 0.7 } as const
-export const chip = { color: '#1a1a1c', roughness: 0.45 } as const
+const brushed = { color: '#d9dde3', metalness: 0.5, roughness: 0.32 } as const
+const silk = { color: '#f1f5f9', roughness: 0.7 } as const
+const chip = { color: '#1a1a1c', roughness: 0.45 } as const
 
 const unit = (v: number) => THREE.MathUtils.clamp(Number.isFinite(v) ? v : 0, 0, 1)
 

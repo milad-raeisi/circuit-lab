@@ -1,33 +1,14 @@
 import { useId, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { BUILD_ART } from './art/build'
-import { CODE_ART } from './art/code'
-import { CUT_ART } from './art/cut'
-import {
-  Cell,
-  Clip,
-  COPPER,
-  H,
-  Handles,
-  LCD,
-  Pivot,
-  Probe,
-  R,
-  r2,
-  Readout,
-  Shadow,
-  STEEL,
-  STEEL_ROUND,
-  Tube,
-  url,
-  V,
-  type ArtProps,
-  type Stop,
-} from './art/kit'
-import { MEASURE_ART } from './art/measure'
-import { POWER_FIX_ART } from './art/powerFix'
-import { SAFE_ART } from './art/safe'
-import { TIDY_ART } from './art/tidy'
+import * as build from './art/build'
+import * as code from './art/code'
+import * as cut from './art/cut'
+import { Cell, Clip, H, Handles, Pivot, Probe, R, Readout, Shadow, Tube, V } from './art/kit'
+import * as measure from './art/measure'
+import { COPPER, LCD, r2, STEEL, STEEL_ROUND, url, type ArtProps, type Stop } from './art/palette'
+import * as powerFix from './art/powerFix'
+import * as safe from './art/safe'
+import * as tidy from './art/tidy'
 import type { ToolId } from './catalog'
 
 /*
@@ -1106,13 +1087,48 @@ const ART: Record<ToolId, (p: ArtProps) => ReactNode> = {
   fumeFan: FumeFan,
   heatMat: HeatMat,
   antiStatic: AntiStatic,
-  ...MEASURE_ART,
-  ...BUILD_ART,
-  ...CUT_ART,
-  ...POWER_FIX_ART,
-  ...SAFE_ART,
-  ...CODE_ART,
-  ...TIDY_ART,
+  continuityTester: measure.ContinuityTester,
+  clampMeter: measure.ClampMeter,
+  usbMeter: measure.UsbMeter,
+  irThermometer: measure.IrThermometer,
+  logicProbe: measure.LogicProbe,
+  logicAnalyzer: measure.LogicAnalyzer,
+  tapeMeasure: measure.TapeMeasure,
+  loupe: measure.Loupe,
+  dupont: build.Dupont,
+  headerPins: build.HeaderPins,
+  perfboard: build.Perfboard,
+  pcb: build.Pcb,
+  screwTerminal: build.ScrewTerminal,
+  wireSpool: build.WireSpool,
+  crimper: build.Crimper,
+  electricalTape: build.ElectricalTape,
+  cuttingMat: cut.CuttingMat,
+  hobbyKnife: cut.HobbyKnife,
+  miniSaw: cut.MiniSaw,
+  file: cut.NeedleFiles,
+  handDrill: cut.HandDrill,
+  pcbVise: cut.PcbVise,
+  coinCells: powerFix.CoinCells,
+  charger: powerFix.Charger,
+  wallAdapter: powerFix.WallAdapter,
+  flux: powerFix.Flux,
+  alcoholBrush: powerFix.AlcoholBrush,
+  hotAir: powerFix.HotAir,
+  gloves: safe.Gloves,
+  esdMat: safe.EsdMat,
+  firstAid: safe.FirstAid,
+  extinguisher: safe.Extinguisher,
+  usbCable: code.UsbCable,
+  laptop: code.Laptop,
+  usbSerial: code.UsbSerial,
+  programmer: code.Programmer,
+  sdCard: code.SdCard,
+  partsBox: tidy.PartsBox,
+  labelMaker: tidy.LabelMaker,
+  magneticTray: tidy.MagneticTray,
+  staticBags: tidy.StaticBags,
+  cableTies: tidy.CableTies,
 }
 
 /** A drawing of a workshop tool. `size` is the width and height in pixels. */

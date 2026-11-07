@@ -18,7 +18,9 @@ export const enToolbox: ToolboxBook = {
     cut: { name: 'Cut and hold', blurb: 'Tools for cutting, bending, holding and turning.' },
     power: { name: 'Power', blurb: 'Safe ways to give your circuit electricity.' },
     fix: { name: 'Fix', blurb: 'Tools for undoing mistakes and keeping tools clean.' },
-    safe: { name: 'Stay safe', blurb: 'Gear that protects your eyes, your lungs, your table and your chips.' },
+    safe: { name: 'Stay safe', blurb: 'Gear that protects your eyes, hands, lungs, table and chips, and helps if something goes wrong.' },
+    code: { name: 'Program and connect', blurb: 'Cables, computers and cards that get your code into a board.' },
+    tidy: { name: 'Keep it tidy', blurb: 'Boxes, labels and trays, so you always find the right part.' },
   },
   labels: {
     use: 'What it is for',
@@ -33,6 +35,158 @@ export const enToolbox: ToolboxBook = {
     next: 'Next tool',
     close: 'Close',
     position: (index, total) => `${index} of ${total}`,
+  },
+  search: {
+    label: 'Find a tool',
+    placeholder: 'Find a tool…',
+    clear: 'Clear',
+    found: (count) => (count === 1 ? '1 tool found' : `${count} tools found`),
+    none: (query) => `No tool called “${query}”.`,
+    hint: 'Try a shorter word, like “wire”, “meter” or “cut”.',
+  },
+  board: {
+    title: 'Try it on the board',
+    text: 'Put the same kind of part on your circuit board and watch it work.',
+    add: 'Add to the board',
+  },
+  quiz: {
+    title: 'Which tool?',
+    blurb: 'Pick the right tool for each job.',
+    start: 'Start',
+    progress: (index, total) => `Question ${index} of ${total}`,
+    pick: 'Which tool do you need?',
+    right: 'Yes, that’s the one!',
+    wrong: (tool) => `Not quite. You need this one: ${tool}.`,
+    next: 'Next question',
+    finish: 'See my score',
+    score: (score, total) => `${score} of ${total}`,
+    best: (score, total) => `Your best: ${score} of ${total}`,
+    cheers: {
+      perfect: 'Perfect! You know the workbench like a real maker.',
+      great: 'Great job! You really know your tools.',
+      good: 'Good start! Look at the tools below, then try again.',
+      start: 'Every maker starts somewhere. Explore the drawers, then try again!',
+    },
+    review: 'Tools to look at again',
+    again: 'Play again',
+    open: 'Open its page',
+    questions: {
+      full: {
+        ask: 'Is this battery still full?',
+        why: 'Set the multimeter to volts and touch the battery’s ends. A full AA battery shows about 1.5.',
+      },
+      forever: {
+        ask: 'These two wires must stay joined forever.',
+        why: 'A soldered joint is strong and lasts for years. Clips and jumper wires are for quick tests.',
+      },
+      tryIdea: {
+        ask: 'You want to try a new circuit idea and change it many times.',
+        why: 'On a breadboard you push parts in and pull them out again. No heat, no glue.',
+      },
+      coat: {
+        ask: 'The metal inside a wire is hidden under plastic.',
+        why: 'A wire stripper takes the plastic coat off and leaves the metal safe.',
+      },
+      legs: {
+        ask: 'An LED’s legs are too long after soldering.',
+        why: 'Side cutters snip the extra legs off right next to the board.',
+      },
+      tiny: {
+        ask: 'A part is too small for your fingers to pick up.',
+        why: 'Tweezers pick up and place even the tiniest parts.',
+      },
+      mystery: {
+        ask: 'You found a part with three legs, and nobody knows what it is.',
+        why: 'Put it in the part tester and press the button. It shows what the part is and which leg is which.',
+      },
+      wave: {
+        ask: 'You want to see how a signal goes up and down over time.',
+        why: 'Only an oscilloscope draws the signal as a moving picture.',
+      },
+      smoke: {
+        ask: 'Smoke from soldering keeps going up to your face.',
+        why: 'A fume extractor pulls the smoke away and catches it in its filter.',
+      },
+      eyes: {
+        ask: 'Snipped legs can fly. What keeps your eyes safe?',
+        why: 'Safety glasses, every time you cut or solder.',
+      },
+      mistake: {
+        ask: 'You soldered a part into the wrong holes.',
+        why: 'Melt the joint, then press the pump’s button: the solder is sucked away and the part comes out.',
+      },
+      upload: {
+        ask: 'Your code is ready. How does it get into the Arduino?',
+        why: 'The USB cable carries your code from the computer into the board, and it powers the board too.',
+      },
+      hot: {
+        ask: 'Is this motor too hot? You don’t want to touch it to find out.',
+        why: 'An IR thermometer measures heat from a distance, without touching.',
+      },
+      thick: {
+        ask: 'How thick is this wire, to a tenth of a millimetre?',
+        why: 'Calipers measure small things very exactly. A tape measure is for long things.',
+      },
+      joint: {
+        ask: 'Is that tiny solder joint shiny and smooth? It is too small to see well.',
+        why: 'A magnifier makes it look big, so you can check it.',
+      },
+      mixedBag: {
+        ask: 'Resistors, LEDs and screws are all mixed up in one bag.',
+        why: 'A parts box gives every kind of part its own little room.',
+      },
+      screws: {
+        ask: 'Tiny screws keep rolling off the table while you open a toy.',
+        why: 'A magnetic tray holds the screws, so none of them get lost.',
+      },
+      chip: {
+        ask: 'A new board must travel to your friend’s house, safe from static.',
+        why: 'An anti-static bag shields it from sparks on the way.',
+      },
+      spaghetti: {
+        ask: 'The wires behind your robot look like a bowl of spaghetti.',
+        why: 'Cable ties hold the wires together in neat bundles.',
+      },
+      bare: {
+        ask: 'Two wires are joined, but bare metal still shows.',
+        why: 'Heat-shrink tube hugs the joint and covers the metal. Electrical tape works too.',
+      },
+      usbPower: {
+        ask: 'How many volts does your phone charger really give your board?',
+        why: 'A USB power meter sits in the cable and shows the volts and the amps.',
+      },
+      pinHigh: {
+        ask: 'Is this Arduino pin HIGH or LOW right now?',
+        why: 'A logic probe lights red for HIGH and green for LOW.',
+      },
+      fire: {
+        ask: 'What should hang on every workshop wall, just in case of a fire?',
+        why: 'A fire extinguisher. Grown-ups use it, and kids get out and shout for help.',
+      },
+      dirtyTip: {
+        ask: 'Your iron’s tip is black, and solder won’t stick to it.',
+        why: 'Poke the hot tip into the brass wool of the tip cleaner, then add a drop of fresh solder.',
+      },
+      window: {
+        ask: 'You want to cut a window in cardboard for your robot’s screen.',
+        why: 'A hobby knife on a cutting mat cuts neat shapes. Use it with a grown-up.',
+      },
+      guard: {
+        ask: 'You need exactly 5 volts, and a guard in case you make a mistake.',
+        why: 'A bench power supply lets you pick the volts and set a current limit: that is the guard.',
+      },
+    },
+  },
+  kit: {
+    title: 'Starter kit',
+    blurb: 'The first 12 tools a new maker needs.',
+    intro: 'These are the first tools to get. Tick the ones you already have.',
+    progress: (ticked, total) => `${ticked} of ${total} ticked`,
+    done: 'Your starter kit is complete. You are ready to build!',
+    later: 'Next come the soldering tools, always with a grown-up.',
+    have: (tool) => `I have it: ${tool}`,
+    open: 'See how it works',
+    clear: 'Untick all',
   },
   tools: {
     multimeter: {

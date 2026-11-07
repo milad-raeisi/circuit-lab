@@ -314,6 +314,9 @@ type Rung = { top: Piece; bottom: Piece; wire?: WireColor }
  */
 function ladder(power: Piece, rungs: Rung[], lead?: Piece): Preset {
   const left = lead ? 560 : 270
+  // a part turned the other way round (270°) has its − end on top
+  const up = (p: Piece) => `${p.key}:${p.rotation === 270 ? 'b' : 'a'}`
+  const down = (p: Piece) => `${p.key}:${p.rotation === 270 ? 'a' : 'b'}`
   return {
     parts: [
       { ...power, x: 0, y: 160, rotation: power.rotation ?? 270 },
@@ -325,11 +328,11 @@ function ladder(power: Piece, rungs: Rung[], lead?: Piece): Preset {
     ],
     wires: [
       ...(lead ? [[`${power.key}:a`, `${lead.key}:a`, 'red'] satisfies PresetWire] : []),
-      [lead ? `${lead.key}:b` : `${power.key}:a`, `${rungs[0].top.key}:a`, 'red'],
-      ...rungs.slice(1).map((r, i): PresetWire => [`${rungs[i].top.key}:a`, `${r.top.key}:a`, 'red']),
-      ...rungs.map((r): PresetWire => [`${r.top.key}:b`, `${r.bottom.key}:a`, r.wire ?? 'yellow']),
-      ...rungs.slice(1).map((r, i): PresetWire => [`${r.bottom.key}:b`, `${rungs[i].bottom.key}:b`, 'black']),
-      [`${rungs[0].bottom.key}:b`, `${power.key}:b`, 'black'],
+      [lead ? `${lead.key}:b` : `${power.key}:a`, up(rungs[0].top), 'red'],
+      ...rungs.slice(1).map((r, i): PresetWire => [up(rungs[i].top), up(r.top), 'red']),
+      ...rungs.map((r): PresetWire => [down(r.top), up(r.bottom), r.wire ?? 'yellow']),
+      ...rungs.slice(1).map((r, i): PresetWire => [down(r.bottom), down(rungs[i].bottom), 'black']),
+      [down(rungs[0].bottom), `${power.key}:b`, 'black'],
     ],
   }
 }
@@ -1860,10 +1863,11 @@ const PRESETS: Record<PresetId, Preset> = {
       { key: 'eyeR', pin: 'D13', type: 'led', color: 'blue', ohms: 100, wire: 'blue' },
     ]),
   ),
-  // START closes the relay, and the relay's own switch keeps its coil on; STOP (the switch) breaks the loop
+  // START closes the relay, and the relay's own switch keeps its coil on; STOP (the switch) breaks the loop.
+  // The bench supply holds its 4.5 V while the motor runs, so the relay never lets go by itself
   conveyor: {
     parts: [
-      { key: 'bat', type: 'battery', x: 0, y: 160, rotation: 270, data: { voltage: 4.5 } },
+      { key: 'bat', type: 'powerSupply', x: -40, y: 160, data: { voltage: 4.5, limit: 2 } },
       { key: 'stop', type: 'switch', x: 270, y: -60, data: { closed: true } },
       { key: 'start', type: 'button', x: 560, y: -60 },
       { key: 'relay', type: 'relay', x: 850, y: 160 },
@@ -2067,9 +2071,9 @@ const PRESETS: Record<PresetId, Preset> = {
       wires: [
         ['board:5V', 'sign:VCC', 'red'],
         ['sign:GND', 'board:GND', 'black'],
-        ['blueR:b', 'star:B', 'blue'],
-        ['greenR:b', 'star:G', 'green'],
-        ['redR:b', 'star:R', 'red'],
+        ['starB:b', 'star:B', 'blue'],
+        ['starG:b', 'star:G', 'green'],
+        ['starR:b', 'star:R', 'red'],
         ['star:K', 'gold:b', 'black'],
       ],
     },
@@ -2080,14 +2084,14 @@ const PRESETS: Record<PresetId, Preset> = {
     ]),
     {
       parts: [
-        { key: 'blueR', type: 'resistor', x: FIRST_COLUMN + 3 * COLUMN, y: RESISTOR_ROW, rotation: 90, data: { resistance: 100 } },
-        { key: 'greenR', type: 'resistor', x: FIRST_COLUMN + 4 * COLUMN, y: RESISTOR_ROW, rotation: 90, data: { resistance: 220 } },
-        { key: 'redR', type: 'resistor', x: FIRST_COLUMN + 5 * COLUMN, y: RESISTOR_ROW, rotation: 90, data: { resistance: 220 } },
+        { key: 'starB', type: 'resistor', x: FIRST_COLUMN + 3 * COLUMN, y: RESISTOR_ROW, rotation: 90, data: { resistance: 100 } },
+        { key: 'starG', type: 'resistor', x: FIRST_COLUMN + 4 * COLUMN, y: RESISTOR_ROW, rotation: 90, data: { resistance: 220 } },
+        { key: 'starR', type: 'resistor', x: FIRST_COLUMN + 5 * COLUMN, y: RESISTOR_ROW, rotation: 90, data: { resistance: 220 } },
       ],
       wires: [
-        ['board:D11', 'blueR:a', 'blue'],
-        ['board:D12', 'greenR:a', 'green'],
-        ['board:D13', 'redR:a', 'red'],
+        ['board:D11', 'starB:a', 'blue'],
+        ['board:D12', 'starG:a', 'green'],
+        ['board:D13', 'starR:a', 'red'],
       ],
     },
   ),
@@ -2429,9 +2433,32 @@ const PRESETS: Record<PresetId, Preset> = {
 export type PresetLevel = 1 | 2 | 3
 
 /** The shelves of the examples gallery. */
-export type PresetCategory = 'first' | 'electronics' | 'boards' | 'smart' | 'screens'
+export type PresetCategory =
+  | 'first'
+  | 'electronics'
+  | 'science'
+  | 'logic'
+  | 'boards'
+  | 'smart'
+  | 'sound'
+  | 'motion'
+  | 'home'
+  | 'games'
+  | 'screens'
 
-export const PRESET_CATEGORIES: readonly PresetCategory[] = ['first', 'electronics', 'boards', 'smart', 'screens']
+export const PRESET_CATEGORIES: readonly PresetCategory[] = [
+  'first',
+  'electronics',
+  'science',
+  'logic',
+  'boards',
+  'smart',
+  'sound',
+  'motion',
+  'home',
+  'games',
+  'screens',
+]
 
 /** A part in an example's picture; LEDs can say their colour (`led:green`). */
 export type PresetArt = PartType | `led:${LedColor}`
@@ -2450,7 +2477,6 @@ export const PRESET_INFO: Record<PresetId, PresetInfo> = {
   doorbell: { category: 'first', level: 1, art: ['battery', 'button', 'buzzer'] },
   led: { category: 'first', level: 1, art: ['battery', 'resistor', 'led:green'] },
   rainbow: { category: 'first', level: 1, art: ['battery', 'led:red', 'led:green', 'led:blue'] },
-  toyCar: { category: 'first', level: 1, art: ['battery', 'switch', 'motor', 'motor'] },
   batteryTester: { category: 'first', level: 1, art: ['battery', 'voltmeter', 'led:green'] },
   series: { category: 'first', level: 1, art: ['battery', 'lamp', 'lamp'] },
   parallel: { category: 'first', level: 1, art: ['battery', 'lamp', 'lamp'] },
@@ -2458,7 +2484,6 @@ export const PRESET_INFO: Record<PresetId, PresetInfo> = {
   short: { category: 'first', level: 1, art: ['battery', 'switch'] },
 
   solar: { category: 'electronics', level: 1, art: ['solar', 'motor'] },
-  meters: { category: 'electronics', level: 2, art: ['ammeter', 'lamp', 'voltmeter'] },
   transistor: { category: 'electronics', level: 2, art: ['button', 'transistor', 'lamp'] },
   capacitor: { category: 'electronics', level: 2, art: ['battery', 'capacitor', 'led:yellow'] },
   fuseGuard: { category: 'electronics', level: 2, art: ['battery', 'fuse', 'lamp'] },
@@ -2493,11 +2518,95 @@ export const PRESET_INFO: Record<PresetId, PresetInfo> = {
   busStop: { category: 'screens', level: 2, art: ['solar', 'lcd', 'segment'] },
   scoreboard: { category: 'screens', level: 2, art: ['battery', 'segment', 'matrix'] },
   cityTv: { category: 'screens', level: 2, art: ['solar', 'ledwall', 'matrix'] },
+
+  hairDryer: { category: 'first', level: 1, art: ['battery', 'switch', 'motor', 'lamp'] },
+  bikeBell: { category: 'first', level: 1, art: ['battery', 'lamp', 'button', 'buzzer'] },
+  carLights: { category: 'first', level: 1, art: ['battery', 'switch', 'led:white', 'led:red'] },
+  morseKey: { category: 'first', level: 1, art: ['button', 'buzzer', 'led:yellow', 'lcd'] },
+
+  knobDimmer: { category: 'electronics', level: 1, art: ['battery', 'potentiometer', 'led:green'] },
+  diodeCheck: { category: 'electronics', level: 2, art: ['battery', 'diode', 'lamp'] },
+  relayLamp: { category: 'electronics', level: 2, art: ['switch', 'relay', 'lamp'] },
+  safeShort: { category: 'electronics', level: 2, art: ['powerSupply', 'lamp', 'switch'] },
+  phoneCharger: { category: 'electronics', level: 2, art: ['battery', 'regulator', 'tft'] },
+  delayLight: { category: 'electronics', level: 3, art: ['capacitor', 'transistor', 'lamp'] },
+
+  meters: { category: 'science', level: 1, art: ['ammeter', 'lamp', 'voltmeter'] },
+  scopeKnob: { category: 'science', level: 1, art: ['battery', 'potentiometer', 'oscilloscope'] },
+  lightMeter: { category: 'science', level: 1, art: ['battery', 'ldr', 'voltmeter'] },
+  solarMeter: { category: 'science', level: 1, art: ['solar', 'ammeter', 'led:green'] },
+  ohmsLaw: { category: 'science', level: 2, art: ['powerSupply', 'resistor', 'ammeter'] },
+  magnetLab: { category: 'science', level: 2, art: ['powerSupply', 'ammeter', 'electromagnet'] },
+  scopeSquare: { category: 'science', level: 2, art: ['timer555', 'led:red', 'oscilloscope'] },
+  scopeCap: { category: 'science', level: 2, art: ['resistor', 'capacitor', 'oscilloscope'] },
+  scopeBreath: { category: 'science', level: 2, art: ['arduino', 'led:yellow', 'oscilloscope'] },
+
+  flasher555: { category: 'logic', level: 1, art: ['battery', 'timer555', 'led:red', 'led:red'] },
+  darkLamp: { category: 'logic', level: 2, art: ['ldr', 'notGate', 'led:yellow'] },
+  stairLight: { category: 'logic', level: 2, art: ['switch', 'switch', 'xorGate', 'led:white'] },
+  safeLock: { category: 'logic', level: 2, art: ['button', 'button', 'andGate', 'led:green'] },
+  twoDoors: { category: 'logic', level: 2, art: ['button', 'button', 'orGate', 'buzzer'] },
+  halfAdder: { category: 'logic', level: 3, art: ['switch', 'xorGate', 'andGate', 'led:yellow'] },
+  seatbelt: { category: 'logic', level: 3, art: ['timer555', 'notGate', 'andGate', 'buzzer'] },
+
+  fireflies: { category: 'boards', level: 1, art: ['pico', 'led:yellow', 'led:green'] },
+  chaser: { category: 'boards', level: 2, art: ['esp32', 'led:red', 'led:red', 'led:red'] },
+
+  rainAlert: { category: 'smart', level: 2, art: ['soilSensor', 'nano', 'led:blue', 'buzzer'] },
+  laserAlarm: { category: 'smart', level: 2, art: ['ldr', 'arduino', 'buzzer'] },
+  babyMonitor: { category: 'smart', level: 2, art: ['soundSensor', 'arduino', 'lcd'] },
+  greenhouse: { category: 'smart', level: 3, art: ['soilSensor', 'arduino', 'transistor', 'motor'] },
+
+  piano: { category: 'sound', level: 1, art: ['button', 'speaker', 'speaker', 'speaker'] },
+  metronome: { category: 'sound', level: 2, art: ['battery', 'timer555', 'buzzer', 'led:green'] },
+  siren: { category: 'sound', level: 2, art: ['powerSupply', 'timer555', 'speaker', 'speaker'] },
+  musicBox: { category: 'sound', level: 2, art: ['arduino', 'speaker', 'speaker', 'speaker'] },
+  morningBird: { category: 'sound', level: 2, art: ['ldr', 'arduino', 'speaker'] },
+  dingDong: { category: 'sound', level: 3, art: ['button', 'speaker', 'capacitor', 'speaker'] },
+
+  toothbrush: { category: 'motion', level: 1, art: ['battery', 'switch', 'vibration'] },
+  toyCar: { category: 'motion', level: 1, art: ['battery', 'switch', 'motor', 'motor'] },
+  crane: { category: 'motion', level: 1, art: ['battery', 'switch', 'electromagnet', 'motor'] },
+  fanKnob: { category: 'motion', level: 2, art: ['potentiometer', 'transistor', 'motor'] },
+  robotArm: { category: 'motion', level: 2, art: ['powerSupply', 'potentiometer', 'servo'] },
+  phoneBuzz: { category: 'motion', level: 2, art: ['regulator', 'timer555', 'vibration', 'tft'] },
+  robotHead: { category: 'motion', level: 2, art: ['arduino', 'servo', 'led:blue', 'speaker'] },
+  conveyor: { category: 'motion', level: 3, art: ['powerSupply', 'button', 'relay', 'motor'] },
+  gasPedal: { category: 'motion', level: 3, art: ['potentiometer', 'transistor', 'motor', 'segment'] },
+  robotCar: { category: 'motion', level: 3, art: ['ultrasonic', 'arduino', 'transistor', 'motor'] },
+
+  lighthouse: { category: 'home', level: 1, art: ['battery', 'timer555', 'led:white', 'led:white'] },
+  fridgeLight: { category: 'home', level: 2, art: ['reed', 'notGate', 'led:white'] },
+  moodLamp: { category: 'home', level: 2, art: ['potentiometer', 'potentiometer', 'rgbLed'] },
+  bikeLights: { category: 'home', level: 2, art: ['switch', 'timer555', 'led:white', 'led:red'] },
+  alarmClock: { category: 'home', level: 2, art: ['regulator', 'segment', 'timer555', 'buzzer'] },
+  christmasTree: { category: 'home', level: 2, art: ['mega', 'led:green', 'rgbLed', 'matrix'] },
+  crossing: { category: 'home', level: 2, art: ['button', 'arduino', 'led:red', 'led:green'] },
+  gardenLamp: { category: 'home', level: 3, art: ['ldr', 'arduino', 'relay', 'lamp'] },
+
+  stopwatch: { category: 'games', level: 1, art: ['battery', 'switch', 'segment'] },
+  steadyHand: { category: 'games', level: 1, art: ['battery', 'tilt', 'buzzer'] },
+  quizBoard: { category: 'games', level: 2, art: ['lcd', 'button', 'led:green', 'buzzer'] },
+  shoutMeter: { category: 'games', level: 2, art: ['soundSensor', 'segment', 'oled'] },
+  disco: { category: 'games', level: 2, art: ['nano', 'rgbLed', 'speaker', 'matrix'] },
+  reactionGame: { category: 'games', level: 3, art: ['timer555', 'button', 'andGate', 'speaker'] },
+
+  openSign: { category: 'screens', level: 1, art: ['battery', 'switch', 'matrix'] },
+  pharmacySign: { category: 'screens', level: 1, art: ['battery', 'matrix'] },
+  newsDesk: { category: 'screens', level: 1, art: ['battery', 'tft', 'matrix'] },
+  cafeMenu: { category: 'screens', level: 1, art: ['battery', 'lcd', 'matrix'] },
+  elevator: { category: 'screens', level: 2, art: ['segment', 'lcd', 'button', 'buzzer'] },
+  weatherStation: { category: 'screens', level: 2, art: ['tempSensor', 'oled', 'lcd'] },
+  airportBoard: { category: 'screens', level: 2, art: ['powerSupply', 'lcd', 'segment'] },
+  cinemaSign: { category: 'screens', level: 2, art: ['mega', 'led:yellow', 'matrix'] },
 }
 
 /** Every example, shelf by shelf, easiest first. */
 export const PRESET_ORDER: PresetId[] = PRESET_CATEGORIES.flatMap((category) =>
-  (Object.keys(PRESET_INFO) as PresetId[]).filter((id) => PRESET_INFO[id].category === category),
+  (Object.keys(PRESET_INFO) as PresetId[])
+    .filter((id) => PRESET_INFO[id].category === category)
+    // a stable sort keeps the hand-picked order inside each level
+    .sort((a, b) => PRESET_INFO[a].level - PRESET_INFO[b].level),
 )
 
 /** Builds a fresh board (new ids every time) from a preset. */

@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react'
-import type { ToolId } from '../catalog'
-import { H, R, r2, Shadow, STEEL, STEEL_ROUND, url, V, type ArtProps, type Stop } from './kit'
+import { H, R, Shadow, V } from './kit'
+import { r2, STEEL, STEEL_ROUND, url, type ArtProps, type Stop } from './palette'
 
 /* ───────────────────────── Cut and hold: the newer tools ───────────────────────── */
 
@@ -327,11 +326,4 @@ function PcbVise({ id }: ArtProps) {
   )
 }
 
-export const CUT_ART = {
-  cuttingMat: CuttingMat,
-  hobbyKnife: HobbyKnife,
-  miniSaw: MiniSaw,
-  file: NeedleFiles,
-  handDrill: HandDrill,
-  pcbVise: PcbVise,
-} satisfies Partial<Record<ToolId, (p: ArtProps) => ReactNode>>
+export { CuttingMat, HobbyKnife, MiniSaw, NeedleFiles, HandDrill, PcbVise }
