@@ -480,7 +480,7 @@ export const enLearn: LearnBook = {
     },
     slideSwitch: {
       about: [
-        'A two-way switch has three legs. COM is always joined to one side: A or B.',
+        'A stair switch, also called a two-way switch, has three legs. COM is always joined to one side: A or B.',
         'Slide the knob and COM jumps from A to B. One of the two paths is always on.',
         'Two of them can switch one stair light from the top and from the bottom. Join A to A and B to B between the switches. Then flip either one, and the light changes!',
       ],
@@ -525,7 +525,7 @@ export const enLearn: LearnBook = {
     },
     dynamo: {
       about: [
-        'A crank generator is a little motor that you turn by hand. Turning magnets past its coils of wire makes electricity.',
+        'A hand dynamo is a little generator with a crank. Turning its magnets past its coils of wire makes electricity.',
         'The faster you turn the crank, the more volts it makes. Stop turning and the power stops too.',
         'Gears inside make the little motor spin much faster than your hand does.',
       ],

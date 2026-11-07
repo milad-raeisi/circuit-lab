@@ -666,6 +666,7 @@ export const fa: Dictionary = {
     siren: { name: 'آژیر آتش‌نشانی', description: 'آژیر دوصدایی با تراشهٔ ۵۵۵' },
     musicBox: { name: 'جعبهٔ موسیقی', description: 'سه نت پشت سر هم پخش می‌شوند' },
     morningBird: { name: 'پرندهٔ صبح', description: 'وقتی خورشید بالا بیاید آواز می‌خواند' },
+    ambulance: { name: 'آمبولانس', description: 'چراغ‌های قرمز و سفید چشمک می‌زنند و آژیر یک‌ریز می‌کشد' },
     dingDong: { name: 'زنگ دینگ‌دانگ', description: 'فشار بده: دینگ؛ رها کن: دانگ' },
     toothbrush: { name: 'مسواک برقی', description: 'یک موتور کوچک که می‌لرزد' },
     crane: { name: 'جرثقیل آهنربایی', description: 'آهن را با آهنربا بگیر و بالا ببر' },

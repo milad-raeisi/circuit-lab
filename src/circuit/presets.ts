@@ -106,6 +106,7 @@ export type PresetId =
   | 'musicBox'
   | 'morningBird'
   | 'dingDong'
+  | 'ambulance'
   // motion and robots
   | 'toothbrush'
   | 'crane'
@@ -1173,7 +1174,7 @@ const PRESETS: Record<PresetId, Preset> = {
       { key: 'beep', type: 'buzzer', x: 560, y: 160, rotation: 90 },
       { key: 'r', type: 'resistor', x: 800, y: -60, data: { resistance: 220 } },
       { key: 'flash', type: 'led', x: 1090, y: 160, rotation: 90, data: { color: 'yellow' } },
-      { key: 'card', type: 'lcd', x: 250, y: 330, data: { cols: 16, rows: 2, tint: 'blue', text: 'SOS\n...  ---  ...' } },
+      { key: 'card', type: 'lcd', x: 250, y: -330, data: { cols: 16, rows: 2, tint: 'blue', text: 'SOS\n...  ---  ...' } },
     ],
     wires: [
       ['bat:a', 'key:a', 'red'],
@@ -1488,8 +1489,8 @@ const PRESETS: Record<PresetId, Preset> = {
       ['bat:a', 'a:a', 'red'],
       ['bat:a', 'b:a', 'red'],
       ['bat:a', 'xor:VCC', 'red'],
-      ['bat:a', 'and:VCC', 'red'],
-      ['xor:GND', 'bat:b', 'black'],
+      ['xor:VCC', 'and:VCC', 'red'],
+      ['xor:GND', 'and:GND', 'black'],
       ['and:GND', 'bat:b', 'black'],
       ['a:b', 'xor:A', 'yellow'],
       ['a:b', 'and:A', 'yellow'],
@@ -1497,44 +1498,44 @@ const PRESETS: Record<PresetId, Preset> = {
       ['b:b', 'and:B', 'blue'],
       ['xor:Y', 'sumR:a', 'yellow'],
       ['sumR:b', 'sum:a', 'yellow'],
-      ['sum:b', 'bat:b', 'black'],
+      ['sum:b', 'carry:b', 'black'],
       ['and:Y', 'carryR:a', 'yellow'],
       ['carryR:b', 'carry:a', 'yellow'],
-      ['carry:b', 'bat:b', 'black'],
+      ['carry:b', 'and:GND', 'black'],
     ],
   },
   // the 555 beats; NOT turns "belt open" into HIGH; AND lets the beats through only then
-  seatbelt: {
-    parts: [
-      { key: 'bat', type: 'battery', x: -910, y: 0, rotation: 270, data: { voltage: 9 } },
-      { key: 'timer', type: 'timer555', x: -620, y: -230, data: { rate: 2 } },
-      { key: 'belt', type: 'switch', x: -620, y: 230, data: { closed: false } },
-      { key: 'not', type: 'notGate', x: -330, y: 230 },
-      { key: 'and', type: 'andGate', x: 0, y: 0 },
-      { key: 'beepR', type: 'resistor', x: 290, y: 0, data: { resistance: 47 } },
-      { key: 'beep', type: 'buzzer', x: 560, y: 0, rotation: 90 },
-      { key: 'warnR', type: 'resistor', x: 290, y: 240, rotation: 90, data: { resistance: 470 } },
-      { key: 'warn', type: 'led', x: 290, y: 470, rotation: 90, data: { color: 'red' } },
-    ],
-    wires: [
-      ['bat:a', 'timer:VCC', 'red'],
-      ['timer:GND', 'bat:b', 'black'],
-      ['bat:a', 'belt:a', 'red'],
-      ['belt:b', 'not:A', 'yellow'],
-      ['bat:a', 'not:VCC', 'red'],
-      ['not:GND', 'bat:b', 'black'],
-      ['bat:a', 'and:VCC', 'red'],
-      ['and:GND', 'bat:b', 'black'],
-      ['timer:OUT', 'and:A', 'blue'],
-      ['not:Y', 'and:B', 'yellow'],
-      ['and:Y', 'beepR:a', 'yellow'],
-      ['beepR:b', 'beep:a', 'yellow'],
-      ['beep:b', 'bat:b', 'black'],
-      ['and:Y', 'warnR:a', 'yellow'],
-      ['warnR:b', 'warn:a', 'yellow'],
-      ['warn:b', 'bat:b', 'black'],
-    ],
-  },
+  seatbelt: join(
+    {
+      parts: [
+        { key: 'bat', type: 'battery', x: -910, y: 0, rotation: 270, data: { voltage: 9 } },
+        { key: 'timer', type: 'timer555', x: -620, y: -230, data: { rate: 2 } },
+        { key: 'belt', type: 'switch', x: -620, y: 230, data: { closed: false } },
+        { key: 'not', type: 'notGate', x: -330, y: 230 },
+        { key: 'and', type: 'andGate', x: 0, y: 0 },
+      ],
+      wires: [
+        ['bat:a', 'timer:VCC', 'red'],
+        ['bat:a', 'belt:a', 'red'],
+        ['bat:a', 'and:VCC', 'red'],
+        ['and:VCC', 'not:VCC', 'red'],
+        ['timer:GND', 'bat:b', 'black'],
+        ['not:GND', 'bat:b', 'black'],
+        ['and:GND', 'not:GND', 'black'],
+        ['belt:b', 'not:A', 'yellow'],
+        ['timer:OUT', 'and:A', 'blue'],
+        ['not:Y', 'and:B', 'yellow'],
+      ],
+    },
+    branches(
+      [
+        { key: 'beep', from: 'and:Y', type: 'buzzer', ohms: 47, wire: 'yellow' },
+        { key: 'warn', from: 'and:Y', type: 'led', color: 'red', ohms: 470, wire: 'yellow' },
+      ],
+      'and:GND',
+      290,
+    ),
+  ),
 
   // ── boards and code, second batch ──
 
@@ -1617,7 +1618,7 @@ const PRESETS: Record<PresetId, Preset> = {
       [
         { key: 'safe', pin: 'D8', type: 'led', color: 'green', ohms: 220, wire: 'green' },
         { key: 'warn', pin: 'D12', type: 'led', color: 'red', ohms: 220, wire: 'white' },
-        { key: 'siren', pin: 'D13', type: 'buzzer', ohms: 100, wire: 'blue' },
+        { key: 'siren', pin: 'D13', type: 'buzzer', sound: 'yelp', ohms: 100, wire: 'blue' },
       ],
       'beam:b',
     ),
@@ -1691,11 +1692,11 @@ const PRESETS: Record<PresetId, Preset> = {
   ),
   // HIGH plays the high speaker, LOW the low one: nee-naw, nee-naw
   siren: join(
-    chipOn({ key: 'timer', type: 'timer555', data: { rate: 2 } }, { key: 'ps', type: 'powerSupply', data: { voltage: 6, limit: 0.5 } }),
+    chipOn({ key: 'timer', type: 'timer555', data: { rate: 2 } }, { key: 'ps', type: 'powerSupply', data: { voltage: 6, limit: 0.5 } }, { x: -330, y: -300 }),
     chipLights(
       'timer:OUT',
       'ps:a',
-      'ps:b',
+      'timer:GND',
       { key: 'nee', type: 'speaker', data: { pitch: 1047 }, ohms: 47 },
       { key: 'naw', type: 'speaker', data: { pitch: 523 }, ohms: 47 },
     ),
@@ -1733,6 +1734,15 @@ const PRESETS: Record<PresetId, Preset> = {
       ],
       'div:b',
     ),
+  ),
+  // red and white take turns while the siren on the steady pin goes hi-lo without a break
+  ambulance: join(
+    { parts: [{ key: 'board', type: 'nano', x: 0, y: 0, data: program('nano', { D8: 'blink', D10: 'blink2', D12: 'on' }) }], wires: [] },
+    outputs('board', [
+      { key: 'red', pin: 'D8', type: 'led', color: 'red', ohms: 220, wire: 'white' },
+      { key: 'white', pin: 'D10', type: 'led', color: 'white', ohms: 100, wire: 'white' },
+      { key: 'siren', pin: 'D12', type: 'buzzer', sound: 'hilo', ohms: 100, wire: 'yellow' },
+    ]),
   ),
   // press: "ding" on the high speaker while the diode fills the capacitor.
   // Let go: the capacitor empties into the low speaker, "dong"
@@ -1803,25 +1813,25 @@ const PRESETS: Record<PresetId, Preset> = {
       ['q:E', 'knob:B', 'black'],
     ],
   },
-  // each knob gives its servo a voltage, and the servo turns to match it
+  // each knob gives its servo a voltage, and the servo turns to match it. Each servo sits just above its knob
   robotArm: {
     parts: [
       { key: 'ps', type: 'powerSupply', x: -330, y: 120, data: { voltage: 5, limit: 1 } },
-      { key: 'knob1', type: 'potentiometer', x: 0, y: -60, data: { level: 0.3 } },
-      { key: 'arm', type: 'servo', x: 290, y: -60 },
-      { key: 'knob2', type: 'potentiometer', x: 0, y: 300, data: { level: 0.7 } },
-      { key: 'claw', type: 'servo', x: 290, y: 300 },
+      { key: 'arm', type: 'servo', x: 0, y: -230 },
+      { key: 'knob1', type: 'potentiometer', x: 0, y: 0, data: { level: 0.3 } },
+      { key: 'claw', type: 'servo', x: 0, y: 260 },
+      { key: 'knob2', type: 'potentiometer', x: 0, y: 490, data: { level: 0.7 } },
     ],
     wires: [
+      ['ps:a', 'arm:VCC', 'red'],
       ['ps:a', 'knob1:A', 'red'],
+      ['ps:a', 'claw:VCC', 'red'],
       ['ps:a', 'knob2:A', 'red'],
+      ['arm:GND', 'ps:b', 'black'],
       ['knob1:B', 'ps:b', 'black'],
+      ['claw:GND', 'ps:b', 'black'],
       ['knob2:B', 'ps:b', 'black'],
-      ['knob1:A', 'arm:VCC', 'red'],
-      ['arm:GND', 'knob1:B', 'black'],
       ['knob1:W', 'arm:OUT', 'yellow'],
-      ['knob2:A', 'claw:VCC', 'red'],
-      ['claw:GND', 'knob2:B', 'black'],
       ['knob2:W', 'claw:OUT', 'blue'],
     ],
   },
@@ -1890,7 +1900,7 @@ const PRESETS: Record<PresetId, Preset> = {
       ['relay:b', 'belt:b', 'black'],
       ['stop:b', 'readyR:a', 'red'],
       ['readyR:b', 'ready:a', 'yellow'],
-      ['relay:b', 'ready:b', 'black'],
+      ['belt:b', 'ready:b', 'black'],
       ['ready:b', 'ps:b', 'black'],
     ],
   },
@@ -2346,17 +2356,17 @@ const PRESETS: Record<PresetId, Preset> = {
   // the number counts up the floors; press the button for the "ding"
   elevator: {
     parts: [
-      { key: 'bat', type: 'battery', x: 0, y: 160, rotation: 270, data: { voltage: 4.5 } },
-      { key: 'floor', type: 'segment', x: 270, y: -260, data: { digits: 2, mode: 'counter', tint: 'red' } },
-      { key: 'screen', type: 'lcd', x: 500, y: -260, data: (texts) => ({ cols: 16, rows: 2, tint: 'green', text: texts.elevator || undefined }) },
-      { key: 'call', type: 'button', x: 270, y: 30 },
-      { key: 'ding', type: 'buzzer', x: 560, y: 160, rotation: 90 },
+      { key: 'bat', type: 'battery', x: -520, y: -80, rotation: 270, data: { voltage: 4.5 } },
+      { key: 'floor', type: 'segment', x: 0, y: -270, data: { digits: 2, mode: 'counter', tint: 'red' } },
+      { key: 'screen', type: 'lcd', x: 230, y: -270, data: (texts) => ({ cols: 16, rows: 2, tint: 'green', text: texts.elevator || undefined }) },
+      { key: 'call', type: 'button', x: -170, y: 0 },
+      { key: 'ding', type: 'buzzer', x: 290, y: 0, rotation: 90 },
     ],
     wires: [
       ['bat:a', 'floor:VCC', 'red'],
-      ['floor:GND', 'bat:b', 'black'],
       ['floor:VCC', 'screen:VCC', 'red'],
-      ['screen:GND', 'floor:GND', 'black'],
+      ['floor:GND', 'screen:GND', 'black'],
+      ['bat:b', 'floor:GND', 'black'],
       ['bat:a', 'call:a', 'red'],
       ['call:b', 'ding:a', 'yellow'],
       ['ding:b', 'bat:b', 'black'],
@@ -2556,6 +2566,7 @@ export const PRESET_INFO: Record<PresetId, PresetInfo> = {
   siren: { category: 'sound', level: 2, art: ['powerSupply', 'timer555', 'speaker', 'speaker'] },
   musicBox: { category: 'sound', level: 2, art: ['arduino', 'speaker', 'speaker', 'speaker'] },
   morningBird: { category: 'sound', level: 2, art: ['ldr', 'arduino', 'speaker'] },
+  ambulance: { category: 'sound', level: 1, art: ['nano', 'led:red', 'led:white', 'buzzer'] },
   dingDong: { category: 'sound', level: 3, art: ['button', 'speaker', 'capacitor', 'speaker'] },
 
   toothbrush: { category: 'motion', level: 1, art: ['battery', 'switch', 'vibration'] },

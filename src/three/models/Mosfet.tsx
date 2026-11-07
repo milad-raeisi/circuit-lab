@@ -124,7 +124,9 @@ export function MosfetModel({
       <mesh geometry={legs}>
         <meshStandardMaterial {...METAL} />
       </mesh>
-      <Smoke active={hot} position={[0, TAB_TOP - 0.05, BACK]} rise={0.3} color="#d4d4d8" />
+      <group position={[0, 0.3, 0.05]} scale={0.6}>
+        <Smoke active={hot} position={[0, 0, 0]} rise={0.4} color="#d4d4d8" />
+      </group>
     </group>
   )
 }

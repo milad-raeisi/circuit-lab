@@ -665,6 +665,7 @@ export const ar: Dictionary = {
     siren: { name: 'صفارة الإطفاء', description: 'صفارة بنغمتين من شريحة 555' },
     musicBox: { name: 'صندوق الموسيقى', description: 'ثلاث نغمات تُعزف مرة بعد مرة' },
     morningBird: { name: 'عصفور الصباح', description: 'يغني عندما تشرق الشمس' },
+    ambulance: { name: 'سيارة إسعاف', description: 'أضواء حمراء وبيضاء تومض والصفارة لا تتوقف' },
     dingDong: { name: 'جرس دينغ دونغ', description: 'دينغ عندما تضغط، ودونغ عندما تترك' },
     toothbrush: { name: 'فرشاة أسنان كهربائية', description: 'محرك صغير يهتز' },
     crane: { name: 'رافعة مغناطيسية', description: 'التقط الحديد بالمغناطيس وارفعه' },

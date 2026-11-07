@@ -142,7 +142,7 @@ export function PumpModel({ flow }: { flow: number }) {
   const spout = (205 * Math.PI) / 180
 
   return (
-    <group position={[0, -0.02, 0]} rotation={[0.3, -0.22, 0]}>
+    <group position={[0.12, -0.02, 0]} rotation={[0.3, -0.22, 0]}>
       {/* the pump on the bottom: black body, motor end, inlet grille and outlet */}
       <group ref={body}>
         <group position={[-0.15, BOTTOM + 0.2, Z]}>
@@ -174,17 +174,30 @@ export function PumpModel({ flow }: { flow: number }) {
           </mesh>
         </group>
       </group>
-      {/* the wires climb out over the back of the beaker */}
-      <Lead points={[[-0.44, BOTTOM + 0.22, 0.0], [-0.5, BOTTOM + 0.26, -0.32], [-0.54, 0.1, -0.54], [-0.52, TOP + 0.06, -0.6], [-0.62, 0.32, -0.74], [-0.78, -0.1, -0.78]]} radius={0.022} color="#dc2626" />
-      <Lead points={[[-0.44, BOTTOM + 0.17, 0.08], [-0.56, BOTTOM + 0.2, -0.26], [-0.6, 0.08, -0.48], [-0.58, TOP + 0.06, -0.54], [-0.7, 0.3, -0.66], [-0.86, -0.14, -0.7]]} radius={0.022} color="#1f2328" />
+      {/* the wires climb up the wall, over the rim and hang down outside */}
       {[
-        [-0.78, -0.1, -0.78],
-        [-0.86, -0.14, -0.7],
-      ].map(([x, y, z]) => (
-        <mesh key={x} position={[x - 0.01, y - 0.05, z]}>
-          <cylinderGeometry args={[0.012, 0.012, 0.1, 6]} />
-          <meshStandardMaterial color="#d6d3d1" metalness={0.8} roughness={0.3} />
-        </mesh>
+        { z: -0.12, color: '#dc2626' },
+        { z: -0.04, color: '#1f2328' },
+      ].map(({ z, color }, i) => (
+        <group key={color}>
+          <Lead
+            points={[
+              [-0.44, BOTTOM + 0.2 - i * 0.04, Z + z + 0.06],
+              [-0.62, BOTTOM + 0.26, z],
+              [-0.74, 0.18, z],
+              [-0.8, TOP + 0.07, z],
+              [-0.9, 0.3, z + 0.02],
+              [-0.97, -0.16, z + 0.08],
+              [-0.95 + i * 0.05, BOTTOM + 0.06, z + 0.16],
+            ]}
+            radius={0.022}
+            color={color}
+          />
+          <mesh position={[-0.95 + i * 0.05, BOTTOM + 0.01, z + 0.17]}>
+            <cylinderGeometry args={[0.012, 0.012, 0.09, 6]} />
+            <meshStandardMaterial color="#d6d3d1" metalness={0.8} roughness={0.3} />
+          </mesh>
+        </group>
       ))}
 
       {/* the clear tube and the water inside it */}

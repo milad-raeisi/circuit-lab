@@ -536,7 +536,7 @@ export const en: Dictionary = {
       working: 'Feeling',
     },
     slideSwitch: {
-      name: 'Two-way switch',
+      name: 'Stair switch',
       description: 'Joins COM to A or to B. Use two of them to turn a stair light on and off from both ends.',
       working: 'On',
     },
@@ -561,7 +561,7 @@ export const en: Dictionary = {
       working: 'Giving power',
     },
     dynamo: {
-      name: 'Crank generator',
+      name: 'Hand dynamo',
       description: 'Turn the crank to make power. The faster you turn it, the more volts you get.',
       working: 'On',
     },
@@ -603,7 +603,8 @@ export const en: Dictionary = {
     powerSupply: {
       name: 'Power supply',
       description: 'A power box you plug in. Turn it to any voltage from 0 to 12 V. Its current limit keeps your parts safe.',
-      working: 'Giving power',
+      // short, so the card title still fits next to it
+      working: 'On',
     },
     potentiometer: {
       name: 'Potentiometer',
@@ -967,6 +968,7 @@ export const en: Dictionary = {
     siren: { name: 'Fire truck siren', description: 'Nee-naw, nee-naw, made with a 555 chip' },
     musicBox: { name: 'Music box', description: 'Three notes play again and again' },
     morningBird: { name: 'Morning bird', description: 'Sings when the sun comes up' },
+    ambulance: { name: 'Ambulance', description: 'Red and white lights flash and the siren never stops' },
     dingDong: { name: 'Ding-dong bell', description: 'Ding when you press, dong when you let go' },
     toothbrush: { name: 'Electric toothbrush', description: 'A tiny motor that shakes' },
     crane: { name: 'Magnet crane', description: 'Pick up steel with a magnet and lift it' },

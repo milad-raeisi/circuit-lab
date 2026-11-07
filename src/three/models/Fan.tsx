@@ -96,7 +96,7 @@ function blurTexture() {
   for (let d = 0; d < 360; d += 1) {
     const a = (d * Math.PI) / 180
     const lobe = (0.5 + 0.5 * Math.cos(a * BLADES)) ** 2
-    ctx.fillStyle = `rgba(28,28,32,${0.35 + 0.4 * lobe})`
+    ctx.fillStyle = `rgba(30,30,34,${0.6 + 0.35 * lobe})`
     ctx.beginPath()
     ctx.moveTo(c, c)
     ctx.arc(c, c, c, a, a + (1.6 * Math.PI) / 180)
@@ -180,8 +180,8 @@ export function FanModel({ speed, hot }: { speed: number; hot: boolean }) {
     if (rotor.current) rotor.current.rotation.z -= w * dt
     // fast blades melt into a dark, see-through disc
     const smear = THREE.MathUtils.clamp((s - 0.45) * 1.3, 0, 0.8)
-    if (bladeMaterial.current) bladeMaterial.current.opacity = 1 - smear * 0.85
-    if (discMaterial.current) discMaterial.current.opacity = smear * 0.9
+    if (bladeMaterial.current) bladeMaterial.current.opacity = 1 - smear * 0.9
+    if (discMaterial.current) discMaterial.current.opacity = Math.min(0.92, smear * 1.15)
     // the air leaves the front in a gentle spiral
     travel.current += dt * (0.25 + 0.75 * Math.min(1.5, s)) * (s > 0.02 ? 1 : 0)
     streaks.current.forEach((streak, i) => {

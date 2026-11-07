@@ -31,7 +31,7 @@ function Segment({ x, lit, off, on }: { x: number; lit: string; off: string; on:
   useFrame((_, dt) => {
     // LEDs snap on and off
     level.current = damp(level.current, on ? 1 : 0, 30, dt)
-    if (material.current) material.current.emissiveIntensity = level.current * 2.3
+    if (material.current) material.current.emissiveIntensity = level.current * 1.25
     glow.current = level.current * 0.55
   })
   return (

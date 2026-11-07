@@ -2902,6 +2902,916 @@ function PowerBank({ id }: ArtProps) {
   )
 }
 
+/* ---- the lab parts: diodes and switches, lights and movers, logic modules, meters ---- */
+
+function Zener({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}g`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fed7aa" />
+          <stop offset="0.3" stopColor="#fb923c" />
+          <stop offset="0.75" stopColor="#c2410c" />
+          <stop offset="1" stopColor="#7c2d12" />
+        </linearGradient>
+        <clipPath id={`${id}clip`}>
+          <rect x="13" y="18.5" width="22" height="11" rx="5.5" />
+        </clipPath>
+      </defs>
+      <Shadow y={35} rx={14} />
+      <path d="M2.5 24h43" stroke="#a1a1aa" strokeWidth="1.8" strokeLinecap="round" />
+      <rect x="13" y="18.5" width="22" height="11" rx="5.5" fill={`url(#${id}g)`} />
+      <g clipPath={`url(#${id}clip)`}>
+        {/* seen through the glass: the two metal slugs and the tiny chip held between them */}
+        <rect x="12" y="21.4" width="10.8" height="5.2" rx="0.8" fill="#7c2d12" opacity="0.5" />
+        <rect x="25.2" y="21.4" width="10.8" height="5.2" rx="0.8" fill="#7c2d12" opacity="0.5" />
+        <rect x="22.8" y="22.5" width="2.4" height="3" fill="#1c1917" opacity="0.75" />
+        {/* the black band marks the striped end */}
+        <rect x="15.2" y="18.5" width="3.6" height="11" fill="#18181b" />
+        {/* glass bends light back up along its lower edge */}
+        <rect x="13" y="26.8" width="22" height="1" fill="#fdba74" opacity="0.55" />
+      </g>
+      <rect x="15.6" y="19.8" width="17.2" height="1.7" rx="0.85" fill="#fff" opacity="0.6" />
+    </>
+  )
+}
+
+function Pnp({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}f`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#3f3f46" />
+          <stop offset="1" stopColor="#0c0c0e" />
+        </linearGradient>
+        <linearGradient id={`${id}t`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#8b8b94" />
+          <stop offset="1" stopColor="#3f3f46" />
+        </linearGradient>
+      </defs>
+      <Shadow y={44} rx={11} />
+      <rect x="17.6" y="31" width="2" height="12" rx="0.6" fill="#a1a1aa" />
+      <rect x="23" y="31" width="2" height="12" rx="0.6" fill="#a1a1aa" />
+      <rect x="28.4" y="31" width="2" height="12" rx="0.6" fill="#a1a1aa" />
+      <path d="M14 13a10 4.5 0 0 1 20 0z" fill={`url(#${id}t)`} />
+      <path d="M14 13h20v17.5a1.5 1.5 0 0 1-1.5 1.5h-17a1.5 1.5 0 0 1-1.5-1.5z" fill={`url(#${id}f)`} />
+      <rect x="14" y="13" width="20" height="0.9" fill="#fff" opacity="0.14" />
+      <ellipse cx="20" cy="10.6" rx="3.6" ry="0.9" fill="#fff" opacity="0.25" />
+      <rect x="18" y="16.6" width="12" height="1.1" rx="0.55" fill="#d4d4d8" opacity="0.6" />
+      {/* printed in amber: the PNP symbol, its arrow pointing in */}
+      <g fill="none" stroke="#fbbf24" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="24" cy="24.4" r="4.7" strokeWidth="0.6" />
+        <path d="M19.3 24.4h2.6M21.9 22v4.8M21.9 23.2l3.4-2.2V19.7M21.9 25.6l3.4 2.2v1.3" strokeWidth="0.75" />
+      </g>
+      <path d="M22.66 26.09 24.41 26.33 23.59 27.59z" fill="#fbbf24" />
+    </>
+  )
+}
+
+function Mosfet({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}t`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#f4f4f5" />
+          <stop offset="0.55" stopColor="#c4c4cc" />
+          <stop offset="1" stopColor="#8b8b94" />
+        </linearGradient>
+        <linearGradient id={`${id}b`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#3f3f46" />
+          <stop offset="1" stopColor="#0c0c0e" />
+        </linearGradient>
+        <linearGradient id={`${id}l`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#d4d4d8" />
+          <stop offset="1" stopColor="#71717a" />
+        </linearGradient>
+        <mask id={`${id}m`}>
+          <rect width="48" height="48" fill="#fff" />
+          <circle cx="26.5" cy="9.2" r="2.3" fill="#000" />
+        </mask>
+      </defs>
+      <Shadow y={45} rx={12} />
+      {/* three straight legs, wide at the shoulder */}
+      {[18.5, 23, 27.5].map((x) => (
+        <g key={x}>
+          <rect x={x - 1.25} y="30" width="2.5" height="4.2" fill={`url(#${id}l)`} />
+          <rect x={x - 0.65} y="33" width="1.3" height="11" rx="0.5" fill={`url(#${id}l)`} />
+        </g>
+      ))}
+      {/* the metal tab behind the body, with its screw hole and side notches */}
+      <g mask={`url(#${id}m)`}>
+        <path d="M16.5 4.4a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v8.6h-0.7v1.8h0.7V16h-20v-1.2h0.7V13h-0.7z" fill="#71717a" transform="translate(0.7 0)" />
+        <path d="M16.5 4.4a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v8.6h-0.7v1.8h0.7V16h-20v-1.2h0.7V13h-0.7z" fill={`url(#${id}t)`} />
+        <path d="M24.2 9.2a2.3 2.3 0 0 1 4.6 0" fill="none" stroke="#3f3f46" strokeWidth="0.9" opacity="0.7" />
+      </g>
+      <rect x="17.5" y="3.9" width="18" height="0.8" rx="0.4" fill="#fff" opacity="0.7" />
+      {/* the body: top, side and front */}
+      <path d="M14 17.4 16.5 14.6h17L31 17.4z" fill="#52525b" />
+      <path d="M31 17.4 33.5 14.6v13.8L31 31.2z" fill="#09090b" />
+      <rect x="14" y="17.4" width="17" height="13.8" rx="0.6" fill={`url(#${id}b)`} />
+      <rect x="14.6" y="17.6" width="15.8" height="0.7" rx="0.35" fill="#fff" opacity="0.18" />
+      <rect x="16.6" y="20.6" width="11.8" height="1.3" rx="0.65" fill="#d4d4d8" opacity="0.85" />
+      <rect x="16.6" y="23.6" width="8" height="1.1" rx="0.55" fill="#d4d4d8" opacity="0.5" />
+      <circle cx="27.4" cy="24.1" r="1.1" fill="none" stroke="#a5b4fc" strokeWidth="0.6" opacity="0.8" />
+      <circle cx="16.9" cy="28.2" r="0.85" fill="#000" opacity="0.6" />
+      <circle cx="17.1" cy="28" r="0.85" fill="#3f3f46" />
+    </>
+  )
+}
+
+function Optocoupler({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}b`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#3f3f46" />
+          <stop offset="1" stopColor="#141417" />
+        </linearGradient>
+        <linearGradient id={`${id}w`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#0c0a09" />
+          <stop offset="1" stopColor="#292524" />
+        </linearGradient>
+        <linearGradient id={`${id}beam`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#f87171" stopOpacity="0.9" />
+          <stop offset="1" stopColor="#f87171" stopOpacity="0.15" />
+        </linearGradient>
+        <linearGradient id={`${id}l`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#e4e4e7" />
+          <stop offset="1" stopColor="#71717a" />
+        </linearGradient>
+      </defs>
+      <Shadow y={42} rx={17} />
+      {/* the back legs peek over the top; the front ones bend down to the table */}
+      {[17.5, 30.5].map((x) => (
+        <g key={x}>
+          <rect x={x - 1.5} y="8.6" width="3" height="4.4" rx="0.4" fill="#a1a1aa" />
+          <rect x={x - 1.5} y="29" width="3" height="4.4" fill={`url(#${id}l)`} />
+          <rect x={x - 0.7} y="32.6" width="1.4" height="8.4" rx="0.5" fill={`url(#${id}l)`} />
+        </g>
+      ))}
+      <rect x="9" y="11" width="30" height="20.6" rx="1.4" fill="#000" />
+      <rect x="9" y="11" width="30" height="17.8" rx="1.4" fill={`url(#${id}b)`} />
+      <rect x="10.2" y="11.5" width="27.6" height="0.8" rx="0.4" fill="#fff" opacity="0.18" />
+      <circle cx="11.6" cy="14" r="1" fill="#52525b" />
+      {/* a peek inside: the LED shines across the gap onto the light switch */}
+      <rect x="12.4" y="15.4" width="23.2" height="10.4" rx="1.2" fill={`url(#${id}w)`} stroke="#52525b" strokeWidth="0.45" />
+      <rect x="13.4" y="22" width="6.6" height="2.6" rx="0.3" fill="#71717a" />
+      <rect x="28" y="22" width="6.6" height="2.6" rx="0.3" fill="#71717a" />
+      <path d="M18.4 20.6 30 18v5z" fill={`url(#${id}beam)`} />
+      <circle cx="17.2" cy="20.4" r="3.8" fill="#ef4444" opacity="0.35" />
+      <circle cx="17.2" cy="20.4" r="1.9" fill="#f87171" />
+      <circle cx="16.7" cy="19.9" r="0.6" fill="#fff" opacity="0.9" />
+      <rect x="29.6" y="18.3" width="3.8" height="3.8" rx="0.4" fill="#3f3f46" stroke="#a1a1aa" strokeWidth="0.4" />
+      <rect x="30.1" y="18.8" width="2.8" height="0.8" fill="#fca5a5" opacity="0.7" />
+      <rect x="12.9" y="15.9" width="22.2" height="1" rx="0.5" fill="#fff" opacity="0.22" />
+    </>
+  )
+}
+
+function Laser({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}br`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fef3c7" />
+          <stop offset="0.3" stopColor="#e8c063" />
+          <stop offset="0.7" stopColor="#a87b2c" />
+          <stop offset="1" stopColor="#6b4a14" />
+        </linearGradient>
+        <linearGradient id={`${id}card`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#fbf8f1" />
+          <stop offset="1" stopColor="#ddd6c6" />
+        </linearGradient>
+        <radialGradient id={`${id}dot`}>
+          <stop offset="0" stopColor="#ff2a1f" stopOpacity="0.8" />
+          <stop offset="1" stopColor="#ff2a1f" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <Shadow y={41} rx={20} />
+      <Legs xs={[8.5, 11.5, 14.5]} y={33} len={7.5} />
+      <Pcb id={id} x={3.5} y={20} w={20} h={13} light="#3f3f46" dark="#141417" edge="#000" />
+      <Strip x={6.9} y={29.4} w={9.2} />
+      {/* the brass laser head lying on the board, its focus thread at the front */}
+      <rect x="6" y="19.6" width="15" height="7.6" rx="1" fill={`url(#${id}br)`} />
+      <rect x="20" y="19" width="4.4" height="8.8" rx="0.8" fill={`url(#${id}br)`} />
+      <path d="M20.9 19v8.8M21.8 19v8.8M22.7 19v8.8M23.6 19v8.8" stroke="#6b4a14" strokeWidth="0.35" opacity="0.7" />
+      <rect x="7" y="20.6" width="12.6" height="1.1" rx="0.55" fill="#fff" opacity="0.6" />
+      <ellipse cx="24.4" cy="23.4" rx="0.9" ry="3" fill="#2a0b0e" />
+      <circle cx="24.5" cy="23.4" r="0.95" fill="#ff3b30" />
+      {/* the paper target on its wooden foot, turned a little toward you */}
+      <path d="M37.6 34.6h8l-.6 2.6h-6.8z" fill="#8f5f33" />
+      <rect x="37.6" y="33.4" width="8" height="1.6" rx="0.4" fill="#c08a52" />
+      <path d="M38.8 12.2 45.2 13.8v19.8l-6.4.4z" fill={`url(#${id}card)`} stroke="#cfc6b3" strokeWidth="0.3" />
+      <ellipse cx="42" cy="23.4" rx="2.5" ry="5.4" fill="none" stroke="#9ca3af" strokeWidth="0.4" />
+      <ellipse cx="42" cy="23.4" rx="1.75" ry="3.8" fill="#1f2937" />
+      <ellipse cx="42" cy="23.4" rx="1" ry="2.2" fill="none" stroke="#f8fafc" strokeWidth="0.3" />
+      <ellipse cx="42" cy="23.4" rx="0.55" ry="1.1" fill="#dc2626" />
+      {/* the thin red beam and the bright dot it makes */}
+      <path d="M25.3 23.4H41.6" stroke="#ff2a1f" strokeWidth="2.2" opacity="0.2" strokeLinecap="round" />
+      <path d="M25.3 23.4H41.6" stroke="#ff3b30" strokeWidth="0.75" strokeLinecap="round" />
+      <path d="M25.3 23.4H41.6" stroke="#ffd9d4" strokeWidth="0.25" strokeLinecap="round" />
+      <circle cx="42" cy="23.4" r="4.2" fill={`url(#${id}dot)`} />
+      <circle cx="42" cy="23.4" r="1.2" fill="#ffd9d4" />
+    </>
+  )
+}
+
+function IrLed({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}l`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#f8f9ff" />
+          <stop offset="0.45" stopColor="#c7cdf8" />
+          <stop offset="1" stopColor="#7c86e0" />
+        </linearGradient>
+        <radialGradient id={`${id}g`}>
+          <stop offset="0" stopColor="#c084fc" stopOpacity="0.6" />
+          <stop offset="0.6" stopColor="#d7b8ff" stopOpacity="0.25" />
+          <stop offset="1" stopColor="#d7b8ff" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <Shadow y={44} rx={10} />
+      {/* what a phone camera sees: a soft violet glow */}
+      <circle cx="21" cy="17" r="13.5" fill={`url(#${id}g)`} />
+      <path d="M18 30v14M24 30v10" stroke="#a1a1aa" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M12 28.4a1.4 1.4 0 0 1 1.4-1.4H29v4H13.4a1.4 1.4 0 0 1-1.4-1.4z" fill="#a5b0f0" />
+      <path d="M14 28V16.5a7 7 0 0 1 14 0V28z" fill={`url(#${id}l)`} />
+      {/* through the clear lens: the cup holding the chip, the thin post and the wire between */}
+      <path d="M15.6 28v-4.2h4l1.4 1.4V28z" fill="#71717a" opacity="0.6" />
+      <rect x="23.4" y="22.6" width="1.6" height="5.4" fill="#71717a" opacity="0.6" />
+      <path d="M17.8 23.2c1.4-2.6 4.6-2.8 6.4-.6" fill="none" stroke="#52525b" strokeWidth="0.35" opacity="0.7" />
+      <circle cx="17.8" cy="23.4" r="2.2" fill="#c084fc" opacity="0.55" />
+      <rect x="17" y="22.6" width="1.6" height="1.2" fill="#2c2a35" />
+      <rect x="16.3" y="13" width="2.2" height="11" rx="1.1" fill="#fff" opacity="0.7" />
+      {/* light you can't see */}
+      <g fill="none" stroke="#9333ea" strokeWidth="1.4" strokeLinecap="round" strokeDasharray="1.6 1.5">
+        <path d="M33.5 10.5a9 9 0 0 1 0 11" />
+        <path d="M37.5 7a14 14 0 0 1 0 18" opacity="0.6" />
+      </g>
+    </>
+  )
+}
+
+function Solenoid({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}s`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fafafa" />
+          <stop offset="0.5" stopColor="#c4c4cc" />
+          <stop offset="1" stopColor="#71717a" />
+        </linearGradient>
+        <linearGradient id={`${id}k`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#a1a1aa" />
+          <stop offset="1" stopColor="#52525b" />
+        </linearGradient>
+        <linearGradient id={`${id}y`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fde68a" />
+          <stop offset="0.45" stopColor="#e6b422" />
+          <stop offset="1" stopColor="#a16207" />
+        </linearGradient>
+      </defs>
+      <Shadow y={40} rx={19} />
+      {/* its two wires */}
+      <path d="M7.5 28.4C4.2 28.4 3 31.5 3.6 36" fill="none" stroke="#dc2626" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M7.5 30.6C5.6 30.8 5.3 33.5 6 37" fill="none" stroke="#18181b" strokeWidth="1.2" strokeLinecap="round" />
+      {/* the steel frame seen from its open side, the coil sitting inside it */}
+      <rect x="7" y="13.5" width="23" height="23" rx="0.8" fill={`url(#${id}k)`} />
+      <rect x="9.6" y="16" width="17.8" height="18" fill="#27272a" />
+      <rect x="10.4" y="16.2" width="1.4" height="17.6" fill="#18181b" />
+      <rect x="25.2" y="16.2" width="1.4" height="17.6" fill="#18181b" />
+      <rect x="11.8" y="17.4" width="13.4" height="15.2" fill={`url(#${id}y)`} />
+      <path d="M11.8 21.5h13.4" stroke="#a16207" strokeWidth="0.4" opacity="0.6" />
+      <rect x="11.8" y="17.4" width="0.9" height="15.2" fill="#c2410c" opacity="0.8" />
+      <rect x="24.3" y="17.4" width="0.9" height="15.2" fill="#c2410c" opacity="0.8" />
+      <rect x="12.8" y="18.2" width="11.4" height="1.4" rx="0.7" fill="#fff" opacity="0.5" />
+      <rect x="14.6" y="24.2" width="7.8" height="4.4" rx="0.3" fill="#f8fafc" />
+      <path d="M15.6 25.6h5.2M15.6 27.2h3.4" stroke="#52525b" strokeWidth="0.5" strokeLinecap="round" />
+      {/* the frame's bars in front */}
+      <rect x="7" y="13.5" width="23" height="2.6" rx="0.6" fill={`url(#${id}s)`} />
+      <rect x="7" y="33.9" width="23" height="2.6" rx="0.6" fill={`url(#${id}s)`} />
+      <rect x="7" y="13.5" width="2.6" height="23" rx="0.6" fill={`url(#${id}s)`} />
+      <rect x="27.4" y="13.5" width="2.6" height="23" rx="0.6" fill={`url(#${id}s)`} />
+      <circle cx="12.5" cy="35.2" r="0.6" fill="#3f3f46" />
+      <circle cx="24.5" cy="35.2" r="0.6" fill="#3f3f46" />
+      {/* the rod pushed out, its spring and the round cap on the end */}
+      <rect x="29" y="22.6" width="11" height="4.2" rx="0.6" fill={`url(#${id}s)`} />
+      <g fill="none" strokeLinecap="round">
+        {[31.2, 33, 34.8, 36.6, 38.4].map((x) => (
+          <path key={x} d={`M${x} 29.2 ${x + 1.4} 20.2`} stroke="#52525b" strokeWidth="1.1" />
+        ))}
+        {[31.2, 33, 34.8, 36.6, 38.4].map((x) => (
+          <path key={x} d={`M${x} 29.2 ${x + 1.4} 20.2`} stroke="#e4e4e7" strokeWidth="0.5" />
+        ))}
+      </g>
+      <rect x="40" y="20.4" width="3.2" height="8.6" rx="1.2" fill={`url(#${id}s)`} />
+      <rect x="40.5" y="21" width="0.8" height="7.4" rx="0.4" fill="#fff" opacity="0.6" />
+    </>
+  )
+}
+
+function Pump({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}b`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#52525b" />
+          <stop offset="0.45" stopColor="#27272a" />
+          <stop offset="1" stopColor="#09090b" />
+        </linearGradient>
+        <linearGradient id={`${id}d`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#bae6fd" />
+          <stop offset="0.5" stopColor="#38bdf8" />
+          <stop offset="1" stopColor="#0369a1" />
+        </linearGradient>
+      </defs>
+      <Shadow y={40} rx={19} />
+      {/* its wires */}
+      <path d="M6.5 29C3.6 29 2.8 32 3.2 36.5" fill="none" stroke="#dc2626" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M6.5 31.4C5 31.6 4.7 34 5.4 37.5" fill="none" stroke="#18181b" strokeWidth="1.2" strokeLinecap="round" />
+      {/* the clear tube full of water, from the spout up and over */}
+      <path d="M31.5 19C31.5 10 41.5 8 41.5 17.5V20" fill="none" stroke="#cbd5e1" strokeWidth="3.6" strokeLinecap="round" opacity="0.55" />
+      <path d="M31.5 19C31.5 10 41.5 8 41.5 17.5V20" fill="none" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M30.4 17C31 11.5 35 9.6 37.8 10.2" fill="none" stroke="#fff" strokeWidth="0.6" strokeLinecap="round" opacity="0.8" />
+      {/* the motor end and the pump head with its spout */}
+      <rect x="6" y="24" width="24" height="13" rx="3" fill={`url(#${id}b)`} />
+      <path d="M9.4 25v11M11 25v11M12.6 25v11" stroke="#000" strokeWidth="0.5" opacity="0.5" />
+      <rect x="8" y="25" width="20" height="1" rx="0.5" fill="#fff" opacity="0.25" />
+      <rect x="29.6" y="18" width="3.8" height="6" fill={`url(#${id}b)`} />
+      <rect x="29.2" y="17.2" width="4.6" height="1.4" rx="0.5" fill="#3f3f46" />
+      <rect x="27" y="22.5" width="10" height="16" rx="2.4" fill={`url(#${id}b)`} />
+      <rect x="28.2" y="23.3" width="7.6" height="0.9" rx="0.45" fill="#fff" opacity="0.3" />
+      {[30, 32, 34].map((x) => (
+        <rect key={x} x={x - 0.4} y="31" width="0.8" height="5" rx="0.4" fill="#000" />
+      ))}
+      {/* a drop falling from the tube */}
+      <path d="M41.5 23.4c1.8 2.6 2.6 3.9 2.6 5a2.6 2.6 0 0 1-5.2 0c0-1.1.8-2.4 2.6-5z" fill={`url(#${id}d)`} />
+      <ellipse cx="40.6" cy="28.2" rx="0.6" ry="0.9" fill="#fff" opacity="0.8" />
+    </>
+  )
+}
+
+function Bell({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <radialGradient id={`${id}g`} cx="0.36" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#fff3c4" />
+          <stop offset="0.35" stopColor="#e8c46a" />
+          <stop offset="0.8" stopColor="#b8902f" />
+          <stop offset="1" stopColor="#7a5a1c" />
+        </radialGradient>
+        <linearGradient id={`${id}w`} x1="0" y1="0" x2="0.3" y2="1">
+          <stop offset="0" stopColor="#c47c45" />
+          <stop offset="0.5" stopColor="#8f5130" />
+          <stop offset="1" stopColor="#6b3a20" />
+        </linearGradient>
+        <linearGradient id={`${id}c`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#ef4444" />
+          <stop offset="0.5" stopColor="#c42a2f" />
+          <stop offset="1" stopColor="#7f1d1d" />
+        </linearGradient>
+        <radialGradient id={`${id}h`} cx="0.35" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#e4e4e7" />
+          <stop offset="1" stopColor="#52525b" />
+        </radialGradient>
+      </defs>
+      <Shadow y={43} rx={16} />
+      {/* the varnished wooden board */}
+      <rect x="9.5" y="27" width="29" height="14" rx="1.6" fill="#5a2f18" transform="translate(0 1.2)" />
+      <rect x="9.5" y="27" width="29" height="14" rx="1.6" fill={`url(#${id}w)`} />
+      <path d="M11 33.5c5-1.2 9 .8 14-.4s8-.6 12 .2M11 37.4c6-1 10 .6 15-.2s7-.4 11 .4" fill="none" stroke="#5a2f18" strokeWidth="0.4" opacity="0.5" />
+      <rect x="11.5" y="27.5" width="25" height="0.8" rx="0.4" fill="#fff" opacity="0.25" />
+      {/* brass terminals with their knurled nuts */}
+      {[12.8, 35.2].map((x) => (
+        <g key={x}>
+          <circle cx={x} cy="38.2" r="1.6" fill="#8a6a2a" />
+          <circle cx={x} cy="38" r="1.4" fill="#c9a24f" />
+          <path d={`M${x - 0.8} 38h1.6`} stroke="#5c4a1e" strokeWidth="0.4" strokeLinecap="round" />
+        </g>
+      ))}
+      {/* the two red coils of the magnet, the iron bar above them and the hammer's arm */}
+      {[15, 21.4].map((x) => (
+        <g key={x}>
+          <rect x={x} y="31" width="5.4" height="7" rx="0.6" fill={`url(#${id}c)`} />
+          <path d={`M${x} 33h5.4M${x} 34.8h5.4M${x} 36.6h5.4`} stroke="#7f1d1d" strokeWidth="0.35" opacity="0.6" />
+          <rect x={x - 0.3} y="30.2" width="6" height="1.3" rx="0.4" fill="#26211d" />
+        </g>
+      ))}
+      <rect x="14" y="28.4" width="16.4" height="1.6" rx="0.5" fill="#8d939b" />
+      <rect x="14.4" y="28.6" width="15.6" height="0.5" rx="0.25" fill="#fff" opacity="0.4" />
+      <path d="M29.8 29.2 32.3 25.7" stroke="#8d939b" strokeWidth="1.1" strokeLinecap="round" />
+      {/* the dome it rings */}
+      <circle cx="24" cy="15" r="11.5" fill={`url(#${id}g)`} />
+      <circle cx="24" cy="15" r="11.5" fill="none" stroke="#7a5a1c" strokeWidth="0.5" opacity="0.6" />
+      <circle cx="24" cy="15" r="7.6" fill="none" stroke="#9a7426" strokeWidth="0.6" opacity="0.55" />
+      <circle cx="24" cy="15" r="2.6" fill="#9a7426" opacity="0.5" />
+      <circle cx="24" cy="15" r="1.7" fill={`url(#${id}h)`} />
+      <path d="M15.5 10.5a10 10 0 0 1 5.6-5" fill="none" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" opacity="0.7" />
+      <circle cx="32.8" cy="25" r="2.1" fill={`url(#${id}h)`} />
+      {/* ring ring */}
+      <g fill="none" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" opacity="0.8">
+        <path d="M8.4 9.5a11 11 0 0 0 0 11" />
+        <path d="M39.6 9.5a11 11 0 0 1 0 11" />
+        <path d="M5 7a15 15 0 0 0 0 16" opacity="0.5" />
+        <path d="M43 7a15 15 0 0 1 0 16" opacity="0.5" />
+      </g>
+    </>
+  )
+}
+
+function BarGraph({ id }: ArtProps) {
+  const bars = Array.from({ length: 10 }, (_, i) => {
+    const [on, off] = i < 6 ? ['#4ade80', '#14532d'] : i < 8 ? ['#facc15', '#713f12'] : ['#f87171', '#7f1d1d']
+    return { x: 7 + i * 3.5, on, off, lit: i < 6 }
+  })
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}b`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#3f3f46" />
+          <stop offset="1" stopColor="#141417" />
+        </linearGradient>
+      </defs>
+      <Shadow y={41} rx={19} />
+      <Legs xs={bars.map((b) => round(b.x + 1.2))} y={31} len={8} />
+      <rect x="4.5" y="14" width="39" height="19.6" rx="1.4" fill="#000" />
+      <rect x="4.5" y="14" width="39" height="17.4" rx="1.4" fill={`url(#${id}b)`} />
+      <rect x="6" y="14.5" width="36" height="0.8" rx="0.4" fill="#fff" opacity="0.2" />
+      {bars.map((b) =>
+        b.lit ? (
+          <g key={b.x}>
+            <rect x={b.x - 0.7} y="16.3" width="3.8" height="13" rx="0.8" fill={b.on} opacity="0.3" />
+            <rect x={b.x} y="17" width="2.4" height="11.6" rx="0.3" fill={b.on} />
+            <rect x={b.x + 0.4} y="17.5" width="0.7" height="10.6" rx="0.35" fill="#fff" opacity="0.55" />
+          </g>
+        ) : (
+          <rect key={b.x} x={b.x} y="17" width="2.4" height="11.6" rx="0.3" fill={b.off} />
+        ),
+      )}
+      <path d="M5.4 31.4h1.6" stroke="#71717a" strokeWidth="0.8" />
+    </>
+  )
+}
+
+function TrafficLight({ id }: ArtProps) {
+  const lamps = [
+    { y: 9.6, on: '#ef4444', off: '#ef4444', glow: '#fca5a5', lit: true },
+    { y: 18.6, on: '#facc15', off: '#a16207', glow: '#fde68a', lit: false },
+    { y: 27.6, on: '#22c55e', off: '#15803d', glow: '#86efac', lit: false },
+  ]
+  return (
+    <>
+      <defs>
+        <radialGradient id={`${id}glow`}>
+          <stop offset="0" stopColor="#f87171" stopOpacity="0.75" />
+          <stop offset="1" stopColor="#f87171" stopOpacity="0" />
+        </radialGradient>
+        {lamps.map((l, i) => (
+          <radialGradient key={i} id={`${id}l${i}`} cx="0.38" cy="0.32" r="0.75">
+            <stop offset="0" stopColor={l.lit ? '#fff' : l.glow} stopOpacity={l.lit ? 1 : 0.7} />
+            <stop offset="0.45" stopColor={l.lit ? l.on : l.off} />
+            <stop offset="1" stopColor={l.lit ? l.on : l.off} />
+          </radialGradient>
+        ))}
+      </defs>
+      <Shadow y={44} rx={12} />
+      <Legs xs={[19.5, 22.5, 25.5, 28.5]} y={38} len={6} />
+      <Pcb id={id} x={15} y={3.5} w={18} h={35} light="#3f3f46" dark="#18181b" edge="#000" />
+      <Strip x={18.5} y={33.6} w={11.4} />
+      {lamps.map((l, i) => (
+        <g key={l.y}>
+          {l.lit && <circle cx="24" cy={l.y} r="7.5" fill={`url(#${id}glow)`} />}
+          <circle cx="24" cy={l.y} r="4.4" fill="none" stroke="#e4e4e7" strokeWidth="0.4" opacity="0.6" />
+          <circle cx="24" cy={l.y} r="3.7" fill={l.lit ? l.on : l.off} opacity="0.65" />
+          <circle cx="24" cy={l.y} r="3.1" fill={`url(#${id}l${i})`} />
+          <ellipse cx="22.8" cy={l.y - 1.2} rx="1.1" ry="0.7" fill="#fff" opacity={l.lit ? 0.9 : 0.45} />
+        </g>
+      ))}
+    </>
+  )
+}
+
+const FAN_BLADE = 'M5.63 -1.4A5.8 5.8 0 0 1 5.21 2.54Q8.25 6 8.99 11.5A14.6 14.6 0 0 0 14.28 3.04Q10.39 -0.36 5.63 -1.4Z'
+
+function Fan({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}f`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#52525b" />
+          <stop offset="0.5" stopColor="#27272a" />
+          <stop offset="1" stopColor="#18181b" />
+        </linearGradient>
+        <linearGradient id={`${id}b`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#71717a" />
+          <stop offset="1" stopColor="#27272a" />
+        </linearGradient>
+        <radialGradient id={`${id}h`} cx="0.38" cy="0.32" r="0.8">
+          <stop offset="0" stopColor="#5eead4" />
+          <stop offset="1" stopColor="#0f766e" />
+        </radialGradient>
+      </defs>
+      <Shadow y={44} rx={17} />
+      {/* its wires out of one corner */}
+      <path d="M39.5 38.5c2 1 3.5 2.5 4.5 5" fill="none" stroke="#dc2626" strokeWidth="1.1" strokeLinecap="round" />
+      <path d="M38 39.5c1.6 1 2.6 2.4 3.4 4.6" fill="none" stroke="#18181b" strokeWidth="1.1" strokeLinecap="round" />
+      <rect x="6" y="5" width="36" height="36" rx="3.2" fill="#09090b" transform="translate(0 1.4)" />
+      <rect x="6" y="5" width="36" height="36" rx="3.2" fill={`url(#${id}f)`} />
+      <rect x="9" y="5.6" width="30" height="0.8" rx="0.4" fill="#fff" opacity="0.25" />
+      {[[9.7, 8.7], [38.3, 8.7], [9.7, 37.3], [38.3, 37.3]].map(([x, y]) => (
+        <g key={`${x}-${y}`}>
+          <circle cx={x} cy={y} r="1.7" fill="#71717a" opacity="0.5" />
+          <circle cx={x} cy={y} r="1.4" fill="#0a0a0a" />
+        </g>
+      ))}
+      <circle cx="24" cy="23" r="16" fill="#0a0a0a" />
+      <circle cx="24" cy="23" r="16" fill="none" stroke="#71717a" strokeWidth="0.5" opacity="0.5" />
+      <g transform="translate(24 23)">
+        {Array.from({ length: 7 }, (_, i) => (
+          <path key={i} d={FAN_BLADE} fill={`url(#${id}b)`} stroke="#a1a1aa" strokeWidth="0.3" strokeOpacity="0.5" transform={`rotate(${round(i * (360 / 7))})`} />
+        ))}
+        <circle r="6" fill="#18181b" />
+        <circle r="4.6" fill={`url(#${id}h)`} />
+        <circle r="1.1" fill="#134e4a" />
+        <ellipse cx="-1.6" cy="-1.8" rx="1.4" ry="0.8" fill="#fff" opacity="0.4" />
+      </g>
+    </>
+  )
+}
+
+/** DIP pins along the top and bottom edges of a chip seen from above. */
+function ChipPins({ x, y, h, n, pitch }: { x: number; y: number; h: number; n: number; pitch: number }) {
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => (
+        <g key={i}>
+          <rect x={x + i * pitch - 0.55} y={y - 1.4} width="1.1" height="1.8" rx="0.3" fill="#d4d4d8" />
+          <rect x={x + i * pitch - 0.55} y={y + h - 0.6} width="1.1" height="1.8" rx="0.3" fill="#d4d4d8" />
+        </g>
+      ))}
+    </>
+  )
+}
+
+/** A chip module's pins: the power header out of its left edge (+ marked red, − black), outputs out of its right. */
+function ModulePins({ left, right }: { left: number[]; right: number[] }) {
+  return (
+    <>
+      {left.map((y) => (
+        <rect key={`l${y}`} x="2.2" y={y - 0.55} width="3.4" height="1.1" rx="0.4" fill="#a1a1aa" />
+      ))}
+      {right.map((y) => (
+        <rect key={`r${y}`} x="42.4" y={y - 0.55} width="3.4" height="1.1" rx="0.4" fill="#a1a1aa" />
+      ))}
+    </>
+  )
+}
+
+/** The + and − marks beside the top and bottom header pins. */
+function PowerMarks({ x, top, bottom }: { x: number; top: number; bottom: number }) {
+  return (
+    <>
+      <rect x={x} y={top - 0.6} width="1.2" height="1.2" rx="0.3" fill="#ef4444" />
+      <rect x={x} y={bottom - 0.6} width="1.2" height="1.2" rx="0.3" fill="#0a0a0a" />
+    </>
+  )
+}
+
+function Latch({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <radialGradient id={`${id}glow`}>
+          <stop offset="0" stopColor="#4ade80" stopOpacity="0.85" />
+          <stop offset="1" stopColor="#4ade80" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <Shadow y={41} rx={19} />
+      <ModulePins left={[15.6, 20.2, 25.8, 30.4]} right={[23]} />
+      <Pcb id={id} x={5} y={11} w={38} h={24} light="#db2777" dark="#831843" edge="#500724" holes={[[40.4, 13.6], [40.4, 32.4]]} />
+      <PowerMarks x={6.4} top={15.6} bottom={30.4} />
+      {/* the latch chip, its symbol printed on top: S and R go in, Q comes out */}
+      <ChipPins x={14.8} y={16.4} h={11.2} n={7} pitch={2.4} />
+      <Chip x={12.8} y={16.4} w={18.4} h={11.2} />
+      <path d="M12.8 20.7a1.3 1.3 0 0 1 0 2.6z" fill="#500724" />
+      <g fill="none" stroke="#e4e4e7" strokeWidth="0.45" strokeLinecap="round" opacity="0.85">
+        <rect x="19" y="18.6" width="5.6" height="6.4" rx="0.3" />
+        <path d="M16.6 20.3H19M16.6 23.3H19M24.6 21.8H27" />
+      </g>
+      {/* S and R lights are off, yet Q remembers and stays lit */}
+      <rect x="8.6" y="19.6" width="2.2" height="1.4" rx="0.3" fill="#bbf7d0" />
+      <rect x="8.6" y="25" width="2.2" height="1.4" rx="0.3" fill="#fed7aa" />
+      <circle cx="36.4" cy="23" r="6.4" fill={`url(#${id}glow)`} />
+      <circle cx="36.4" cy="23" r="2.9" fill="#15803d" />
+      <circle cx="36.4" cy="23" r="2.4" fill="#4ade80" />
+      <circle cx="35.6" cy="22.2" r="0.8" fill="#fff" opacity="0.9" />
+      <Glow cx={36.4} cy={14.4} color="#ef4444" halo="#f87171" />
+    </>
+  )
+}
+
+function Counter({ id }: ArtProps) {
+  const ys = [13.8, 18.4, 23, 27.6, 32.2]
+  return (
+    <>
+      <defs>
+        <radialGradient id={`${id}glow`}>
+          <stop offset="0" stopColor="#f87171" stopOpacity="0.85" />
+          <stop offset="1" stopColor="#f87171" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <Shadow y={41} rx={19} />
+      <ModulePins left={[15.6, 20.2, 25.8, 30.4]} right={ys} />
+      <Pcb id={id} x={5} y={11} w={38} h={24} light="#0891b2" dark="#155e75" edge="#083344" />
+      <PowerMarks x={6.4} top={15.6} bottom={30.4} />
+      {/* the 16-pin counting chip */}
+      <ChipPins x={12.6} y={17} h={11.2} n={8} pitch={2.4} />
+      <Chip x={10.6} y={17} w={20.2} h={11.2} />
+      <path d="M10.6 21.3a1.3 1.3 0 0 1 0 2.6z" fill="#083344" />
+      <circle cx="12.7" cy="25.8" r="0.6" fill="#52525b" />
+      <rect x="15" y="20.8" width="12" height="1.1" rx="0.55" fill="#d4d4d8" opacity="0.6" />
+      <rect x="17" y="23.6" width="8" height="1" rx="0.5" fill="#d4d4d8" opacity="0.4" />
+      <rect x="8.6" y="12.8" width="2.2" height="1.4" rx="0.3" fill="#fef08a" />
+      {/* five lights, one for each count: the count is on the second */}
+      {ys.map((y, i) =>
+        i === 1 ? (
+          <g key={y}>
+            <circle cx="37" cy={y} r="4.8" fill={`url(#${id}glow)`} />
+            <circle cx="37" cy={y} r="1.9" fill="#b91c1c" />
+            <circle cx="37" cy={y} r="1.5" fill="#ef4444" />
+            <circle cx="36.5" cy={y - 0.5} r="0.55" fill="#fff" opacity="0.9" />
+          </g>
+        ) : (
+          <g key={y}>
+            <circle cx="37" cy={y} r="1.9" fill="#7f1d1d" />
+            <circle cx="37" cy={y} r="1.5" fill="#fca5a5" opacity="0.55" />
+            <circle cx="36.5" cy={y - 0.5} r="0.45" fill="#fff" opacity="0.5" />
+          </g>
+        ),
+      )}
+    </>
+  )
+}
+
+function Comparator({ id }: ArtProps) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}u`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#60a5fa" />
+          <stop offset="1" stopColor="#2563eb" />
+        </linearGradient>
+        <radialGradient id={`${id}s`} cx="0.35" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#fef3c7" />
+          <stop offset="1" stopColor="#a87b2c" />
+        </radialGradient>
+        <radialGradient id={`${id}glow`}>
+          <stop offset="0" stopColor="#4ade80" stopOpacity="0.85" />
+          <stop offset="1" stopColor="#4ade80" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <Shadow y={41} rx={19} />
+      <ModulePins left={[15.6, 20.2, 25.8, 30.4]} right={[23]} />
+      <Pcb id={id} x={5} y={11} w={38} h={24} light="#ca8a04" dark="#713f12" edge="#3f2306" holes={[[40.4, 13.6], [40.4, 32.4]]} />
+      <PowerMarks x={6.4} top={15.6} bottom={30.4} />
+      {/* the comparator chip, its triangle printed on top */}
+      <ChipPins x={12.2} y={18.2} h={10} n={4} pitch={2.6} />
+      <Chip x={10.2} y={18.2} w={11.8} h={10} />
+      <path d="M10.2 21.9a1.3 1.3 0 0 1 0 2.6z" fill="#3f2306" />
+      <g fill="none" stroke="#e4e4e7" strokeWidth="0.45" strokeLinejoin="round" opacity="0.85">
+        <path d="M13.8 20.3v6.2l5-3.1z" />
+        <path d="M14.5 21.9h1.2M15.1 21.3v1.2M14.5 25h1.2" strokeLinecap="round" />
+      </g>
+      {/* the blue many-turn trimmer that sets where it flips */}
+      <path d="M25 15.2 27 13.2h8.6l-2 2z" fill="#93c5fd" />
+      <path d="M33.6 15.2 35.6 13.2v7.4l-2 2z" fill="#1e3a8a" />
+      <rect x="25" y="15.2" width="8.6" height="7.4" rx="0.3" fill={`url(#${id}u)`} />
+      <rect x="25.6" y="15.7" width="7.4" height="0.6" rx="0.3" fill="#fff" opacity="0.4" />
+      <rect x="26" y="20.2" width="3.4" height="0.8" rx="0.3" fill="#bfdbfe" opacity="0.8" />
+      <ellipse cx="32.6" cy="14.2" rx="1.5" ry="0.9" fill={`url(#${id}s)`} />
+      <path d="M31.7 14.6l1.8-0.8" stroke="#5c4214" strokeWidth="0.4" strokeLinecap="round" />
+      {/* two tiny resistors, and the OUT light on */}
+      {[26.4, 29.8].map((x) => (
+        <g key={x}>
+          <rect x={x} y="26.4" width="2.4" height="1.3" rx="0.2" fill="#d4d4d8" />
+          <rect x={x + 0.5} y="26.4" width="1.4" height="1.3" fill="#141416" />
+        </g>
+      ))}
+      <circle cx="37.6" cy="23" r="4.6" fill={`url(#${id}glow)`} />
+      <rect x="36.4" y="22.2" width="2.4" height="1.6" rx="0.3" fill="#22c55e" />
+      <rect x="36.8" y="22.4" width="1" height="0.6" rx="0.2" fill="#fff" opacity="0.8" />
+      <Glow cx={37.6} cy={29.6} color="#ef4444" halo="#f87171" />
+    </>
+  )
+}
+
+function HBridge({ id }: ArtProps) {
+  const terminal = (x: number, y: number, n: number, vertical: boolean) => (
+    <g key={`${x}-${y}`}>
+      <rect x={x} y={y} width={vertical ? 5.6 : n * 4} height={vertical ? n * 4 : 5.6} rx="0.6" fill="#1e3a8a" transform="translate(0 0.9)" />
+      <rect x={x} y={y} width={vertical ? 5.6 : n * 4} height={vertical ? n * 4 : 5.6} rx="0.6" fill="#2563eb" />
+      {Array.from({ length: n }, (_, i) => {
+        const cx = vertical ? x + 2.8 : x + 2 + i * 4
+        const cy = vertical ? y + 2 + i * 4 : y + 2.8
+        return (
+          <g key={i}>
+            <circle cx={cx} cy={cy} r="1.45" fill={`url(#${id}u)`} />
+            <path d={`M${cx - 0.9} ${cy + 0.5}l1.8-1`} stroke="#52525b" strokeWidth="0.45" strokeLinecap="round" />
+          </g>
+        )
+      })}
+    </g>
+  )
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}u`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fafafa" />
+          <stop offset="0.6" stopColor="#d4d4d8" />
+          <stop offset="1" stopColor="#8b8b94" />
+        </linearGradient>
+        <linearGradient id={`${id}k`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#3f3f46" />
+          <stop offset="1" stopColor="#09090b" />
+        </linearGradient>
+      </defs>
+      <Shadow y={43} rx={20} />
+      <Pcb id={id} x={4} y={13} w={40} h={27} light="#ef4444" dark="#b91c1c" edge="#7f1d1d" holes={[[6.6, 37.4], [41.4, 37.4]]} />
+      {/* motor terminals left and right, power along the bottom */}
+      {terminal(5, 16, 2, true)}
+      {terminal(37.4, 16, 2, true)}
+      {terminal(9.6, 32.4, 3, false)}
+      <Header x={26} y={34} cols={8} rows={1} pin="#a1a1aa" />
+      <rect x="27.2" y="33.5" width="2.4" height="2.4" rx="0.3" fill="#18181b" />
+      <rect x="31.8" y="33.5" width="2.4" height="2.4" rx="0.3" fill="#18181b" />
+      {/* the big black heatsink standing up, with the driver chip bolted to its front */}
+      <rect x="14" y="4" width="20" height="18" rx="0.6" fill="#000" />
+      {Array.from({ length: 8 }, (_, i) => (
+        <g key={i}>
+          <rect x={14.4 + i * 2.45} y="4" width="1.7" height="17.5" fill={`url(#${id}k)`} />
+          <rect x={14.4 + i * 2.45} y="4" width="1.7" height="0.8" fill="#71717a" />
+        </g>
+      ))}
+      <rect x="14" y="18.6" width="20" height="4" fill="#18181b" />
+      <rect x="16.6" y="17.2" width="14.8" height="5.4" rx="0.5" fill="#27272a" />
+      <rect x="17.2" y="17.7" width="13.6" height="0.6" rx="0.3" fill="#fff" opacity="0.2" />
+      <circle cx="24" cy="19.6" r="1.2" fill={`url(#${id}u)`} />
+      {Array.from({ length: 8 }, (_, i) => (
+        <rect key={i} x={17.3 + i * 1.8} y="22.6" width="0.7" height="2.6" fill="#d4d4d8" />
+      ))}
+      {/* the big capacitor and the little regulator */}
+      <circle cx="12" cy="27.4" r="2.9" fill="#18181b" />
+      <circle cx="12" cy="27.4" r="2.3" fill="#3f3f46" />
+      <path d="M10.6 27.4h2.8M12 26v2.8" stroke="#a1a1aa" strokeWidth="0.4" />
+      <rect x="33.4" y="26.2" width="4.6" height="4" rx="0.4" fill="#27272a" />
+      <rect x="33.8" y="25.4" width="3.8" height="1.4" rx="0.3" fill="#a1a1aa" />
+      <Glow cx={38.8} cy={14.8} color="#ef4444" halo="#f87171" />
+    </>
+  )
+}
+
+function Multimeter({ id }: ArtProps) {
+  const top = 9.4
+  const h = 5.4
+  // "12.9" with the ghosts of the unlit bars, like a real LCD
+  const digits: [number, string][] = [
+    [17.4, 'bc'],
+    [21.3, 'abdeg'],
+    [26.3, 'abcdfg'],
+  ]
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}y`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#fcd34d" />
+          <stop offset="0.5" stopColor="#f2b10a" />
+          <stop offset="1" stopColor="#c98a04" />
+        </linearGradient>
+        <linearGradient id={`${id}f`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#3a3f48" />
+          <stop offset="1" stopColor="#1d2026" />
+        </linearGradient>
+        <linearGradient id={`${id}s`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#c9d3bd" />
+          <stop offset="1" stopColor="#a3af96" />
+        </linearGradient>
+        <radialGradient id={`${id}k`} cx="0.38" cy="0.32" r="0.8">
+          <stop offset="0" stopColor="#71717a" />
+          <stop offset="0.6" stopColor="#1f2125" />
+          <stop offset="1" stopColor="#09090b" />
+        </radialGradient>
+      </defs>
+      <Shadow y={44.5} rx={17} />
+      {/* the yellow rubber boot */}
+      <rect x="9" y="3" width="30" height="40" rx="4.6" fill="#a16207" transform="translate(0 1.2)" />
+      <rect x="9" y="3" width="30" height="40" rx="4.6" fill={`url(#${id}y)`} />
+      <rect x="11.5" y="3.7" width="25" height="1.2" rx="0.6" fill="#fff" opacity="0.55" />
+      {/* the dark face */}
+      <rect x="12" y="6" width="24" height="34" rx="2.4" fill={`url(#${id}f)`} />
+      {/* the screen */}
+      <rect x="14" y="8" width="20" height="8.8" rx="1.1" fill={`url(#${id}s)`} stroke="#0a0a0a" strokeWidth="0.6" />
+      {digits.map(([x, lit]) => (
+        <g key={x}>
+          {Object.entries(segmentBars(x, top, 3.5, h, 0.8)).map(([bar, points]) => (
+            <polygon key={bar} points={points} fill="#1a201b" opacity={lit.includes(bar) ? 1 : 0.08} />
+          ))}
+        </g>
+      ))}
+      <circle cx="25.4" cy={top + h - 0.35} r="0.45" fill="#1a201b" />
+      <rect x="14.6" y="8.6" width="18.8" height="1.1" rx="0.55" fill="#fff" opacity="0.4" />
+      {/* the big dial and the settings around it */}
+      {[-60, -20, 20, 60, 100, 140, 180, 220].map((a) => (
+        <rect
+          key={a}
+          x="23.55"
+          y="19.6"
+          width="0.9"
+          height="1.4"
+          rx="0.3"
+          fill={a === -60 ? '#fcd34d' : '#eef0f3'}
+          opacity={a === -60 ? 1 : 0.6}
+          transform={`rotate(${a} 24 27)`}
+        />
+      ))}
+      <circle cx="24" cy="27" r="5.7" fill="#0a0a0a" />
+      <circle cx="24" cy="27" r="5.2" fill={`url(#${id}k)`} />
+      <rect x="22.6" y="22" width="2.8" height="10" rx="1.4" fill="#2a2d33" transform="rotate(-60 24 27)" />
+      <rect x="23.1" y="22.5" width="0.8" height="9" rx="0.4" fill="#fff" opacity="0.2" transform="rotate(-60 24 27)" />
+      <circle cx="20.1" cy="24.7" r="0.75" fill="#f8fafc" />
+      {/* the leads plugged in: red into V, black into COM, out over the boot's edge */}
+      <path d="M18.6 37.6C15 40.6 9 38 5 42.6" fill="none" stroke="#c81e1e" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M29.4 37.6C33 40.6 39 38 43 42.6" fill="none" stroke="#1f2024" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M17.6 37.9C14.6 40 9.6 38 6.6 41.2" fill="none" stroke="#fca5a5" strokeWidth="0.4" strokeLinecap="round" opacity="0.6" />
+      <path d="M30.4 37.9C33.4 40 38.4 38 41.4 41.2" fill="none" stroke="#a1a1aa" strokeWidth="0.4" strokeLinecap="round" opacity="0.5" />
+      {[
+        { x: 18.6, plug: '#d32020', ring: '#b91c1c' },
+        { x: 29.4, plug: '#2a2b30', ring: '#52525b' },
+      ].map(({ x, plug, ring }) => (
+        <g key={x}>
+          <circle cx={x} cy="35.4" r="2.2" fill={ring} />
+          <circle cx={x} cy="35.4" r="1.6" fill={plug} />
+          <circle cx={x - 0.5} cy="34.9" r="0.55" fill="#fff" opacity="0.4" />
+        </g>
+      ))}
+    </>
+  )
+}
+
+function LogicProbe({ id }: ArtProps) {
+  const leds = [
+    { x: 21.5, on: '#ef4444', off: '#ef4444', lit: true },
+    { x: 25, on: '#22c55e', off: '#166534', lit: false },
+    { x: 28.5, on: '#f59e0b', off: '#92400e', lit: false },
+  ]
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${id}b`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#c4b5fd" />
+          <stop offset="0.45" stopColor="#7c3aed" />
+          <stop offset="1" stopColor="#3b0764" />
+        </linearGradient>
+        <linearGradient id={`${id}c`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#52525b" />
+          <stop offset="1" stopColor="#09090b" />
+        </linearGradient>
+        <linearGradient id={`${id}n`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fafafa" />
+          <stop offset="1" stopColor="#71717a" />
+        </linearGradient>
+        <radialGradient id={`${id}glow`}>
+          <stop offset="0" stopColor="#f87171" stopOpacity="0.85" />
+          <stop offset="1" stopColor="#f87171" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <Shadow y={42} rx={18} />
+      {/* its power leads: red to +, black to − */}
+      <path d="M8.6 35.2C6.4 36.8 4.2 36.4 2.8 34.4" fill="none" stroke="#dc2626" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M9.2 36.2C7.6 38.4 5.2 39.4 2.8 39.2" fill="none" stroke="#27272a" strokeWidth="1.2" strokeLinecap="round" />
+      <g transform="rotate(-38 24 24)">
+        {/* the needle tip and its cone */}
+        <path d="M40 23.6 46 24 40 24.4z" fill={`url(#${id}n)`} />
+        <path d="M34.5 21.2 40.4 23.3v1.4L34.5 26.8z" fill={`url(#${id}c)`} />
+        {/* the pen body */}
+        <rect x="6" y="20.6" width="29" height="6.8" rx="2.6" fill={`url(#${id}b)`} />
+        <rect x="8" y="21.3" width="25" height="1.1" rx="0.55" fill="#fff" opacity="0.45" />
+        <rect x="4.6" y="21.6" width="3" height="4.8" rx="1" fill={`url(#${id}c)`} />
+        <path d="M10 20.8v6.4M11.3 20.8v6.4M12.6 20.8v6.4" stroke="#2e1065" strokeWidth="0.45" opacity="0.5" />
+        {leds.map((l) => (
+          <g key={l.x}>
+            {l.lit && <circle cx={l.x} cy="24" r="3.4" fill={`url(#${id}glow)`} />}
+            <circle cx={l.x} cy="24" r="1.4" fill="#1e1b4b" />
+            <circle cx={l.x} cy="24" r="1" fill={l.lit ? l.on : l.off} />
+            <circle cx={l.x - 0.3} cy="23.7" r="0.35" fill="#fff" opacity={l.lit ? 0.9 : 0.45} />
+          </g>
+        ))}
+      </g>
+    </>
+  )
+}
+
 const ART: Record<PartType, (p: ArtProps) => ReactNode> = {
   battery: Battery,
   switch: Switch,
@@ -2976,27 +3886,26 @@ const ART: Record<PartType, (p: ArtProps) => ReactNode> = {
   xorGate: XorGate,
   timer555: Timer555,
   oscilloscope: Oscilloscope,
-  // TODO(lab-art): placeholders until each part has its own drawing
-  zener: Diode,
-  pnp: Transistor,
-  mosfet: Regulator,
-  optocoupler: Timer555,
-  laser: Led,
-  irLed: Led,
-  solenoid: Electromagnet,
-  pump: Motor,
-  bell: Buzzer,
-  barGraph: SegmentDisplay,
-  trafficLight: RgbLed,
-  fan: Motor,
-  nandGate: AndGate,
-  norGate: OrGate,
-  latch: Timer555,
-  counter: Timer555,
-  comparator: Timer555,
-  hBridge: Relay,
-  multimeter: Voltmeter,
-  logicProbe: Voltmeter,
+  zener: Zener,
+  pnp: Pnp,
+  mosfet: Mosfet,
+  optocoupler: Optocoupler,
+  laser: Laser,
+  irLed: IrLed,
+  solenoid: Solenoid,
+  pump: Pump,
+  bell: Bell,
+  barGraph: BarGraph,
+  trafficLight: TrafficLight,
+  fan: Fan,
+  nandGate: NandGate,
+  norGate: NorGate,
+  latch: Latch,
+  counter: Counter,
+  comparator: Comparator,
+  hBridge: HBridge,
+  multimeter: Multimeter,
+  logicProbe: LogicProbe,
 }
 
 /** A drawing of a part. `size` is the width and height in pixels. */

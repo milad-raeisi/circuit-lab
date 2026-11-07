@@ -154,7 +154,9 @@ export function ZenerModel({
           ))}
         <Halo color="#ffb067" tint={tint} intensity={halo} position={[0, 0, 0.14]} scale={1.35} />
       </group>
-      <Smoke active={burnt} position={[0, 0.25, 0]} />
+      <group position={[0, 0.1, 0.05]} scale={0.55}>
+        <Smoke active={burnt} position={[0, 0, 0]} rise={0.5} />
+      </group>
     </group>
   )
 }

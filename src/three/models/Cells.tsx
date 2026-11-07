@@ -14,7 +14,7 @@ import { BRUSHED, COPPER, METAL, unit, useBuilt } from './shared'
 /* ----------------------------------------------------------------- lemon */
 
 const LEMON_HALF = 0.3
-const LEMON_R = 0.21
+const LEMON_R = 0.235
 const LEMON_GAP = 0.66
 
 /** A lemon lying along x: round in the middle, a little point at each end, tiny pores all over. */
@@ -48,7 +48,7 @@ function OneLemon({ turn }: { turn: number }) {
   const geometry = useBuilt(lemonGeometry)
   return (
     <group rotation={[0, turn, 0]}>
-      <mesh geometry={geometry} scale={[1, 0.92, 1]}>
+      <mesh geometry={geometry} scale={[1, 0.95, 1]}>
         <meshStandardMaterial color="#facc15" roughness={0.55} emissive="#a16207" emissiveIntensity={0.06} />
       </mesh>
       {/* the stalk end */}
@@ -57,11 +57,11 @@ function OneLemon({ turn }: { turn: number }) {
         <meshStandardMaterial color="#65a30d" roughness={0.7} />
       </mesh>
       {/* the copper strip on the right, the zinc nail on the left */}
-      <mesh position={[0.12, LEMON_R * 0.92 - 0.01, 0.02]} rotation={[0, 0.25, -0.1]}>
+      <mesh position={[0.12, LEMON_R * 0.95 - 0.01, 0.02]} rotation={[0, 0.25, -0.1]}>
         <boxGeometry args={[0.13, 0.18, 0.018]} />
         <meshStandardMaterial {...COPPER} />
       </mesh>
-      <group position={[-0.12, LEMON_R * 0.92 + 0.03, 0.02]} rotation={[0, 0, 0.12]}>
+      <group position={[-0.12, LEMON_R * 0.95 + 0.03, 0.02]} rotation={[0, 0, 0.12]}>
         <mesh>
           <cylinderGeometry args={[0.014, 0.014, 0.22, 8]} />
           <meshStandardMaterial color="#a1a1aa" metalness={0.7} roughness={0.35} />
@@ -102,9 +102,9 @@ export function LemonModel({ cells }: { cells: number }) {
   const width = (n - 1) * LEMON_GAP + LEMON_HALF * 2 + 0.5
   const fit = Math.min(1, 2.3 / width)
   const xs = Array.from({ length: n }, (_, i) => (i - (n - 1) / 2) * LEMON_GAP)
-  const top = LEMON_R * 0.92
+  const top = LEMON_R * 0.95
   return (
-    <group position={[0, -0.12, 0]} rotation={[0.42, 0, 0]} scale={fit}>
+    <group position={[0, -0.1, 0]} rotation={[0.3, 0, 0]} scale={fit}>
       {xs.map((x, i) => (
         <group key={i} position={[x, 0, i % 2 === 0 ? 0 : -0.06]}>
           <OneLemon turn={TURNS[i]} />

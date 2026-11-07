@@ -98,7 +98,7 @@ export function SolenoidModel({ push, hot }: { push: number; hot: boolean }) {
   })
 
   return (
-    <group position={[0.12, 0.02, 0]} rotation={[0.42, -0.42, 0]}>
+    <group position={[0.0, 0.02, 0]} rotation={[0.4, -0.18, 0]}>
       {/* the bent steel frame: a base with mounting holes and two ends the plunger runs through */}
       <RoundedBox args={[2 * END + PLATE, PLATE, 0.92]} radius={0.012} smoothness={2} position={[0, BASE_Y - PLATE / 2, 0]}>
         <meshStandardMaterial {...ZINC} />

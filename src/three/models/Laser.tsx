@@ -9,9 +9,9 @@ import { METAL, useBuilt } from './shared'
 /* The beam runs along +x at y = 0, from the lens to the middle of the card. */
 const LENS_X = -0.4
 const CARD_X = 1.06
-const CARD = 0.66
+const CARD = 0.76
 /** the card is turned partly toward you, so the beam meets it at a slant */
-const CARD_TURN = 0.72
+const CARD_TURN = 0.8
 const BARREL_R = 0.17
 const BOARD_TOP = -BARREL_R
 const BOARD_X = -1.0
@@ -130,7 +130,7 @@ export function LaserModel({ level, burnt }: { level: number; burnt: boolean }) 
   const barrel = burnt ? { ...BRASS, color: SOOT, metalness: 0.3, roughness: 0.8 } : BRASS
 
   return (
-    <group position={[0.18, -0.02, 0]} rotation={[0.36, 0.4, 0]}>
+    <group position={[0.16, -0.02, 0]} rotation={[0.36, 0.3, 0]}>
       {/* the black KY-008 board */}
       <RoundedBox args={[1.0, 0.06, 0.8]} radius={0.015} smoothness={2} position={[BOARD_X, BOARD_TOP - 0.03, 0]}>
         <meshStandardMaterial color="#141417" roughness={0.6} metalness={0.1} />

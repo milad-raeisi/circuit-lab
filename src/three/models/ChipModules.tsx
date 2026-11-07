@@ -193,7 +193,7 @@ const CHIP_TOP = FACE + 0.112
 
 /* ----------------------------------------------------------------- latch */
 
-const LATCH_SYMBOL: [number, number] = [0.7, 0.34]
+const LATCH_SYMBOL: [number, number] = [0.84, 0.38]
 
 /** The latch symbol: a box with S and R going in and Q coming out. */
 function latchSymbol() {
@@ -202,11 +202,11 @@ function latchSymbol() {
     const u = pw / w
     ctx.strokeStyle = SILK.color
     ctx.fillStyle = SILK.color
-    ctx.lineWidth = 0.018 * u
-    const box = { x: pw / 2 - 0.15 * u, y: ph / 2 - 0.14 * u, w: 0.3 * u, h: 0.28 * u }
+    ctx.lineWidth = 0.02 * u
+    const box = { x: pw / 2 - 0.2 * u, y: ph / 2 - 0.16 * u, w: 0.4 * u, h: 0.32 * u }
     ctx.strokeRect(box.x, box.y, box.w, box.h)
     // legs: S and R in on the left, Q out on the right
-    for (const dy of [-0.08, 0.08]) {
+    for (const dy of [-0.085, 0.085]) {
       ctx.beginPath()
       ctx.moveTo(0, ph / 2 + dy * u)
       ctx.lineTo(box.x, ph / 2 + dy * u)
@@ -216,13 +216,13 @@ function latchSymbol() {
     ctx.moveTo(box.x + box.w, ph / 2)
     ctx.lineTo(pw, ph / 2)
     ctx.stroke()
-    ctx.font = `700 ${0.1 * u}px ${PRINT_FONT}`
+    ctx.font = `700 ${0.125 * u}px ${PRINT_FONT}`
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'left'
-    ctx.fillText('S', box.x + 0.03 * u, ph / 2 - 0.08 * u)
-    ctx.fillText('R', box.x + 0.03 * u, ph / 2 + 0.08 * u)
+    ctx.fillText('S', box.x + 0.035 * u, ph / 2 - 0.08 * u)
+    ctx.fillText('R', box.x + 0.035 * u, ph / 2 + 0.08 * u)
     ctx.textAlign = 'right'
-    ctx.fillText('Q', box.x + box.w - 0.03 * u, ph / 2)
+    ctx.fillText('Q', box.x + box.w - 0.035 * u, ph / 2)
   })
 }
 
@@ -232,7 +232,7 @@ function latchSymbol() {
  */
 export function LatchModel({ set, reset, q, powered }: { set: number; reset: number; q: number; powered: boolean }) {
   const symbol = latchSymbol()
-  const label = markingTexture(['HC279'], 0.3, 0.07)
+  const label = markingTexture(['HC279'], 0.22, 0.05)
   return (
     <group position={[0.06, 0, 0]} rotation={TILT}>
       <Board
@@ -255,13 +255,13 @@ export function LatchModel({ set, reset, q, powered }: { set: number; reset: num
       />
       <DipChip width={0.98} height={0.44} pins={7} position={[0, 0, FACE]} />
       <Print texture={symbol} width={LATCH_SYMBOL[0]} height={LATCH_SYMBOL[1]} position={[0, 0.02, CHIP_TOP]} />
-      <Print texture={label} width={0.3} height={0.07} position={[0.24, -0.16, CHIP_TOP]} />
+      <Print texture={label} width={0.22} height={0.05} position={[0.32, -0.175, CHIP_TOP]} />
       <Indicator position={[-0.8, 0.2, FACE + 0.02]} color="#22c55e" off="#bbf7d0" level={powered ? set : 0} />
       <Indicator position={[-0.8, -0.2, FACE + 0.02]} color="#f97316" off="#fed7aa" level={powered ? reset : 0} />
       <Smd x={-0.66} y={0.33} kind="r" />
       <Smd x={-0.66} y={-0.33} kind="r" />
       <Smd x={0.62} y={0.3} kind="c" turn />
-      <RoundLed x={0.76} y={0} color="#22c55e" off="#86efac" level={powered ? q : 0} radius={0.085} height={0.13} />
+      <RoundLed x={0.76} y={0} color="#22c55e" off="#15803d" level={powered ? q : 0} radius={0.085} height={0.13} />
       <Indicator position={[0.62, 0.47, FACE + 0.02]} color="#ef4444" off="#fecaca" level={powered ? 1 : 0} size={[0.07, 0.045, 0.035]} halo={0.35} />
       <PowerHeader />
       <SidePin x={PIN_X} y={0} z={FACE + 0.06} direction={1} length={0.22} />
@@ -320,7 +320,7 @@ export function CounterModel({ count, clock, powered }: { count: number; clock: 
       <Indicator position={[-0.3, 0.47, FACE + 0.02]} color="#ef4444" off="#fecaca" level={powered ? 1 : 0} size={[0.07, 0.045, 0.035]} halo={0.35} />
       <Smd x={-0.48} y={0.38} kind="c" />
       {COUNTER_Y.map((y, i) => (
-        <RoundLed key={y} x={COUNTER_LED_X} y={y} color="#ef4444" off="#fca5a5" level={powered && at === i ? 1 : 0} speed={26} />
+        <RoundLed key={y} x={COUNTER_LED_X} y={y} color="#ff3b30" off="#b91c1c" level={powered && at === i ? 1 : 0} speed={26} />
       ))}
       <Print texture={digits} width={0.08} height={1.04} position={[0.83, 0, FACE + 0.002]} />
       <PowerHeader />
@@ -546,7 +546,7 @@ export function HBridgeModel({
     if (sinkMaterial.current) sinkMaterial.current.emissiveIntensity = warm.current * 0.5
   })
   return (
-    <group position={[0.05, 0, 0]} rotation={TILT}>
+    <group position={[0.1, 0, 0]} rotation={TILT}>
       <Board
         color="#b91c1c"
         trace="#cc2a2a"
@@ -580,7 +580,9 @@ export function HBridgeModel({
           <meshStandardMaterial {...METAL} />
         </mesh>
       </group>
-      <Smoke active={hot} position={[SINK_X, SINK_Y + 0.2, FACE + 0.35]} rise={0.3} color="#d4d4d8" />
+      <group position={[SINK_X, SINK_Y, FACE + 0.36]} scale={0.75}>
+        <Smoke active={hot} position={[0, 0, 0]} rise={0.35} color="#d4d4d8" />
+      </group>
       {/* which way the motor turns */}
       <DirectionArrow y={0.12} turn={1} color="#22c55e" level={powered && direction > 0 ? 1 : 0} />
       <DirectionArrow y={-0.12} turn={-1} color="#f59e0b" level={powered && direction < 0 ? 1 : 0} />

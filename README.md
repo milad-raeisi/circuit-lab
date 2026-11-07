@@ -22,7 +22,7 @@ Requires Node.js 22.12 or later (the Animate UI CLI needs it).
 - **Switches and knobs:** switch, push button, dimmer, potentiometer (a real voltage divider) and a relay.
 - **Electronic parts:** resistor (with a colour-code lesson), capacitor (charges and discharges over time), diode, NPN transistor (B, C, E), fuse (blows to protect the rest) and a 7805 regulator.
 - **Chips and logic:** NOT, AND, OR and XOR gates (with a live truth table) and a 555 blinker.
-- **Light, sound and motion:** lamp, LED, RGB LED, motor, vibration motor, buzzer, speaker, electromagnet and a servo motor whose arm follows its signal.
+- **Light, sound and motion:** lamp, LED, RGB LED, motor, vibration motor, buzzer (a beep, or a real siren: the slow police wail, the fast yelp or the two-tone nee-naw), speaker, electromagnet and a servo motor whose arm follows its signal.
 - **Sensors:** light sensor (LDR), thermistor, tilt switch, magnet (reed) switch, and + / − / S modules for temperature, distance (ultrasonic), motion (PIR), sound, smoke/gas, soil moisture and touch. Each has a slider, hold button or toggle on its card.
 - **Screens:** seven-segment digits, a text LCD, OLED and colour TFT screens, an LED matrix and LED walls of any size for scrolling shop signs and a city TV that plays your own photos and videos (stored in the browser).
 - **Meters:** voltmeter and ammeter with a needle and an LCD readout, and an oscilloscope that draws the voltage over time.

@@ -762,6 +762,19 @@ describe('sound and music', () => {
     expect(morning.last.parts.moon.level).toBe(0)
   })
 
+  it('ambulance: red and white take turns and the hi-lo siren never stops', () => {
+    expect(at('ambulance', 0.25).red.status).toBe('on')
+    expect(at('ambulance', 0.25).white.level).toBe(0)
+    expect(at('ambulance', 0.75).white.status).toBe('on')
+    const { steps, parts } = run('ambulance', 2)
+    expect(steps.every((r) => on(r, 'siren'))).toBe(true)
+    expect(parts.find((p) => p.id === 'siren')?.data.sound).toBe('hilo')
+  })
+
+  it('laser alarm yelps like a police car', () => {
+    expect(run('laserAlarm', 0.1).parts.find((p) => p.id === 'siren')?.data.sound).toBe('yelp')
+  })
+
   it('ding-dong: press for the high note, let go for the low one', () => {
     const idle = run('dingDong')
     expect(on(idle.last, 'power')).toBe(true)

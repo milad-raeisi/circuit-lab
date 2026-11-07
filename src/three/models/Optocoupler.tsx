@@ -188,7 +188,9 @@ export function OptocouplerModel({
         <planeGeometry args={[0.5, 0.13]} />
         <meshStandardMaterial map={print} transparent opacity={burnt ? 0.3 : 0.9} roughness={0.7} depthWrite={false} />
       </mesh>
-      <Smoke active={burnt} position={[0, 0.2, TOP]} rise={0.4} />
+      <group position={[0, 0, TOP]} scale={0.7}>
+        <Smoke active={burnt} position={[0, 0, 0]} rise={0.35} />
+      </group>
     </group>
   )
 }

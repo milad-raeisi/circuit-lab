@@ -34,6 +34,7 @@ export function IrLedModel({ level, burnt, camera }: { level: number; burnt: boo
   const dome = useRef<THREE.MeshStandardMaterial>(null)
   const die = useRef<THREE.MeshStandardMaterial>(null)
   const light = useRef<THREE.PointLight>(null)
+  const glow = useRef(0)
   const core = useRef(0)
 
   useFrame((_, dt) => {
@@ -41,10 +42,11 @@ export function IrLedModel({ level, burnt, camera }: { level: number; burnt: boo
     const target = !burnt && camera ? Math.min(1.3, Math.max(0, level)) : 0
     seen.current = damp(seen.current, target, 18, dt)
     const b = seen.current
-    for (const m of [lens.current, dome.current]) if (m) m.emissiveIntensity = b * 1.2
+    for (const m of [lens.current, dome.current]) if (m) m.emissiveIntensity = b * 0.45
     if (die.current) die.current.emissiveIntensity = b * 7
     if (light.current) light.current.intensity = b * 2.2
-    core.current = b * 0.9
+    glow.current = b * 0.7
+    core.current = b * 0.75
   })
 
   const epoxy = burnt ? '#3f3f46' : EPOXY
@@ -124,8 +126,8 @@ export function IrLedModel({ level, burnt, camera }: { level: number; burnt: boo
       </mesh>
 
       {/* through a camera: a wide violet bloom with a white-hot middle */}
-      <Halo color={SEEN} intensity={seen} position={[0, 0.3, 0.12]} scale={1.85} />
-      <Halo color="#ffffff" intensity={core} position={[0, 0.26, 0.14]} scale={0.75} />
+      <Halo color={SEEN} intensity={glow} position={[0, 0.3, 0.12]} scale={1.7} />
+      <Halo color="#ffffff" intensity={core} position={[0.06, 0.22, 0.1]} scale={0.5} />
       <pointLight ref={light} position={[0, 0.35, 0.5]} color={SEEN} intensity={0} distance={3} decay={1.5} />
       <Smoke active={burnt} position={[0, 0.65, 0]} rise={0.45} />
     </group>

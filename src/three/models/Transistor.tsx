@@ -97,7 +97,10 @@ export function TransistorModel({
         </mesh>
       ))}
       <Halo color={look.halo} intensity={halo} position={[0, 0.13, FACE_Z + 0.08]} scale={1.1} />
-      <Smoke active={burnt} position={[0, 0.66, 0]} rise={0.45} />
+      {/* small puffs from the body, so they stay inside the window */}
+      <group position={[0, 0.3, 0.2]} scale={0.6}>
+        <Smoke active={burnt} position={[0, 0, 0]} rise={0.4} />
+      </group>
     </group>
   )
 }
