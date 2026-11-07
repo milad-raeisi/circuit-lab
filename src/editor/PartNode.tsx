@@ -128,7 +128,7 @@ function Terminal({ id, def, rotation }: { id: string; def: TerminalDef; rotatio
 
 /** Colour of the little indicator lamp for each state. */
 const LED_COLOR: Record<PartStatus, string> = {
-  idle: 'oklch(0.78 0.01 265)',
+  idle: 'oklch(0.78 0.01 60)',
   weak: '#f59e0b',
   on: '#22c55e',
   over: '#f97316',
@@ -179,7 +179,7 @@ function CardTitle({
               transition={{ type: 'spring', stiffness: 420, damping: 30 }}
               className={cn(
                 'block text-[10.5px] leading-none font-medium whitespace-nowrap',
-                thinking ? 'text-violet-700 dark:text-violet-300' : STATUS_TEXT[status],
+                thinking ? 'text-amber-700 dark:text-amber-300' : STATUS_TEXT[status],
               )}
             >
               {label}
@@ -196,7 +196,7 @@ function CardTitle({
           thinking && 'status-led--thinking',
           !thinking && (status === 'short' || status === 'over') && 'status-led--blink',
         )}
-        style={{ ['--led' as string]: thinking ? '#8b7cf6' : LED_COLOR[status] }}
+        style={{ ['--led' as string]: thinking ? '#f2aa00' : LED_COLOR[status] }}
       />
     </div>
   )
@@ -462,7 +462,7 @@ function NodeControl({ id, data, result }: { id: string; data: PartData; result?
         <HoldButton
           held={sense > 0.5}
           label={t.sense[type]}
-          className="bg-violet-500 shadow-violet-500/30"
+          className="bg-primary shadow-primary/30"
           onHold={(down) => {
             updatePart(id, { sense: down ? 1 : 0 }, { history: false })
             playClick(down)

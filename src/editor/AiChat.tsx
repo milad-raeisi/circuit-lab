@@ -44,7 +44,7 @@ function ideaText(idea: Suggestion, ai: AiBook, lang: Lang): string {
 
 /** A small round lamp before the connection line, like the one on each card. */
 function Lamp({ tone, pulse }: { tone: 'idle' | 'on' | 'warn'; pulse?: boolean }) {
-  const color = tone === 'on' ? '#22c55e' : tone === 'warn' ? '#f59e0b' : 'oklch(0.72 0.01 265)'
+  const color = tone === 'on' ? '#22c55e' : tone === 'warn' ? '#f59e0b' : 'oklch(0.72 0.01 60)'
   return (
     <span
       aria-hidden
@@ -306,7 +306,7 @@ function Thinking({ boardId, since, ai }: { boardId: string; since: number; ai: 
     <div className="flex items-center gap-2" role="status">
       <Avatar />
       <div className="flex min-w-0 flex-1 items-center gap-2 text-sm text-muted-foreground">
-        <ThinkingDots className="text-violet-500" />
+        <ThinkingDots className="text-amber-500" />
         <span className="truncate">{ai.thinkingNow}</span>
         <span className="text-xs tabular-nums">{ai.seconds(seconds)}</span>
       </div>

@@ -54,72 +54,74 @@
 }
 
 :root {
-    --background: oklch(0.992 0.003 265);
-    --foreground: oklch(0.21 0.025 270);
+    /* the logo's two colours: bulb red for actions, filament orange for focus and highlights;
+       the greys lean warm so they sit with both */
+    --background: oklch(0.993 0.003 80);
+    --foreground: oklch(0.2 0.015 40);
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.21 0.025 270);
+    --card-foreground: oklch(0.2 0.015 40);
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.21 0.025 270);
-    --primary: oklch(0.56 0.22 278);
+    --popover-foreground: oklch(0.2 0.015 40);
+    --primary: oklch(0.581 0.238 29.2);
     --primary-foreground: oklch(0.99 0 0);
-    --secondary: oklch(0.955 0.012 270);
-    --secondary-foreground: oklch(0.3 0.04 275);
-    --muted: oklch(0.958 0.008 268);
-    --muted-foreground: oklch(0.5 0.025 268);
-    --accent: oklch(0.945 0.025 275);
-    --accent-foreground: oklch(0.3 0.06 278);
+    --secondary: oklch(0.962 0.012 75);
+    --secondary-foreground: oklch(0.3 0.04 45);
+    --muted: oklch(0.962 0.007 75);
+    --muted-foreground: oklch(0.5 0.02 50);
+    --accent: oklch(0.96 0.035 80);
+    --accent-foreground: oklch(0.32 0.07 50);
     --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.912 0.011 268);
-    --input: oklch(0.9 0.012 268);
-    --ring: oklch(0.6 0.2 278);
+    --border: oklch(0.915 0.01 70);
+    --input: oklch(0.9 0.012 70);
+    --ring: oklch(0.787 0.164 78.1);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
     --radius: 0.375rem;
-    --sidebar: oklch(0.992 0.003 265);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.56 0.22 278);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.955 0.014 275);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.912 0.011 268);
-    --sidebar-ring: oklch(0.708 0 0);
+    --sidebar: oklch(0.993 0.003 80);
+    --sidebar-foreground: oklch(0.2 0.015 40);
+    --sidebar-primary: oklch(0.581 0.238 29.2);
+    --sidebar-primary-foreground: oklch(0.99 0 0);
+    --sidebar-accent: oklch(0.96 0.03 80);
+    --sidebar-accent-foreground: oklch(0.2 0.015 40);
+    --sidebar-border: oklch(0.915 0.01 70);
+    --sidebar-ring: oklch(0.787 0.164 78.1);
 }
 
 .dark {
-    --background: oklch(0.175 0.02 272);
-    --foreground: oklch(0.96 0.01 265);
-    --card: oklch(0.222 0.024 272);
-    --card-foreground: oklch(0.96 0.01 265);
-    --popover: oklch(0.22 0.028 272);
-    --popover-foreground: oklch(0.96 0.01 265);
-    --primary: oklch(0.7 0.18 278);
-    --primary-foreground: oklch(0.16 0.03 275);
-    --secondary: oklch(0.26 0.028 272);
-    --secondary-foreground: oklch(0.96 0.01 265);
-    --muted: oklch(0.25 0.022 272);
-    --muted-foreground: oklch(0.71 0.025 268);
-    --accent: oklch(0.29 0.045 278);
-    --accent-foreground: oklch(0.96 0.01 265);
+    --background: oklch(0.175 0.012 45);
+    --foreground: oklch(0.96 0.008 80);
+    --card: oklch(0.22 0.014 45);
+    --card-foreground: oklch(0.96 0.008 80);
+    --popover: oklch(0.22 0.016 45);
+    --popover-foreground: oklch(0.96 0.008 80);
+    --primary: oklch(0.6 0.235 29);
+    --primary-foreground: oklch(0.99 0 0);
+    --secondary: oklch(0.26 0.016 45);
+    --secondary-foreground: oklch(0.96 0.008 80);
+    --muted: oklch(0.25 0.014 45);
+    --muted-foreground: oklch(0.72 0.02 70);
+    --accent: oklch(0.3 0.04 55);
+    --accent-foreground: oklch(0.96 0.008 80);
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(1 0 0 / 9%);
     --input: oklch(1 0 0 / 14%);
-    --ring: oklch(0.62 0.18 278);
+    --ring: oklch(0.79 0.16 78);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.175 0.02 272);
+    --sidebar: oklch(0.175 0.012 45);
     --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.7 0.18 278);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.26 0.03 275);
+    --sidebar-primary: oklch(0.6 0.235 29);
+    --sidebar-primary-foreground: oklch(0.99 0 0);
+    --sidebar-accent: oklch(0.27 0.03 55);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --sidebar-ring: oklch(0.79 0.16 78);
 }
 
 @layer base {
@@ -149,20 +151,20 @@
   /* Geist has no Arabic letters, so Persian and Arabic words inside English
    * text (like the language menu) fall through to Vazirmatn, not a system font */
   --app-font: 'Geist Variable', 'Vazirmatn Variable', sans-serif;
-  --board-bg: oklch(0.958 0.011 268);
-  --board-dots: oklch(0.55 0.03 265 / 0.26);
-  --wire-outline: oklch(0.25 0.02 265 / 0.5);
-  --terminal-ring: oklch(0.45 0.02 265);
-  --stage-bg: oklch(0.972 0.007 268);
-  --stage-line: oklch(0.3 0.03 270 / 0.07);
-  --stage-hole: oklch(0.3 0.03 270 / 0.11);
+  --board-bg: oklch(0.962 0.008 75);
+  --board-dots: oklch(0.55 0.03 60 / 0.26);
+  --wire-outline: oklch(0.25 0.02 50 / 0.5);
+  --terminal-ring: oklch(0.45 0.02 50);
+  --stage-bg: oklch(0.975 0.006 75);
+  --stage-line: oklch(0.3 0.03 50 / 0.07);
+  --stage-hole: oklch(0.3 0.03 50 / 0.11);
   --card-highlight: oklch(1 0 0 / 0.9);
   --shadow-card:
-    0 1px 2px oklch(0.25 0.03 270 / 0.06),
-    0 8px 20px -10px oklch(0.25 0.03 270 / 0.22);
+    0 1px 2px oklch(0.25 0.03 40 / 0.06),
+    0 8px 20px -10px oklch(0.25 0.03 40 / 0.22);
   --shadow-float:
-    0 1px 2px oklch(0.25 0.03 270 / 0.05),
-    0 12px 32px -12px oklch(0.25 0.03 270 / 0.28);
+    0 1px 2px oklch(0.25 0.03 40 / 0.05),
+    0 12px 32px -12px oklch(0.25 0.03 40 / 0.28);
 }
 
 html[lang='fa'],
@@ -181,11 +183,11 @@ html[lang='ar'] {
 
 .dark {
   /* the board becomes a dark room so lamps and LEDs really shine */
-  --board-bg: oklch(0.135 0.02 272);
-  --board-dots: oklch(0.75 0.03 270 / 0.14);
+  --board-bg: oklch(0.135 0.012 45);
+  --board-dots: oklch(0.75 0.03 70 / 0.14);
   --wire-outline: oklch(0 0 0 / 0.55);
-  --terminal-ring: oklch(0.8 0.02 265);
-  --stage-bg: oklch(0.165 0.02 272);
+  --terminal-ring: oklch(0.8 0.02 60);
+  --stage-bg: oklch(0.165 0.012 45);
   --stage-line: oklch(1 0 0 / 0.06);
   --stage-hole: oklch(1 0 0 / 0.07);
   --card-highlight: oklch(1 0 0 / 0.06);
@@ -323,7 +325,7 @@ html[lang='ar'] {
 
 /* status: a tiny indicator lamp, like the one on a real power supply */
 .status-led {
-  --led: oklch(0.78 0.01 265);
+  --led: oklch(0.78 0.01 60);
   flex-shrink: 0;
   width: 8px;
   height: 8px;
@@ -1278,23 +1280,23 @@ html[lang='ar'] {
 }
 
 /* ── the AI board ──
- * The card's "Ask" button wears the board's own violet; while the model
- * thinks, the title lamp breathes and the card's edge glows softly. */
+ * The card's "Ask" button wears the logo's red; while the model thinks, the
+ * title lamp breathes and the card's edge glows orange, like a filament. */
 
 .ai-ask {
-  --llama-eyes: #3b2f86;
-  background: linear-gradient(180deg, #7a69dc, #5d4cc4);
+  --llama-eyes: #5c0a00;
+  background: linear-gradient(180deg, #f2382c, #d40000);
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 0.22),
-    0 1px 2px oklch(0.25 0.1 280 / 0.35);
+    0 1px 2px oklch(0.35 0.15 29 / 0.35);
 }
 
 .ai-ask:hover {
-  background: linear-gradient(180deg, #8475e2, #6553cb);
+  background: linear-gradient(180deg, #f64a3f, #dc0d0d);
 }
 
 .ai-ask--thinking {
-  background: linear-gradient(180deg, #6a5bc9, #4f40ad);
+  background: linear-gradient(180deg, #e0281d, #bf0000);
 }
 
 .ai-dots > span {
@@ -1336,10 +1338,10 @@ html[lang='ar'] {
 }
 
 .part-node--thinking:not(.part-node--selected) {
-  border-color: color-mix(in oklch, #8b7cf6 55%, var(--border));
+  border-color: color-mix(in oklch, #f2aa00 55%, var(--border));
   box-shadow:
-    0 0 0 1px color-mix(in oklch, #8b7cf6 30%, transparent),
-    0 12px 28px -12px color-mix(in oklch, #8b7cf6 60%, transparent);
+    0 0 0 1px color-mix(in oklch, #f2aa00 30%, transparent),
+    0 12px 28px -12px color-mix(in oklch, #f2aa00 60%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
