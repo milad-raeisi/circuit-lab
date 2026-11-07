@@ -103,7 +103,7 @@ export function RainSensorModel({ sense, level, powered }: SensorProps) {
   })
 
   return (
-    <group position={[0.05, 0.06, 0]} rotation={[0.08, -0.12, 0]}>
+    <group position={[-0.06, 0.06, 0]} rotation={[0.08, -0.12, 0]}>
       {/* the plate: blue board, nickel combs, two pins at its far end */}
       <group position={[PLATE_X, PLATE_Y, 0]} rotation={[PLATE_TILT, 0, 0]}>
         <RoundedBox args={[PLATE_W, PLATE_H, BOARD_T]} radius={0.02} smoothness={2}>

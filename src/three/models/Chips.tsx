@@ -7,15 +7,15 @@ import { Halo, Smoke, damp } from '../helpers'
 import { Indicator, SidePin } from './kit'
 import { METAL, SILK, unit, useBuiltWith } from './shared'
 
-const BOARD_T = 0.05
-const FACE = BOARD_T / 2
+export const BOARD_T = 0.05
+export const FACE = BOARD_T / 2
 /** chip modules lean back a little and turn to show their edge, like the sensor modules */
 const TILT: [number, number, number] = [-0.3, 0.22, 0]
 
 /* ------------------------------------------------------------- DIP chip */
 
 /** A black DIP chip lying on a board: `pins` legs along each long side, a notch at the left end. */
-function DipChip({ width, height, pins, position }: { width: number; height: number; pins: number; position: [number, number, number] }) {
+export function DipChip({ width, height, pins, position }: { width: number; height: number; pins: number; position: [number, number, number] }) {
   const pitch = (width - 0.16) / (pins - 1)
   return (
     <group position={position}>

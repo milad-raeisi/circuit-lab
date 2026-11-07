@@ -152,7 +152,7 @@ export function FlameSensorModel({ sense, level, powered }: SensorProps) {
   })
 
   return (
-    <group position={[0.05, 0.02, 0]} rotation={[MODULE_TILT[0] * 0.6, 0.35, 0]}>
+    <group position={[0.26, 0.02, 0]} rotation={[MODULE_TILT[0] * 0.6, 0.35, 0]}>
       <group position={[0.42, 0.02, 0]}>
         <ModuleBoard width={1.18} height={0.56} color="#1d4ed8" pins={4} leds={[[0.44, 0.13], [0.44, -0.03]]} powered={powered} level={level}>
           <Trimmer x={-0.05} y={0.06} />
@@ -285,7 +285,7 @@ export function IrSensorModel({ sense, level, powered }: SensorProps) {
   })
 
   return (
-    <group position={[0.12, 0.04, 0]} rotation={[MODULE_TILT[0] * 0.7, -0.5, 0]}>
+    <group position={[0.055, 0.04, 0]} rotation={[MODULE_TILT[0] * 0.7, -0.5, 0]}>
       <group position={[0.42, 0, 0]}>
         <ModuleBoard width={1.1} height={0.44} color="#047857" leds={[[0.4, 0.11], [0.4, -0.05]]} powered={powered} level={level}>
           <Trimmer x={-0.08} y={0.04} />

@@ -3,6 +3,8 @@ import { PARTS, alarmBeat, partHeight, partWidth, pinModesFor, pinOutput, termin
 import { PRESET_CATEGORIES, PRESET_INFO, PRESET_ORDER, buildPreset, type PresetId } from './presets'
 import { DEFAULT_STEP, solveCircuit, type NetPart, type NetWire, type SimResult } from './solver'
 import type { PartData } from './types'
+// this file's own text: every example must be named in one of its tests
+import thisFile from './examples.test.ts?raw'
 
 /*
  * Every example in the gallery is run here the way the app runs it: step by
@@ -1045,9 +1047,7 @@ describe('screens and signs, second batch', () => {
 })
 
 describe('every example has its own behaviour check', () => {
-  it('names each new example in a test above', async () => {
-    const { readFileSync } = await import('node:fs')
-    const source = readFileSync(new URL(import.meta.url), 'utf8')
-    for (const id of NEW_EXAMPLES) expect(source.includes(`'${id}'`), id).toBe(true)
+  it('names each new example in a test above', () => {
+    for (const id of NEW_EXAMPLES) expect(thisFile.includes(`'${id}'`), id).toBe(true)
   })
 })

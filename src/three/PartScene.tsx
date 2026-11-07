@@ -52,6 +52,11 @@ import { PumpModel } from './models/Pump'
 import { SolenoidModel } from './models/Solenoid'
 import { TrafficLightModel } from './models/TrafficLight'
 import { ZenerModel } from './models/Zener'
+import { CoinCellModel, DynamoModel, LemonModel, PowerBankModel } from './models/Cells'
+import { ForceSensorModel, HallSensorModel, KnockSensorModel, PulseSensorModel } from './models/HandSensors'
+import { FlameSensorModel, IrSensorModel, LineSensorModel } from './models/InfraredSensors'
+import { JoystickModel, MicroSwitchModel, SlideSwitchModel } from './models/Inputs'
+import { HumiditySensorModel, RainSensorModel, WaterSensorModel } from './models/WaterSensors'
 
 /*
  * Camera framing for every model, measured so each one sits in the middle of
@@ -86,6 +91,25 @@ const FRAMING = {
   tilt: { camera: [0, 0.4, 4.6], scale: 0.78, lift: 0 },
   reed: { camera: [0, 0.4, 4.6], scale: 0.72, lift: 0 },
   module: { camera: [0, 0.4, 4.6], scale: 0.95, lift: 0 },
+  // the newer sensors, switches and small power sources
+  flameSensor: { camera: [0, 0.4, 4.6], scale: 0.81, lift: 0 },
+  rainSensor: { camera: [0, 0.4, 4.6], scale: 0.71, lift: 0 },
+  waterSensor: { camera: [0, 0.4, 4.6], scale: 0.85, lift: 0.04 },
+  humiditySensor: { camera: [0, 0.4, 4.6], scale: 0.63, lift: -0.09 },
+  hallSensor: { camera: [0, 0.4, 4.6], scale: 0.77, lift: -0.03 },
+  irSensor: { camera: [0, 0.4, 4.6], scale: 0.73, lift: -0.02 },
+  lineSensor: { camera: [0, 0.4, 4.6], scale: 0.85, lift: -0.04 },
+  forceSensor: { camera: [0, 0.4, 4.6], scale: 0.77, lift: 0.16 },
+  pulseSensor: { camera: [0, 0.4, 4.6], scale: 0.84, lift: -0.09 },
+  knockSensor: { camera: [0, 0.4, 4.6], scale: 0.75, lift: 0.05 },
+  slideSwitch: { camera: [0, 0.4, 4.6], scale: 0.65, lift: 0.08 },
+  slideSwitchUpright: { camera: [0, 0.4, 4.6], scale: 1.1, lift: 0 },
+  microSwitch: { camera: [0, 0.4, 4.6], scale: 0.68, lift: -0.06 },
+  joystick: { camera: [0, 0.4, 4.6], scale: 0.68, lift: 0.02 },
+  lemon: { camera: [0, 0.4, 4.6], scale: 0.8, lift: 0 },
+  coinCell: { camera: [0, 0.4, 4.6], scale: 0.655, lift: -0.14 },
+  dynamo: { camera: [0, 0.4, 4.6], scale: 0.6, lift: -0.07 },
+  powerBank: { camera: [0, 0.4, 4.6], scale: 0.75, lift: -0.19 },
   powerSupply: { camera: [0, 0.4, 4.6], scale: 1.08, lift: -0.15 },
   potentiometer: { camera: [0, 0.4, 4.6], scale: 1.1, lift: -0.1 },
   relay: { camera: [0, 0.4, 4.6], scale: 1.1, lift: -0.15 },
@@ -113,7 +137,7 @@ const FRAMING = {
   counter: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
   comparator: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
   hBridge: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
-  multimeter: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  multimeter: { camera: [0, 0.4, 4.6], scale: 1.3, lift: 0.03 },
   logicProbe: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
 } satisfies Record<string, Framing>
 
@@ -401,7 +425,7 @@ export function PartScene({ data, result }: { data: PartData; result?: PartResul
     case 'pnp':
       return (
         <Stage {...FRAMING.transistor}>
-          <TransistorModel on={Math.min(1, (result?.current ?? 0) / 0.1)} burnt={!!data.burnt} />
+          <TransistorModel variant="pnp" on={Math.min(1, (result?.current ?? 0) / 0.1)} burnt={!!data.burnt} />
         </Stage>
       )
     case 'mosfet':
@@ -515,6 +539,49 @@ export function PartScene({ data, result }: { data: PartData; result?: PartResul
         </Stage>
       )
     }
+    case 'slideSwitch':
+      return (
+        <Stage {...(upright ? FRAMING.slideSwitchUpright : FRAMING.slideSwitch)}>
+          <SlideSwitchModel toB={!!data.closed} rotation={data.rotation} current={result?.current ?? 0} />
+        </Stage>
+      )
+    case 'microSwitch':
+      return (
+        <Stage {...FRAMING.microSwitch}>
+          <MicroSwitchModel pressed={!!data.pressed} />
+        </Stage>
+      )
+    case 'joystick':
+      return (
+        <Stage {...FRAMING.joystick}>
+          <JoystickModel x={data.stickX ?? 0.5} y={data.stickY ?? 0.5} powered={status === 'on'} />
+        </Stage>
+      )
+    case 'lemon':
+      return (
+        <Stage {...FRAMING.lemon}>
+          <LemonModel cells={data.cells ?? 3} />
+        </Stage>
+      )
+    case 'coinCell':
+      return (
+        <Stage {...FRAMING.coinCell}>
+          {/* 1 when the load takes as much as a short circuit would */}
+          <CoinCellModel load={(result?.current ?? 0) / (ELECTRICAL.coinCell.voltage / ELECTRICAL.coinCell.resistance)} />
+        </Stage>
+      )
+    case 'dynamo':
+      return (
+        <Stage {...FRAMING.dynamo}>
+          <DynamoModel speed={data.level ?? 0} output={(result?.current ?? 0) / 0.3} />
+        </Stage>
+      )
+    case 'powerBank':
+      return (
+        <Stage {...FRAMING.powerBank}>
+          <PowerBankModel on={status === 'on' || status === 'over'} limiting={status === 'over'} />
+        </Stage>
+      )
     case 'logicProbe':
       return (
         <Stage {...FRAMING.logicProbe}>
@@ -537,10 +604,22 @@ export function PartScene({ data, result }: { data: PartData; result?: PartResul
         gasSensor: GasSensorModel,
         soilSensor: SoilSensorModel,
         touchSensor: TouchSensorModel,
+        flameSensor: FlameSensorModel,
+        rainSensor: RainSensorModel,
+        waterSensor: WaterSensorModel,
+        humiditySensor: HumiditySensorModel,
+        hallSensor: HallSensorModel,
+        irSensor: IrSensorModel,
+        lineSensor: LineSensorModel,
+        forceSensor: ForceSensorModel,
+        pulseSensor: PulseSensorModel,
+        knockSensor: KnockSensorModel,
       }[data.type as string]
       if (!Model) return null
+      // the newer modules each have a framing of their own
+      const framing: Framing = (FRAMING as Record<string, Framing>)[data.type] ?? FRAMING.module
       return (
-        <Stage {...FRAMING.module}>
+        <Stage {...framing}>
           <Model {...props} />
         </Stage>
       )

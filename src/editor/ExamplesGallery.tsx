@@ -1,9 +1,19 @@
-import { LayoutGrid } from 'lucide-react'
-import { useEffect, useRef, useState, useSyncExternalStore, type ComponentType, type CSSProperties, type ReactNode } from 'react'
+import { LayoutGrid, Search, SearchX, X } from 'lucide-react'
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ComponentType,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
 import { BookOpen } from '@/components/animate-ui/icons/book-open'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
+import { SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import {
   PRESET_CATEGORIES,
   PRESET_INFO,
@@ -13,24 +23,32 @@ import {
   type PresetLevel,
 } from '@/circuit/presets'
 import type { LedColor, PartType } from '@/circuit/types'
-import { useI18n } from '@/i18n'
+import { DICTIONARIES, useI18n, type Dictionary } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { PartArt } from './PartArt'
 
 /*
  * The examples gallery: every ready-made project on shelves, each a card
  * with a little picture of its main parts, its name, one line about it and
- * how hard it is. A dialog on wide screens, a bottom sheet on phones.
+ * how hard it is. A search box and an Easy / Medium / Hard filter narrow the
+ * shelves down. A dialog on wide screens, a bottom sheet on phones.
  */
 
 type Shelf = 'all' | PresetCategory
+type LevelChoice = 'any' | PresetLevel
 
 /** Each shelf's colour and the part drawn on its tab: the accents the parts themselves use. */
 const SHELVES: Record<PresetCategory, { accent: string; art: PartType }> = {
   first: { accent: '#f59e0b', art: 'lamp' },
   electronics: { accent: '#65a30d', art: 'transistor' },
+  science: { accent: '#059669', art: 'oscilloscope' },
+  logic: { accent: '#ea580c', art: 'andGate' },
   boards: { accent: '#0e9aa7', art: 'arduino' },
   smart: { accent: '#9333ea', art: 'pir' },
+  sound: { accent: '#0284c7', art: 'speaker' },
+  motion: { accent: '#4f46e5', art: 'servo' },
+  home: { accent: '#a16207', art: 'rgbLed' },
+  games: { accent: '#c026d3', art: 'button' },
   screens: { accent: '#db2777', art: 'segment' },
 }
 
@@ -43,36 +61,97 @@ const LED_TINTS: Partial<Record<LedColor, string>> = {
 }
 
 const LEVEL_BARS: Record<PresetLevel, string> = { 1: 'bg-emerald-500', 2: 'bg-amber-500', 3: 'bg-rose-500' }
+const LEVELS: readonly PresetLevel[] = [1, 2, 3]
 
 const accentStyle = (category: PresetCategory) => ({ '--shelf': SHELVES[category].accent }) as CSSProperties
 
+const WIDE_QUERY = '(min-width: 768px)'
+
 function useWideScreen() {
-  const query = '(min-width: 768px)'
   return useSyncExternalStore(
     (onChange) => {
-      const list = window.matchMedia(query)
+      const list = window.matchMedia(WIDE_QUERY)
       list.addEventListener('change', onChange)
       return () => list.removeEventListener('change', onChange)
     },
-    () => window.matchMedia(query).matches,
+    () => window.matchMedia(WIDE_QUERY).matches,
     () => true,
   )
 }
 
+/* ---- search ---- */
+
+/**
+ * Folds the small differences people do not type: case, accents, Arabic and
+ * Persian letter shapes (ي/ی, ك/ک, ة/ه), short-vowel marks and the
+ * zero-width joiners Persian uses inside words.
+ */
+function fold(text: string) {
+  return text
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[̀-ًͯ-ٰٟـ‌‍]/g, '')
+    .replace(/[يى]/g, 'ی')
+    .replace(/ك/g, 'ک')
+    .replace(/ة/g, 'ه')
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+}
+
+/** Everything a child might type to find an example: its name, its words, its shelf and its parts, in their language and in English. */
+function searchText(id: PresetId, t: Dictionary) {
+  const en = DICTIONARIES.en
+  const { category, art } = PRESET_INFO[id]
+  const parts = art.map((item) => (item.startsWith('led:') ? 'led' : item) as PartType)
+  return fold(
+    [
+      t.presets[id].name,
+      t.presets[id].description,
+      t.gallery.categories[category].name,
+      ...parts.map((p) => t.parts[p].name),
+      en.presets[id].name,
+      en.presets[id].description,
+      ...parts.map((p) => en.parts[p].name),
+    ].join(' '),
+  )
+}
+
+/** The examples that match every word typed and the level picked, in gallery order. */
+function useMatches(query: string, level: LevelChoice): readonly PresetId[] {
+  const { t } = useI18n()
+  const index = useMemo(() => new Map(PRESET_ORDER.map((id) => [id, searchText(id, t)])), [t])
+  return useMemo(() => {
+    const words = fold(query).split(/\s+/).filter(Boolean)
+    return PRESET_ORDER.filter(
+      (id) =>
+        (level === 'any' || PRESET_INFO[id].level === level) && words.every((word) => index.get(id)!.includes(word)),
+    )
+  }, [index, query, level])
+}
+
+/* ---- cards ---- */
+
 /** Three little bars, like a signal meter: one for easy, three for hard. */
+function LevelBars({ level, className }: { level: PresetLevel; className?: string }) {
+  return (
+    <span aria-hidden className={cn('flex h-2.5 shrink-0 items-end gap-[2px]', className)}>
+      {LEVELS.map((bar) => (
+        <span
+          key={bar}
+          className={cn('w-[3px] rounded-[1px]', bar <= level ? LEVEL_BARS[level] : 'bg-foreground/15')}
+          style={{ height: 3 + bar * 2.5 }}
+        />
+      ))}
+    </span>
+  )
+}
+
 function LevelMark({ level }: { level: PresetLevel }) {
   const { t } = useI18n()
   return (
     <span className="inline-flex items-center gap-1.5 text-[11px] leading-none font-medium text-muted-foreground">
-      <span aria-hidden className="flex h-2.5 items-end gap-[2px]">
-        {([1, 2, 3] as const).map((bar) => (
-          <span
-            key={bar}
-            className={cn('w-[3px] rounded-[1px]', bar <= level ? LEVEL_BARS[level] : 'bg-foreground/15')}
-            style={{ height: 3 + bar * 2.5 }}
-          />
-        ))}
-      </span>
+      <LevelBars level={level} />
       {t.gallery.levels[level]}
     </span>
   )
@@ -150,11 +229,16 @@ function ExampleCard({ id, onPick }: { id: PresetId; onPick: (id: PresetId) => v
   )
 }
 
-const shelfIds = (shelf: PresetCategory) => PRESET_ORDER.filter((id) => PRESET_INFO[id].category === shelf)
-
-function ShelfSection({ shelf, onPick }: { shelf: PresetCategory; onPick: (id: PresetId) => void }) {
+function ShelfSection({
+  shelf,
+  ids,
+  onPick,
+}: {
+  shelf: PresetCategory
+  ids: readonly PresetId[]
+  onPick: (id: PresetId) => void
+}) {
   const { t } = useI18n()
-  const ids = shelfIds(shelf)
   return (
     <section aria-labelledby={`shelf-${shelf}`} className="space-y-3">
       <header className="flex items-start gap-2.5">
@@ -176,6 +260,8 @@ function ShelfSection({ shelf, onPick }: { shelf: PresetCategory; onPick: (id: P
   )
 }
 
+/* ---- the shelves, the search box and the level filter ---- */
+
 /** A shelf's tab: the part drawn on it, its name and how many examples it holds. */
 function ShelfIcon({ shelf }: { shelf: Shelf }) {
   return shelf === 'all' ? (
@@ -185,17 +271,40 @@ function ShelfIcon({ shelf }: { shelf: Shelf }) {
   )
 }
 
-function ShelfTabs({ shelf, onShelf, compact }: { shelf: Shelf; onShelf: (shelf: Shelf) => void; compact: boolean }) {
+function ShelfTabs({
+  shelf,
+  onShelf,
+  counts,
+  total,
+  compact,
+}: {
+  shelf: Shelf
+  onShelf: (shelf: Shelf) => void
+  counts: Record<PresetCategory, number>
+  total: number
+  compact: boolean
+}) {
   const { t } = useI18n()
   const shelves: Shelf[] = ['all', ...PRESET_CATEGORIES]
+  const strip = useRef<HTMLElement>(null)
+  // on phones the picked chip scrolls into view, so it is never hidden past the edge
+  useEffect(() => {
+    if (!compact) return
+    strip.current?.querySelector<HTMLElement>('[aria-pressed="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [shelf, compact])
   return (
     <nav
+      ref={strip}
       aria-label={t.gallery.shelves}
-      className={compact ? 'grid grid-cols-3 gap-1.5' : 'flex flex-col gap-0.5'}
+      className={
+        compact
+          ? '-mx-4 flex snap-x scroll-px-4 gap-1.5 overflow-x-auto px-4 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+          : 'flex flex-col gap-0.5'
+      }
     >
       {shelves.map((s) => {
         const name = s === 'all' ? t.gallery.all : compact ? t.gallery.categories[s].short : t.gallery.categories[s].name
-        const count = s === 'all' ? PRESET_ORDER.length : shelfIds(s).length
+        const count = s === 'all' ? total : counts[s]
         return (
           <button
             key={s}
@@ -203,13 +312,17 @@ function ShelfTabs({ shelf, onShelf, compact }: { shelf: Shelf; onShelf: (shelf:
             aria-pressed={shelf === s}
             onClick={() => onShelf(s)}
             style={s === 'all' ? undefined : accentStyle(s)}
-            className={cn('shelf-tab', compact ? 'shelf-tab--chip' : 'shelf-tab--rail')}
+            className={cn(
+              'shelf-tab',
+              compact ? 'shelf-tab--chip shrink-0 snap-start pe-2.5' : 'shelf-tab--rail',
+              count === 0 && 'opacity-45',
+            )}
           >
             <span aria-hidden className="shelf-tab__icon">
               <ShelfIcon shelf={s} />
             </span>
-            <span className="min-w-0 flex-1 truncate">{name}</span>
-            {!compact && <span className="text-xs text-muted-foreground tabular-nums">{count}</span>}
+            <span className={cn(compact ? 'whitespace-nowrap' : 'min-w-0 flex-1 truncate')}>{name}</span>
+            <span className={cn('text-xs text-muted-foreground tabular-nums', compact && 'text-[11px]')}>{count}</span>
           </button>
         )
       })}
@@ -217,25 +330,151 @@ function ShelfTabs({ shelf, onShelf, compact }: { shelf: Shelf; onShelf: (shelf:
   )
 }
 
+/** A bordered, filled search field that stands out from the panel behind it. Escape clears it. */
+function GallerySearch({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const { t } = useI18n()
+  const input = useRef<HTMLInputElement>(null)
+  return (
+    <div className="group relative min-w-0 flex-1">
+      <Search
+        aria-hidden
+        className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary"
+      />
+      <input
+        ref={input}
+        type="search"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          // the first Escape clears the words; the next one closes the gallery
+          if (e.key === 'Escape' && value) {
+            e.stopPropagation()
+            onChange('')
+          }
+        }}
+        placeholder={t.gallery.search}
+        aria-label={t.gallery.searchLabel}
+        autoComplete="off"
+        spellCheck={false}
+        enterKeyHint="search"
+        className={cn(
+          'h-10 w-full rounded-md border border-foreground/20 bg-muted ps-9 pe-10 text-sm text-foreground outline-none',
+          'shadow-[inset_0_1px_2px_oklch(0_0_0/0.06)] transition-[background-color,border-color,box-shadow]',
+          'placeholder:text-muted-foreground hover:border-foreground/30',
+          'focus-visible:border-primary focus-visible:bg-card focus-visible:shadow-none focus-visible:ring-4 focus-visible:ring-primary/15',
+          '[&::-webkit-search-cancel-button]:appearance-none',
+        )}
+      />
+      {value && (
+        <button
+          type="button"
+          aria-label={t.gallery.clearSearch}
+          onClick={() => {
+            onChange('')
+            input.current?.focus()
+          }}
+          className="absolute end-2 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-md text-muted-foreground transition hover:bg-foreground/10 hover:text-foreground"
+        >
+          <X className="size-3.5" />
+        </button>
+      )}
+    </div>
+  )
+}
+
+/** All levels, Easy, Medium, Hard: a segmented control with the same bars the cards wear. */
+function LevelFilter({ level, onLevel, compact }: { level: LevelChoice; onLevel: (level: LevelChoice) => void; compact: boolean }) {
+  const { t } = useI18n()
+  const choices: LevelChoice[] = ['any', ...LEVELS]
+  return (
+    <div
+      role="radiogroup"
+      aria-label={t.gallery.levelFilter}
+      className={cn('grid shrink-0 grid-cols-4 gap-0.5 rounded-md border bg-muted p-0.5', compact ? 'h-9 w-full' : 'h-10')}
+    >
+      {choices.map((choice) => (
+        <button
+          key={choice}
+          type="button"
+          role="radio"
+          aria-checked={level === choice}
+          onClick={() => onLevel(choice)}
+          className={cn(
+            'flex min-w-0 items-center justify-center gap-1.5 rounded-[5px] px-2.5 text-xs font-medium whitespace-nowrap transition',
+            'outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+            level === choice
+              ? 'bg-card text-foreground shadow-sm ring-1 ring-foreground/10'
+              : 'text-muted-foreground hover:bg-card/60 hover:text-foreground',
+          )}
+        >
+          {choice !== 'any' && <LevelBars level={choice} />}
+          <span className="truncate">{choice === 'any' ? t.gallery.anyLevel : t.gallery.levels[choice]}</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function NoMatches({ onReset }: { onReset: () => void }) {
+  const { t } = useI18n()
+  return (
+    <div className="grid place-items-center px-6 py-16 text-center">
+      <span aria-hidden className="mb-3 grid size-11 place-items-center rounded-md bg-muted text-muted-foreground">
+        <SearchX className="size-5" />
+      </span>
+      <p className="text-sm font-semibold">{t.gallery.noResults}</p>
+      <p className="mt-1 max-w-64 text-xs leading-relaxed text-muted-foreground">{t.gallery.noResultsHint}</p>
+      <Button variant="outline" size="sm" className="mt-4" onClick={onReset}>
+        {t.gallery.showAll}
+      </Button>
+    </div>
+  )
+}
+
+/** What the gallery is showing: kept above both of its looks, so it survives a switch between them. */
+type View = { shelf: Shelf; query: string; level: LevelChoice }
+const FRESH_VIEW: View = { shelf: 'all', query: '', level: 'any' }
+
 function GalleryBody({
   compact,
   onPick,
+  view,
+  onView,
   Title,
   Description,
 }: {
   compact: boolean
   onPick: (id: PresetId) => void
+  view: View
+  onView: (change: (view: View) => View) => void
   Title: ComponentType<{ className?: string; children: ReactNode }>
   Description: ComponentType<{ className?: string; children: ReactNode }>
 }) {
   const { t } = useI18n()
-  const [shelf, setShelf] = useState<Shelf>('all')
+  const { shelf, query, level } = view
+  const setShelf = (next: Shelf) => onView((v) => ({ ...v, shelf: next }))
+  const setLevel = (next: LevelChoice) => onView((v) => ({ ...v, level: next }))
+  // typing stays quick while the cards catch up
+  const matches = useMatches(useDeferredValue(query), level)
+  const filtering = query.trim() !== '' || level !== 'any'
+
   const list = useRef<HTMLDivElement>(null)
-  // a new shelf starts at its top (scrollTo may return a promise, so nothing is returned)
+  // a new shelf, new words or a new level start the list at its top (scrollTo may return a promise, so nothing is returned)
   useEffect(() => {
     list.current?.scrollTo({ top: 0 })
-  }, [shelf])
-  const shown = shelf === 'all' ? PRESET_CATEGORIES : [shelf]
+  }, [shelf, query, level])
+
+  const counts = useMemo(() => {
+    const out = Object.fromEntries(PRESET_CATEGORIES.map((c) => [c, 0])) as Record<PresetCategory, number>
+    for (const id of matches) out[PRESET_INFO[id].category]++
+    return out
+  }, [matches])
+  const shown = (shelf === 'all' ? PRESET_CATEGORIES : [shelf]).filter((s) => counts[s] > 0)
+
+  // a new search looks through every shelf
+  const search = (value: string) =>
+    onView((v) => ({ ...v, query: value, shelf: !v.query.trim() && value.trim() ? 'all' : v.shelf }))
+  const reset = () => onView(() => FRESH_VIEW)
 
   const heading = (
     <div className="flex min-w-0 items-center gap-3">
@@ -251,21 +490,36 @@ function GalleryBody({
 
   const sections = (
     <div ref={list} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-      <div className={cn('space-y-7', compact ? 'px-4 pt-3 pb-6' : 'p-5')}>
-        {shown.map((s) => (
-          <ShelfSection key={s} shelf={s} onPick={onPick} />
-        ))}
-      </div>
+      {shown.length === 0 ? (
+        <NoMatches onReset={reset} />
+      ) : (
+        <div className={compact ? 'px-4 pt-3 pb-6' : 'p-5'}>
+          {filtering && (
+            <p role="status" className="mb-3 text-xs font-medium text-muted-foreground tabular-nums">
+              {t.gallery.found(shown.reduce((sum, s) => sum + counts[s], 0))}
+            </p>
+          )}
+          <div className="space-y-7">
+            {shown.map((s) => (
+              <ShelfSection key={s} shelf={s} ids={matches.filter((id) => PRESET_INFO[id].category === s)} onPick={onPick} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
+
+  const tabs = <ShelfTabs shelf={shelf} onShelf={setShelf} counts={counts} total={matches.length} compact={compact} />
 
   if (compact) {
     return (
       <>
         <div aria-hidden className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-muted-foreground/25" />
-        <div className="space-y-3 border-b px-4 pt-2 pb-3 pe-12">{heading}</div>
-        <div className="border-b px-4 py-2.5">
-          <ShelfTabs shelf={shelf} onShelf={setShelf} compact />
+        <div className="space-y-3 border-b px-4 pt-2 pb-3">
+          <div className="pe-8">{heading}</div>
+          <GallerySearch value={query} onChange={search} />
+          <LevelFilter level={level} onLevel={setLevel} compact />
+          {tabs}
         </div>
         <div className="pb-safe flex min-h-0 flex-1 flex-col">{sections}</div>
       </>
@@ -275,10 +529,14 @@ function GalleryBody({
   return (
     <>
       <div className="border-b px-5 py-3.5 pe-14">{heading}</div>
-      <div className="flex min-h-0 flex-1">
-        <div className="w-56 shrink-0 overflow-y-auto border-e bg-sidebar p-2.5">
-          <ShelfTabs shelf={shelf} onShelf={setShelf} compact={false} />
+      <div className="flex items-center gap-3 border-b bg-sidebar px-5 py-3">
+        <div className="flex max-w-md min-w-0 flex-1">
+          <GallerySearch value={query} onChange={search} />
         </div>
+        <LevelFilter level={level} onLevel={setLevel} compact={false} />
+      </div>
+      <div className="flex min-h-0 flex-1">
+        <div className="w-56 shrink-0 overflow-y-auto border-e bg-sidebar p-2.5">{tabs}</div>
         {sections}
       </div>
     </>
@@ -297,6 +555,10 @@ function focusPanel(event: Event) {
 /**
  * The "Examples" button and the gallery it opens. Picking an example calls
  * `onPick`; the top bar decides whether to ask before replacing the board.
+ *
+ * One dialog root holds both looks: only its panel changes between the
+ * centred dialog and the bottom sheet, so turning a tablet or resizing the
+ * window across 768 px keeps the gallery open.
  */
 export function ExamplesGallery({
   open,
@@ -309,6 +571,8 @@ export function ExamplesGallery({
 }) {
   const { t } = useI18n()
   const wide = useWideScreen()
+  const [view, setView] = useState<View>(FRESH_VIEW)
+  const body = { onPick, view, onView: setView }
 
   return (
     <>
@@ -319,28 +583,36 @@ export function ExamplesGallery({
         aria-label={t.toolbar.examples}
         aria-haspopup="dialog"
         aria-expanded={open}
-        onClick={() => onOpenChange(true)}
+        onClick={() => {
+          // every visit starts fresh: all shelves, no words, every level
+          setView(FRESH_VIEW)
+          onOpenChange(true)
+        }}
       >
         <BookOpen size={18} animateOnHover />
         <span className="max-sm:hidden">{t.toolbar.examples}</span>
       </Button>
 
-      {wide ? (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        {wide ? (
           <DialogContent
-            className="flex h-[min(44rem,calc(100dvh-3rem))] w-[min(60rem,calc(100vw-3rem))] max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-none"
+            key="dialog"
+            className="flex h-[min(46rem,calc(100dvh-3rem))] w-[min(62rem,calc(100vw-3rem))] max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-none"
             onOpenAutoFocus={focusPanel}
           >
-            <GalleryBody compact={false} onPick={onPick} Title={DialogTitle} Description={DialogDescription} />
+            <GalleryBody compact={false} {...body} Title={DialogTitle} Description={DialogDescription} />
           </DialogContent>
-        </Dialog>
-      ) : (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-          <SheetContent side="bottom" className="gap-0 rounded-t-xl p-0 outline-none data-[side=bottom]:h-[88dvh]" onOpenAutoFocus={focusPanel}>
-            <GalleryBody compact onPick={onPick} Title={SheetTitle} Description={SheetDescription} />
+        ) : (
+          <SheetContent
+            key="sheet"
+            side="bottom"
+            className="gap-0 rounded-t-xl p-0 outline-none data-[side=bottom]:h-[90dvh]"
+            onOpenAutoFocus={focusPanel}
+          >
+            <GalleryBody compact {...body} Title={SheetTitle} Description={SheetDescription} />
           </SheetContent>
-        </Sheet>
-      )}
+        )}
+      </Dialog>
     </>
   )
 }

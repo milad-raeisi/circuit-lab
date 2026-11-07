@@ -56,6 +56,16 @@ function hasAmbientMotion(nodes: PartNode[], result: SimResult) {
       case 'dimmer':
       case 'regulator':
         return r.status === 'over' // smoke
+      case 'flameSensor':
+        return (data.sense ?? 0) > 0.02 // a flickering flame
+      case 'rainSensor':
+        return (data.sense ?? 0) > 0.03 // falling drops
+      case 'knockSensor':
+        return (data.sense ?? 0) > 0.5 // the mallet tapping
+      case 'dynamo':
+        return (data.level ?? 0) > 0.01 // the crank turning
+      case 'powerBank':
+        return r.status === 'over' // its lights blink at the limit
       default:
         return false
     }

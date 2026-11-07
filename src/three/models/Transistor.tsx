@@ -35,15 +35,24 @@ function bodyGeometry() {
   return geometry
 }
 
-/** Small NPN transistor in a TO-92 package; a green light shows how hard it conducts. */
+/** How the two kinds differ: the PNP (BC557) has an amber light and its own print. */
+const VARIANT = {
+  npn: { off: '#14532d', light: '#22c55e', halo: '#4ade80', print: [[0.38, 0.42], [0.28, 0.3]] },
+  pnp: { off: '#78350f', light: '#f59e0b', halo: '#fbbf24', print: [[0.38, 0.42], [0.28, 0.2]] },
+} as const
+
+/** Small transistor in a TO-92 package (NPN BC547 or PNP BC557); a light shows how hard it conducts. */
 export function TransistorModel({
   on,
   burnt,
+  variant = 'npn',
 }: {
   /** 0..1: how much it conducts */
   on: number
   burnt: boolean
+  variant?: 'npn' | 'pnp'
 }) {
+  const look = VARIANT[variant]
   const geometry = useMemo(() => bodyGeometry(), [])
   useEffect(() => () => geometry.dispose(), [geometry])
   const dot = useRef<THREE.MeshStandardMaterial>(null)
@@ -69,10 +78,7 @@ export function TransistorModel({
         />
       </mesh>
       {/* printed type number on the flat face */}
-      {[
-        [0.38, 0.42],
-        [0.28, 0.3],
-      ].map(([y, w]) => (
+      {look.print.map(([y, w]) => (
         <mesh key={y} position={[0, y, FACE_Z + 0.002]}>
           <boxGeometry args={[w, 0.032, 0.004]} />
           <meshStandardMaterial color={burnt ? '#44403c' : '#d4d4d8'} roughness={0.7} />
@@ -81,7 +87,7 @@ export function TransistorModel({
       {/* conduction light */}
       <mesh position={[0, 0.13, FACE_Z + 0.004]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.045, 0.045, 0.01, 20]} />
-        <meshStandardMaterial ref={dot} color="#14532d" emissive="#22c55e" emissiveIntensity={0.05} roughness={0.3} toneMapped={false} />
+        <meshStandardMaterial ref={dot} color={look.off} emissive={look.light} emissiveIntensity={0.05} roughness={0.3} toneMapped={false} />
       </mesh>
       {/* three legs: C, B, E */}
       {[-0.25, 0, 0.25].map((x) => (
@@ -90,7 +96,7 @@ export function TransistorModel({
           <meshStandardMaterial color="#d4d4d8" metalness={0.9} roughness={0.25} />
         </mesh>
       ))}
-      <Halo color="#4ade80" intensity={halo} position={[0, 0.13, FACE_Z + 0.08]} scale={1.1} />
+      <Halo color={look.halo} intensity={halo} position={[0, 0.13, FACE_Z + 0.08]} scale={1.1} />
       <Smoke active={burnt} position={[0, 0.66, 0]} rise={0.45} />
     </group>
   )
