@@ -1,44 +1,22 @@
-import { useId } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
- * Circuit Lab's logo: one loop of wire with a battery on the left, closed by a
- * lit bulb at the top. This is the bold small-size drawing (the same as
- * public/favicon.svg); public/logo.svg is the detailed one for large sizes.
+ * Circuit Lab's logo: a red bulb with an orange filament and screw base,
+ * traced from public/logo.jpg (the same drawing as public/logo.svg).
  */
 export function BrandLogo({ className }: { className?: string }) {
-  // gradient ids must be unique when the logo appears twice on a page
-  const id = useId()
-  const tile = `${id}-tile`
-  const bulb = `${id}-bulb`
   return (
-    <svg viewBox="0 0 512 512" className={cn('shrink-0', className)} aria-hidden>
-      <defs>
-        <linearGradient id={tile} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#6b5cff" />
-          <stop offset="1" stopColor="#4330da" />
-        </linearGradient>
-        <radialGradient id={bulb} cx="0.38" cy="0.34" r="0.7">
-          <stop offset="0" stopColor="#fffbe6" />
-          <stop offset="0.45" stopColor="#fde047" />
-          <stop offset="1" stopColor="#f59e0b" />
-        </radialGradient>
-      </defs>
-      <rect width="512" height="512" rx="112" fill={`url(#${tile})`} />
-      <g fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round">
-        <path
-          d="M200 196H206a70 70 0 0 0-70 70V268M136 336V350a70 70 0 0 0 70 70H318a70 70 0 0 0 70-70V266a70 70 0 0 0-70-70H328"
-          strokeWidth="48"
-        />
-        <path d="M84 268H188" strokeWidth="22" />
-        <path d="M110 336H162" strokeWidth="38" />
+    <svg viewBox="179 179 622 622" className={cn('shrink-0', className)} aria-hidden>
+      <path
+        fill="#E60000"
+        d="M390.3 620.5C382.1 602.3 353.3 566.1 339.2 552A213.3 213.3 0 1 1 640.8 552C626.7 566.1 597.9 602.3 589.7 620.5H529V612C529 599 532.4 540.1 576.4 495A120.6 120.6 0 1 0 403.6 495C447.6 540.1 451 599 451 612V620.5Z"
+      />
+      <g fill="#F2AA00">
+        <path d="M452.1 446C474.1 469.2 476 488 476 490V650H504V490C504 488 505.9 469.2 527.9 446A52.2 52.2 0 1 0 452.1 446Z" />
+        <rect x="377" y="642.5" width="226" height="35.5" rx="17.75" />
+        <rect x="412" y="697.5" width="156" height="36" rx="18" />
+        <path d="M442 752H538A49 49 0 0 1 442 752Z" />
       </g>
-      <g stroke="#fde047" strokeWidth="22" strokeLinecap="round">
-        <path d="M264 104V74" />
-        <path d="M330 136L354 118" />
-        <path d="M198 136L174 118" />
-      </g>
-      <circle cx="264" cy="196" r="66" fill={`url(#${bulb})`} />
     </svg>
   )
 }

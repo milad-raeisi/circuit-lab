@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://circuitlab.app"><img src="public/logo.svg" width="112" alt="Circuit Lab logo: a loop of wire with a battery, closed by a glowing light bulb"></a>
+  <a href="https://circuitlab.app"><img src="public/logo.svg" width="112" alt="Circuit Lab logo: a red light bulb with an orange filament"></a>
 </p>
 
 <h1 align="center">Circuit Lab</h1>
@@ -39,7 +39,7 @@ One-time setup:
 
 `.app` domains only work over HTTPS, so the site opens once GitHub has issued its certificate (usually minutes, at most a day after DNS is set).
 
-**Brand and app files** live in `public/`: `logo.svg` (the full logo), `favicon.svg` / `favicon.ico` (the bolder small-size drawing), `apple-touch-icon.png`, `icons/` (PWA and maskable icons), `og-image.jpg` (link previews) and `manifest.webmanifest`. The app can be installed and works offline: `src/pwa/sw.js` is written to `/sw.js` by the build, with a fresh cache for each release.
+**Brand and app files** live in `public/`: `logo.jpg` (the original logo), `logo.svg` (the same bulb traced as a sharp vector), `favicon.svg` / `favicon.ico`, `apple-touch-icon.png`, `icons/` (PWA and maskable icons), `og-image.jpg` (link previews) and `manifest.webmanifest`. The app can be installed and works offline: `src/pwa/sw.js` is written to `/sw.js` by the build, with a fresh cache for each release.
 
 ## What kids can do
 
