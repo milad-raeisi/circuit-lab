@@ -1,6 +1,7 @@
 import type {
   LampColor,
   LedColor,
+  MeterDial,
   PartData,
   PartType,
   PinMode,
@@ -105,6 +106,19 @@ export const ELECTRICAL = {
   servo: { resistance: 50, signalResistance: 10000, minVoltage: 3.5 },
   /** NTC thermistor: 10 kΩ at 25 °C, falling as it warms */
   thermistor: { r25: 10000, beta: 3950 },
+  /**
+   * one lemon with a copper coin and a zinc nail in it: about 0.9 V, but the juice lets
+   * only a tiny current through. Three in a row just glow a red LED; no lemon spins a motor
+   */
+  lemon: { voltage: 0.9, resistance: 100 },
+  /** CR2032 coin cell: 3 V, but so much resistance inside that it lights an LED and stalls a motor */
+  coinCell: { voltage: 3, resistance: 40 },
+  /** hand-crank generator: its volts follow the crank, up to 6 V when you turn it fast */
+  dynamo: { maxVoltage: 6, resistance: 5 },
+  /** USB power bank: a steady 5 V that holds back anything above 2 A */
+  powerBank: { voltage: 5, limit: 2 },
+  /** thumb joystick: one 10 kΩ knob for left–right and one for up–down */
+  joystick: { resistance: 10000 },
   /** screens: they light up from about 3 V; the S input only listens */
   display: { minVoltage: 3, signalResistance: 1e6, ratedVoltage: 5 },
   /**
@@ -130,12 +144,60 @@ export const ELECTRICAL = {
   timer555: { minVoltage: 4.5, outputResistance: 10, supplyResistance: 1500 },
   /** the oscilloscope's probe only listens */
   oscilloscope: { resistance: 1e6 },
+  /**
+   * 5.1 V Zener diode. Joined + to + it waits until it has 5.1 V across it, then lets
+   * just enough through to hold the volts there. The other way round it is a plain diode.
+   */
+  zener: { voltage: 5.1, forwardVoltage: 0.7, seriesResistance: 2, forwardResistance: 0.5, hotPower: 0.5, burnPower: 1.3 },
+  /** logic-level N-channel MOSFET: off below 2 V on G, fully on from 4 V; G only listens */
+  mosfet: { threshold: 2, fullOn: 4, onResistance: 0.05, gateResistance: 1e6, hotPower: 1.5, steps: 20 },
+  /** optocoupler (PC817): its LED needs 1.2 V; the light switch passes up to twice the LED's current */
+  optocoupler: { forwardVoltage: 1.2, seriesResistance: 15, transfer: 2, saturationResistance: 10, burnCurrent: 0.1 },
+  /** red laser module with its own resistor: a beam from about 2.5 V, too much above 60 mA */
+  laser: { forwardVoltage: 2.2, seriesResistance: 80, weakCurrent: 0.012, overCurrent: 0.06, burnCurrent: 0.12 },
+  /** infrared LED: like any LED, but it starts at 1.2 V and its light is invisible to our eyes */
+  irLed: { forwardVoltage: 1.2 },
+  /** push solenoid: the coil pushes the rod out from 0.2 A, hot above 0.8 A */
+  solenoid: { resistance: 10, pushCurrent: 0.2, ratedCurrent: 0.45, hotCurrent: 0.8 },
+  /** small water pump made for 5 V: it lifts water from about 1.5 V */
+  pump: { resistance: 15, ratedVoltage: 5, startSpeed: 0.3, overSpeed: 1.6 },
+  /** electric bell: the hammer rings from 0.12 A, full and loud at 0.35 A */
+  bell: { resistance: 12, ringCurrent: 0.12, ratedCurrent: 0.35, hotCurrent: 0.75 },
+  /** 10-bar LED bar graph module: each lit bar takes about 8 mA from + */
+  barGraph: { minVoltage: 2.7, supplyResistance: 5000, barResistance: 600, inputResistance: 1e7, bars: 10 },
+  /** traffic light module: three LEDs with their resistors built in, sharing one − pin */
+  trafficLight: { seriesResistance: 220, fullCurrent: 0.012 },
+  /** 5 V cooling fan: its electronics let it spin one way only, from about 1.5 V */
+  fan: { forwardVoltage: 0.4, resistance: 45, ratedVoltage: 5, startSpeed: 0.3, overSpeed: 1.6 },
+  /** comparator chip (like the LM393): its inputs listen very quietly */
+  comparator: { inputResistance: 1e7, hysteresis: 0.005 },
+  /** H-bridge motor driver (like the L9110): each motor pin joins + or − through about 1 Ω */
+  hBridge: { minVoltage: 2.5, outputResistance: 1, supplyResistance: 2000, hotCurrent: 1.5 },
+  /**
+   * multimeter: on V it only listens, on A it is almost a wire, and on Ω it pushes a tiny
+   * test current from its 1 V cell through 1 kΩ and works out the ohms from the volts it gets
+   */
+  multimeter: {
+    voltResistance: 1e7,
+    ampResistance: 0.01,
+    testVoltage: 1,
+    testResistance: 1000,
+    beepBelow: 30,
+    openAbove: 4e7,
+    maxAmps: 10,
+  },
+  /** logic probe: HIGH above 70 % of its supply, LOW below 30 %; a change lights PULSE for a moment */
+  logicProbe: { minVoltage: 3, supplyResistance: 2000, biasResistance: 1e6, high: 0.7, low: 0.3, pulseTime: 0.3 },
 } as const
 
-export const BATTERY_VOLTAGES = [1.5, 3, 4.5, 9] as const
-export const RESISTOR_VALUES = [10, 47, 100, 220, 470, 1000] as const
+/** AA packs of 1 to 4 cells, a 9 V block and a 12 V block */
+export const BATTERY_VOLTAGES = [1.5, 3, 4.5, 6, 9, 12] as const
+/** the values in a beginner's resistor kit, ohms */
+export const RESISTOR_VALUES = [10, 22, 47, 100, 220, 330, 470, 1000, 2200, 4700, 10000, 100000] as const
 /** microfarads */
-export const CAPACITOR_VALUES = [470, 2200, 10000] as const
+export const CAPACITOR_VALUES = [10, 100, 470, 1000, 2200, 4700, 10000] as const
+/** lemon battery: how many lemons can sit in a row */
+export const LEMON_COUNTS = [1, 2, 3, 4] as const
 /** amps */
 export const FUSE_RATINGS = [0.2, 0.5, 1] as const
 /** bench power supply current limits, amps */
@@ -148,6 +210,10 @@ export const SPEAKER_NOTES = [262, 523, 1047] as const
 export const TIMER_RATES = [0.5, 1, 2] as const
 /** oscilloscope screen widths, seconds */
 export const SCOPE_SPANS = [2, 5, 10] as const
+/** the multimeter's dial, in the order it turns */
+export const METER_DIALS = ['volts', 'amps', 'ohms', 'beep'] as const satisfies readonly MeterDial[]
+/** how many outputs the counter chip steps through */
+export const COUNTER_OUTPUTS = 5
 
 export type BoardType = 'arduino' | 'nano' | 'mega' | 'esp32' | 'esp8266' | 'pico' | 'microbit' | 'raspberrypi'
 
@@ -274,18 +340,23 @@ export function pinModesFor(board: BoardType, pin: string): PinMode[] {
 
 export const LED_FORWARD_VOLTAGE: Record<LedColor, number> = {
   red: 1.8,
+  orange: 1.9,
   yellow: 2.0,
   green: 2.2,
   blue: 2.9,
   white: 2.9,
+  // a blue LED with a pink glow coating inside
+  pink: 2.9,
 }
 
 export const LED_COLORS: Record<LedColor, string> = {
   red: '#ff3b3b',
+  orange: '#ff8a1f',
   yellow: '#ffd21f',
   green: '#22e06b',
   blue: '#3b82ff',
   white: '#f4f7ff',
+  pink: '#ff5fb8',
 }
 
 export const LAMP_COLORS: Record<LampColor, string> = {
@@ -309,6 +380,10 @@ export const PART_ORDER: PartType[] = [
   'battery',
   'solar',
   'powerSupply',
+  'coinCell',
+  'lemon',
+  'dynamo',
+  'powerBank',
   'arduino',
   'nano',
   'mega',
@@ -319,29 +394,50 @@ export const PART_ORDER: PartType[] = [
   'raspberrypi',
   'switch',
   'button',
+  'slideSwitch',
+  'microSwitch',
   'dimmer',
   'potentiometer',
+  'joystick',
   'relay',
   'resistor',
   'capacitor',
   'diode',
+  'zener',
   'transistor',
+  'pnp',
+  'mosfet',
+  'optocoupler',
   'fuse',
   'notGate',
   'andGate',
   'orGate',
   'xorGate',
+  'nandGate',
+  'norGate',
+  'latch',
+  'counter',
+  'comparator',
   'timer555',
+  'hBridge',
   'regulator',
   'lamp',
   'led',
+  'irLed',
+  'laser',
   'rgbLed',
+  'trafficLight',
+  'barGraph',
   'motor',
+  'fan',
+  'pump',
   'vibration',
   'buzzer',
   'speaker',
+  'bell',
   'servo',
   'electromagnet',
+  'solenoid',
   'ldr',
   'thermistor',
   'tilt',
@@ -353,9 +449,21 @@ export const PART_ORDER: PartType[] = [
   'gasSensor',
   'soilSensor',
   'touchSensor',
+  'flameSensor',
+  'rainSensor',
+  'waterSensor',
+  'humiditySensor',
+  'hallSensor',
+  'irSensor',
+  'lineSensor',
+  'forceSensor',
+  'pulseSensor',
+  'knockSensor',
+  'multimeter',
   'voltmeter',
   'ammeter',
   'oscilloscope',
+  'logicProbe',
   'segment',
   'lcd',
   'oled',
@@ -373,6 +481,12 @@ const twoWay: Record<TerminalId, TerminalDef> = {
 const polarised: Record<TerminalId, TerminalDef> = {
   a: { side: 'left', polarity: '+' },
   b: { side: 'right', polarity: '-' },
+}
+
+/** Small power sources (lemons, coin cell, crank, power bank): + on the right like the battery */
+const cellTerminals: Record<TerminalId, TerminalDef> = {
+  a: { side: 'right', polarity: '+' },
+  b: { side: 'left', polarity: '-' },
 }
 
 /** 3-pin sensor modules: power on the left, the signal (S) on the right */
@@ -400,6 +514,31 @@ const gate = (inputs: 1 | 2, accent: string): PartDef => ({
   terminals: gateTerminals(inputs),
   defaults: {},
 })
+
+/**
+ * Chip modules laid out like the gates: + and − at the corners of the left side,
+ * two inputs between them, and their outputs on the right.
+ */
+function chipTerminals(
+  inputs: [[TerminalId, string], [TerminalId, string]],
+  outputs: Record<TerminalId, TerminalDef>,
+): Record<TerminalId, TerminalDef> {
+  return {
+    VCC: { side: 'left', offset: 0.86, polarity: '+' },
+    [inputs[0][0]]: { side: 'left', offset: 0.62, label: inputs[0][1] },
+    [inputs[1][0]]: { side: 'left', offset: 0.38, label: inputs[1][1] },
+    GND: { side: 'left', offset: 0.14, polarity: '-' },
+    ...outputs,
+  }
+}
+
+/** The counter's outputs Q0 … Q4, top to bottom along the right side. */
+const counterOutputs = Object.fromEntries(
+  Array.from({ length: COUNTER_OUTPUTS }, (_, i) => [
+    `Q${i}`,
+    { side: 'right', offset: 0.14 + i * 0.18, label: String(i) } satisfies TerminalDef,
+  ]),
+)
 
 /** Boards: supply, GND and the input on the left, the six output pins on the right. */
 function boardTerminals(spec: BoardSpec): Record<TerminalId, TerminalDef> {
@@ -500,6 +639,54 @@ export const PARTS: Record<PartType, PartDef> = {
   gasSensor: { category: 'sensor', accent: '#57534e', terminals: sensorModule, defaults: { sense: 0.1 } },
   soilSensor: { category: 'sensor', accent: '#15803d', terminals: sensorModule, defaults: { sense: 0.5 } },
   touchSensor: { category: 'sensor', accent: '#c026d3', terminals: sensorModule, defaults: { sense: 0 } },
+  flameSensor: { category: 'sensor', accent: '#ea580c', terminals: sensorModule, defaults: { sense: 0 } },
+  rainSensor: { category: 'sensor', accent: '#0284c7', terminals: sensorModule, defaults: { sense: 0 } },
+  waterSensor: { category: 'sensor', accent: '#b91c1c', terminals: sensorModule, defaults: { sense: 0.3 } },
+  humiditySensor: { category: 'sensor', accent: '#0ea5e9', terminals: sensorModule, defaults: { sense: 0.45 } },
+  hallSensor: { category: 'sensor', accent: '#4338ca', terminals: sensorModule, defaults: { sense: 0 } },
+  irSensor: { category: 'sensor', accent: '#059669', terminals: sensorModule, defaults: { sense: 0 } },
+  lineSensor: { category: 'sensor', accent: '#334155', terminals: sensorModule, defaults: { sense: 0 } },
+  forceSensor: { category: 'sensor', accent: '#7c3aed', terminals: sensorModule, defaults: { sense: 0 } },
+  pulseSensor: { category: 'sensor', accent: '#16a34a', terminals: sensorModule, defaults: { sense: 0.25 } },
+  knockSensor: { category: 'sensor', accent: '#a16207', terminals: sensorModule, defaults: { sense: 0 } },
+  slideSwitch: {
+    category: 'control',
+    accent: '#475569',
+    // COM is joined to A or to B: two of them switch a stair light from both ends
+    terminals: {
+      COM: { side: 'left', label: 'COM' },
+      A: { side: 'right', offset: 0.32, label: 'A' },
+      B: { side: 'right', offset: 0.68, label: 'B' },
+    },
+    defaults: { closed: false },
+  },
+  microSwitch: {
+    category: 'control',
+    accent: '#be123c',
+    // COM touches NC until the lever is pressed, then it jumps over to NO
+    terminals: {
+      COM: { side: 'left', label: 'COM' },
+      NO: { side: 'right', offset: 0.32, label: 'NO' },
+      NC: { side: 'right', offset: 0.68, label: 'NC' },
+    },
+    defaults: {},
+  },
+  joystick: {
+    category: 'control',
+    accent: '#18181b',
+    terminals: {
+      VCC: { side: 'left', offset: 0.68, polarity: '+' },
+      GND: { side: 'left', offset: 0.32, polarity: '-' },
+      X: { side: 'right', offset: 0.32, label: 'X' },
+      Y: { side: 'right', offset: 0.68, label: 'Y' },
+    },
+    defaults: { stickX: 0.5, stickY: 0.5 },
+  },
+  // the small power sources: + on the right, like the battery. Their models stay the right way up
+  lemon: { category: 'power', accent: '#ca8a04', terminals: cellTerminals, defaults: { cells: 3 }, rotatable: false },
+  coinCell: { category: 'power', accent: '#71717a', terminals: cellTerminals, defaults: {}, rotatable: false },
+  dynamo: { category: 'power', accent: '#ea580c', terminals: cellTerminals, defaults: { level: 0 }, rotatable: false },
+  powerBank: { category: 'power', accent: '#0ea5e9', terminals: cellTerminals, defaults: {}, rotatable: false },
   voltmeter: { category: 'meter', accent: '#0284c7', terminals: polarised, defaults: {} },
   ammeter: { category: 'meter', accent: '#f97316', terminals: polarised, defaults: {} },
   segment: screen('segment', '#ef4444'),
@@ -585,11 +772,121 @@ export const PARTS: Record<PartType, PartDef> = {
     // a screen turned on its side would show its picture sideways
     rotatable: false,
   },
+  // the striped end (+) goes toward + so it can hold its 5.1 V
+  zener: { category: 'component', accent: '#c2410c', terminals: polarised, defaults: {} },
+  pnp: {
+    category: 'component',
+    accent: '#ca8a04',
+    // the mirror of the NPN: E goes to +, C to the part it switches
+    terminals: {
+      B: { side: 'left', label: 'B' },
+      E: { side: 'right', offset: 0.32, label: 'E' },
+      C: { side: 'right', offset: 0.68, label: 'C' },
+    },
+    defaults: {},
+  },
+  mosfet: {
+    category: 'component',
+    accent: '#4338ca',
+    terminals: {
+      G: { side: 'left', label: 'G' },
+      D: { side: 'right', offset: 0.32, label: 'D' },
+      S: { side: 'right', offset: 0.68, label: 'S' },
+    },
+    defaults: {},
+  },
+  optocoupler: {
+    category: 'component',
+    accent: '#9f1239',
+    // the LED on the left, the light switch it works on the right
+    terminals: {
+      a: { side: 'left', offset: 0.68, polarity: '+' },
+      b: { side: 'left', offset: 0.32, polarity: '-' },
+      C: { side: 'right', offset: 0.32, label: 'C' },
+      E: { side: 'right', offset: 0.68, label: 'E' },
+    },
+    defaults: {},
+  },
+  laser: { category: 'output', accent: '#dc2626', terminals: polarised, defaults: {} },
+  irLed: { category: 'output', accent: '#7e22ce', terminals: polarised, defaults: { camera: false } },
+  solenoid: { category: 'output', accent: '#57534e', terminals: twoWay, defaults: {} },
+  pump: { category: 'output', accent: '#0891b2', terminals: twoWay, defaults: {} },
+  bell: { category: 'output', accent: '#d97706', terminals: twoWay, defaults: {} },
+  barGraph: {
+    category: 'output',
+    accent: '#16a34a',
+    terminals: {
+      VCC: { side: 'left', offset: 0.68, polarity: '+' },
+      GND: { side: 'left', offset: 0.32, polarity: '-' },
+      IN: { side: 'right', label: 'IN' },
+    },
+    defaults: {},
+  },
+  trafficLight: {
+    category: 'output',
+    accent: '#eab308',
+    terminals: {
+      R: { side: 'left', offset: 0.76, label: 'R', tint: '#dc2626' },
+      Y: { side: 'left', offset: 0.5, label: 'Y', tint: '#ca8a04' },
+      G: { side: 'left', offset: 0.24, label: 'G', tint: '#16a34a' },
+      GND: { side: 'right', polarity: '-' },
+    },
+    defaults: {},
+  },
+  fan: { category: 'output', accent: '#0d9488', terminals: polarised, defaults: {} },
+  nandGate: gate(2, '#0d9488'),
+  norGate: gate(2, '#4f46e5'),
+  latch: {
+    category: 'logic',
+    accent: '#db2777',
+    terminals: chipTerminals([['S', 'S'], ['R', 'R']], { Q: { side: 'right', label: 'Q' } }),
+    defaults: {},
+  },
+  counter: {
+    category: 'logic',
+    accent: '#0891b2',
+    terminals: chipTerminals([['CLK', 'CLK'], ['RST', 'RST']], counterOutputs),
+    defaults: {},
+  },
+  comparator: {
+    category: 'logic',
+    accent: '#ca8a04',
+    terminals: chipTerminals([['P', 'IN+'], ['N', 'IN−']], { OUT: { side: 'right', label: 'OUT' } }),
+    defaults: {},
+  },
+  hBridge: {
+    category: 'logic',
+    accent: '#dc2626',
+    terminals: chipTerminals([['IN1', 'IN1'], ['IN2', 'IN2']], {
+      M1: { side: 'right', offset: 0.32, label: 'M1' },
+      M2: { side: 'right', offset: 0.68, label: 'M2' },
+    }),
+    defaults: {},
+  },
+  multimeter: {
+    category: 'meter',
+    accent: '#eab308',
+    // red probe (+) on the left, black COM probe (−) on the right
+    terminals: polarised,
+    defaults: { dial: 'volts' },
+    // its screen would read sideways
+    rotatable: false,
+  },
+  logicProbe: {
+    category: 'meter',
+    accent: '#7c3aed',
+    terminals: {
+      VCC: { side: 'left', offset: 0.68, polarity: '+' },
+      GND: { side: 'left', offset: 0.32, polarity: '-' },
+      TIP: { side: 'right', label: 'TIP' },
+    },
+    defaults: {},
+  },
 }
 
 /** The logic gates. */
-export type GateType = 'notGate' | 'andGate' | 'orGate' | 'xorGate'
-export const GATE_TYPES: readonly GateType[] = ['notGate', 'andGate', 'orGate', 'xorGate']
+export type GateType = 'notGate' | 'andGate' | 'orGate' | 'xorGate' | 'nandGate' | 'norGate'
+export const GATE_TYPES: readonly GateType[] = ['notGate', 'andGate', 'orGate', 'xorGate', 'nandGate', 'norGate']
 export const isGate = (type: PartType): type is GateType => (GATE_TYPES as readonly string[]).includes(type)
 
 /** What a gate's output Y is for its inputs. NOT only looks at A. */
@@ -603,6 +900,11 @@ export function gateOutput(type: GateType, a: boolean, b: boolean): boolean {
       return a || b
     case 'xorGate':
       return a !== b
+    // NAND and NOR are AND and OR with a NOT on the end
+    case 'nandGate':
+      return !(a && b)
+    case 'norGate':
+      return !(a || b)
   }
 }
 
@@ -636,8 +938,11 @@ export type SensorSpec = {
   control: 'slider' | 'hold' | 'toggle'
   /** the value shown next to the slider */
   format?: (sense: number) => string
-  /** 3-pin modules only: the output, as a share of the supply voltage, for this `sense` */
-  signal?: (sense: number) => number
+  /**
+   * 3-pin modules only: the output, as a share of the supply voltage, for this `sense`
+   * at `time` seconds (only the heartbeat sensor changes by itself)
+   */
+  signal?: (sense: number, time: number) => number
   /** 3-pin modules only: the output is just HIGH or LOW */
   digital?: boolean
 }
@@ -647,6 +952,21 @@ const percent = (s: number) => `${Math.round(s * 100)}%`
 export const senseToCelsius = (s: number) => Math.round(s * 60)
 /** the distance sensor reads 2 cm … 200 cm */
 export const senseToCentimetres = (s: number) => Math.round(2 + s * 198)
+/** the water sensor's strip is 4 cm long */
+export const senseToWaterDepth = (s: number) => Math.round(s * 40) / 10
+/** the heartbeat sensor: 40 to 180 beats a minute */
+export const senseToBpm = (s: number) => Math.round(40 + Math.min(1, Math.max(0, s)) * 140)
+
+/**
+ * The heartbeat sensor's output at `time` seconds: a quick bump for every beat and
+ * a small echo after it, like the line on a hospital monitor. 0..1.
+ */
+export function heartbeat(bpm: number, time: number): number {
+  const phase = ((time * bpm) / 60) % 1
+  const beat = Math.exp(-(((phase - 0.12) / 0.09) ** 2))
+  const echo = 0.25 * Math.exp(-(((phase - 0.42) / 0.07) ** 2))
+  return 0.12 + 0.88 * Math.min(1, beat + echo)
+}
 
 /** Parts whose card has a control for the world around them. */
 export type SensedPart =
@@ -660,6 +980,16 @@ export type SensedPart =
   | 'gasSensor'
   | 'soilSensor'
   | 'touchSensor'
+  | 'flameSensor'
+  | 'rainSensor'
+  | 'waterSensor'
+  | 'humiditySensor'
+  | 'hallSensor'
+  | 'irSensor'
+  | 'lineSensor'
+  | 'forceSensor'
+  | 'pulseSensor'
+  | 'knockSensor'
 
 export const SENSORS: Partial<Record<PartType, SensorSpec>> & Record<SensedPart, SensorSpec> = {
   thermistor: { control: 'slider', format: (s) => `${senseToCelsius(s)}°C` },
@@ -673,6 +1003,25 @@ export const SENSORS: Partial<Record<PartType, SensorSpec>> & Record<SensedPart,
   gasSensor: { control: 'slider', format: percent, signal: (s) => s },
   soilSensor: { control: 'slider', format: percent, signal: (s) => s },
   touchSensor: { control: 'hold', digital: true, signal: (s) => s },
+  // a bigger, closer flame gives a bigger signal
+  flameSensor: { control: 'slider', format: percent, signal: (s) => s },
+  rainSensor: { control: 'slider', format: percent, signal: (s) => s },
+  waterSensor: { control: 'slider', format: (s) => `${senseToWaterDepth(s).toFixed(1)} cm`, signal: (s) => s },
+  // the share of water the air holds, 0 … 100 %
+  humiditySensor: { control: 'slider', format: percent, signal: (s) => s },
+  // HIGH while the magnet is near
+  hallSensor: { control: 'toggle', digital: true, signal: (s) => s },
+  // HIGH while something is in front of it
+  irSensor: { control: 'toggle', digital: true, signal: (s) => s },
+  // HIGH over a black line: black takes in the light, so none bounces back
+  lineSensor: { control: 'toggle', digital: true, signal: (s) => s },
+  forceSensor: { control: 'slider', format: percent, signal: (s) => s },
+  pulseSensor: {
+    control: 'slider',
+    format: (s) => `${senseToBpm(s)} bpm`,
+    signal: (s, time) => heartbeat(senseToBpm(s), time),
+  },
+  knockSensor: { control: 'hold', digital: true, signal: (s) => s },
 }
 
 export const isSensorModule = (type: PartType) => SENSORS[type]?.signal !== undefined
@@ -725,9 +1074,73 @@ export function nextRotation(rotation: Rotation): Rotation {
 
 /** The bench power supply's set voltage and current limit, kept inside what it can do. */
 export function supplySettings(data: PartData) {
+  // a USB power bank is a supply with fixed settings
+  if (data.type === 'powerBank') return { voltage: ELECTRICAL.powerBank.voltage, limit: ELECTRICAL.powerBank.limit }
   const voltage = Math.min(ELECTRICAL.supply.maxVoltage, Math.max(0, data.voltage ?? 5))
   const limit = Math.min(2, Math.max(0.01, data.limit ?? 0.5))
   return { voltage, limit }
+}
+
+/** Parts that hold their volts steady up to a current limit: the bench supply and the power bank. */
+export const isSupply = (type: PartType) => type === 'powerSupply' || type === 'powerBank'
+
+/** How many lemons are in the row, 1 … 4. */
+export const lemonCount = (data: PartData) => Math.min(4, Math.max(1, Math.round(data.cells ?? 3)))
+
+/** The volts of the crank generator for how fast its crank turns. */
+export const dynamoVoltage = (speed: number) => ELECTRICAL.dynamo.maxVoltage * Math.min(1, Math.max(0, speed))
+
+/**
+ * The lemons, the coin cell and the crank generator are cells like the battery:
+ * a push (volts) behind a resistance inside them. Null for every other part.
+ */
+export function cellModel(data: PartData): { voltage: number; resistance: number } | null {
+  switch (data.type) {
+    case 'lemon': {
+      // lemons in a row add their volts, and their resistances too
+      const n = lemonCount(data)
+      return { voltage: n * ELECTRICAL.lemon.voltage, resistance: n * ELECTRICAL.lemon.resistance }
+    }
+    case 'coinCell':
+      return { voltage: ELECTRICAL.coinCell.voltage, resistance: ELECTRICAL.coinCell.resistance }
+    case 'dynamo':
+      return { voltage: dynamoVoltage(data.level ?? 0), resistance: ELECTRICAL.dynamo.resistance }
+    default:
+      return null
+  }
+}
+
+/**
+ * The terminal pairs a switch-like part joins right now, with the ohms between
+ * them: the slide switch's and micro switch's contacts, and the joystick's two knobs.
+ */
+export function contactPairs(data: PartData): [TerminalId, TerminalId, number][] {
+  const contact = ELECTRICAL.contactResistance
+  switch (data.type) {
+    case 'slideSwitch':
+      return [['COM', data.closed ? 'B' : 'A', contact]]
+    case 'microSwitch':
+      return [['COM', data.pressed ? 'NO' : 'NC', contact]]
+    case 'joystick': {
+      // each knob runs from + to −, its wiper is X or Y: pushed right (or up) gives more volts
+      const total = ELECTRICAL.joystick.resistance
+      const { wiperResistance } = ELECTRICAL.potentiometer
+      const halves = (share: number) => {
+        const s = Math.min(1, Math.max(0, share))
+        return [total * (1 - s) + wiperResistance, total * s + wiperResistance]
+      }
+      const [xTop, xBottom] = halves(data.stickX ?? 0.5)
+      const [yTop, yBottom] = halves(data.stickY ?? 0.5)
+      return [
+        ['VCC', 'X', xTop],
+        ['X', 'GND', xBottom],
+        ['VCC', 'Y', yTop],
+        ['Y', 'GND', yBottom],
+      ]
+    }
+    default:
+      return []
+  }
 }
 
 /** The potentiometer's two halves: from A to the wiper W and from W to B. */
@@ -817,6 +1230,10 @@ export const SENSOR_MODES: readonly PinMode[] = ['follow', 'invert', 'alarm']
 /** True when the board changes over time (blinking pins, charging capacitors, pins reading a sensor). */
 export function isTimeDependent(data: PartData): boolean {
   if (data.type === 'capacitor' || data.type === 'timer555') return true
+  // the heartbeat sensor beats by itself
+  if (data.type === 'pulseSensor') return true
+  // the logic probe's PULSE light stays on for a moment after each change, then goes out
+  if (data.type === 'logicProbe') return true
   if (isBoard(data.type)) return Object.values(data.pins ?? {}).some((m) => m !== 'off' && m !== 'on')
   return false
 }

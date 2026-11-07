@@ -596,6 +596,16 @@ function useKeys() {
   }
 }
 
+/**
+ * Opening the Toolbox focuses the panel itself, not its close button: a
+ * focus ring would otherwise flash on the button on every open, and Tab
+ * still walks in from the top.
+ */
+function focusPanel(event: Event) {
+  event.preventDefault()
+  ;(event.currentTarget as HTMLElement | null)?.focus({ preventScroll: true })
+}
+
 export default function Toolbox() {
   const open = useToolbox((s) => s.open)
   const setOpen = useToolbox((s) => s.setOpen)
@@ -615,9 +625,10 @@ export default function Toolbox() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           showCloseButton={false}
+          onOpenAutoFocus={focusPanel}
           onKeyDown={onKeyDown}
           onEscapeKeyDown={onEscape}
-          className="flex h-[min(48rem,calc(100dvh-3rem))] flex-col gap-0 overflow-hidden p-0 sm:max-w-[min(64rem,calc(100%-3rem))]"
+          className="flex outline-none h-[min(48rem,calc(100dvh-3rem))] flex-col gap-0 overflow-hidden p-0 sm:max-w-[min(64rem,calc(100%-3rem))]"
         >
           <Header />
           <Body />
@@ -631,9 +642,10 @@ export default function Toolbox() {
       <SheetContent
         side="bottom"
         showCloseButton={false}
+        onOpenAutoFocus={focusPanel}
         onKeyDown={onKeyDown}
         onEscapeKeyDown={onEscape}
-        className="gap-0 overflow-hidden rounded-t-xl p-0 data-[side=bottom]:h-[92dvh]"
+        className="gap-0 overflow-hidden outline-none rounded-t-xl p-0 data-[side=bottom]:h-[92dvh]"
       >
         <div aria-hidden className="mx-auto mt-2 h-1.5 w-10 shrink-0 rounded-full bg-muted-foreground/25" />
         <Header />

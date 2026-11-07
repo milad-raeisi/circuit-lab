@@ -20,6 +20,9 @@ import {
   BOARDS,
   CAPACITOR_VALUES,
   FUSE_RATINGS,
+  LEMON_COUNTS,
+  dynamoVoltage,
+  lemonCount,
   LAMP_COLORS,
   LED_COLORS,
   LED_FORWARD_VOLTAGE,
@@ -81,10 +84,30 @@ function tipFor(data: PartData, result: PartResult | undefined, status: PartStat
     if (status === 'weak') return { text: data.type === 'timer555' ? w.timerWeak : w.chipWeak, tone: 'info' }
     return result.voltage < 0.5 ? { text: w.chipPower, tone: 'info' } : null
   }
+  const k = t.inputs.tips
   switch (data.type) {
     case 'powerSupply':
       if (status === 'over') return { text: w.supplyLimit, tone: 'warn' }
       return status === 'idle' ? { text: t.tips.batteryIdle, tone: 'info' } : null
+    case 'lemon':
+      if (status !== 'idle') return { text: k.lemonTiny, tone: 'info' }
+      return { text: lemonCount(data) < 3 ? k.lemonMore : t.tips.batteryIdle, tone: 'info' }
+    case 'coinCell':
+      if (status === 'idle') return { text: t.tips.batteryIdle, tone: 'info' }
+      // a big load pulls its volts right down
+      return result.voltage < 2 ? { text: k.coinSag, tone: 'info' } : null
+    case 'dynamo':
+      if ((data.level ?? 0) < 0.02) return { text: k.crank, tone: 'info' }
+      return status === 'idle' ? { text: t.tips.batteryIdle, tone: 'info' } : null
+    case 'powerBank':
+      if (status === 'over') return { text: k.bankLimit, tone: 'warn' }
+      return status === 'idle' ? { text: t.tips.batteryIdle, tone: 'info' } : null
+    case 'slideSwitch':
+      return status === 'idle' ? { text: k.slideHint, tone: 'info' } : null
+    case 'microSwitch':
+      return status === 'idle' ? { text: k.microHint, tone: 'info' } : null
+    case 'joystick':
+      return status === 'on' ? null : { text: k.joystickPower, tone: 'info' }
     case 'potentiometer':
       if (status === 'over') return { text: w.potHot, tone: 'warn' }
       return Math.abs(result.voltage) < 0.05 ? { text: w.potHint, tone: 'info' } : null
@@ -320,14 +343,75 @@ function PartSettings({ node }: { node: SelectedPart }) {
         </label>
       )
     case 'capacitor':
+      // seven sizes: a list keeps them tidy
+      return (
+        <div className="space-y-1.5">
+          <p className="text-xs text-muted-foreground">{t.inspector.capacitance}</p>
+          <Select
+            value={String(data.capacitance ?? 2200)}
+            onValueChange={(v) => updatePart(id, { capacitance: Number(v) })}
+          >
+            <SelectTrigger className="w-full" dir="ltr" aria-label={t.inspector.capacitance}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CAPACITOR_VALUES.map((v) => (
+                <SelectItem key={v} value={String(v)}>
+                  {formatFarads(v)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )
+    case 'lemon':
       return (
         <ChoiceRow
-          label={t.inspector.capacitance}
-          value={data.capacitance ?? 2200}
-          options={CAPACITOR_VALUES}
-          format={formatFarads}
-          onChange={(capacitance) => updatePart(id, { capacitance })}
+          label={t.inputs.lemons}
+          value={lemonCount(data) as (typeof LEMON_COUNTS)[number]}
+          options={LEMON_COUNTS}
+          format={(n) => String(n)}
+          onChange={(cells) => updatePart(id, { cells })}
         />
+      )
+    case 'dynamo':
+      return (
+        <SliderBox
+          label={t.inputs.crank}
+          value={data.level ?? 0}
+          text={`${dynamoVoltage(data.level ?? 0).toFixed(1)} V`}
+          onChange={(level) => updatePart(id, { level }, { history: false })}
+        />
+      )
+    case 'slideSwitch':
+      return (
+        <ChoiceRow
+          label={t.inputs.slideTo}
+          value={data.closed ? 1 : 0}
+          options={[0, 1] as const}
+          format={(side) => (side ? 'B' : 'A')}
+          onChange={(side) => {
+            updatePart(id, { closed: side === 1 })
+            playClick(true)
+          }}
+        />
+      )
+    case 'joystick':
+      return (
+        <div className="space-y-3">
+          <SliderBox
+            label={`X · ${t.inputs.stickX}`}
+            value={data.stickX ?? 0.5}
+            text={`${Math.round((data.stickX ?? 0.5) * 100)}%`}
+            onChange={(stickX) => updatePart(id, { stickX }, { history: false })}
+          />
+          <SliderBox
+            label={`Y · ${t.inputs.stickY}`}
+            value={data.stickY ?? 0.5}
+            text={`${Math.round((data.stickY ?? 0.5) * 100)}%`}
+            onChange={(stickY) => updatePart(id, { stickY }, { history: false })}
+          />
+        </div>
       )
     case 'fuse':
       return (
@@ -754,6 +838,9 @@ function PartInspector({ node }: { node: SelectedPart }) {
   const showLevel = ['lamp', 'led', 'motor', 'buzzer'].includes(data.type)
   const hasSettings = ![
     'button',
+    'microSwitch',
+    'coinCell',
+    'powerBank',
     'motor',
     'buzzer',
     'diode',
@@ -834,6 +921,13 @@ function PartInspector({ node }: { node: SelectedPart }) {
         {/* a relay's tiny coil current switches a much bigger one */}
         {data.type === 'relay' && (
           <CurrentReading label={t.workshop.contactCurrent} amps={result?.channels?.contact ?? 0} />
+        )}
+        {/* the joystick's two outputs */}
+        {data.type === 'joystick' && (
+          <div className="grid grid-cols-2 gap-2">
+            <Reading label="X" value={Math.max(0, result?.channels?.X ?? 0)} unit={t.units.volt} decimals={2} />
+            <Reading label="Y" value={Math.max(0, result?.channels?.Y ?? 0)} unit={t.units.volt} decimals={2} />
+          </div>
         )}
         {showLevel && (
           <div className="flex items-center gap-2 rounded-xl border p-2.5">

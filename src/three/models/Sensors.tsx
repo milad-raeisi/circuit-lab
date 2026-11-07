@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { Halo, Smoke, damp } from '../helpers'
 
-type SensorProps = {
+export type SensorProps = {
   /** 0..1: what the sensor feels (heat, distance, motion, loudness, smoke, moisture, touch) */
   sense: number
   /** 0..1: the module's output signal right now */
@@ -14,18 +14,18 @@ type SensorProps = {
   powered: boolean
 }
 
-const BOARD_T = 0.05
-const FACE = BOARD_T / 2
-const PITCH = 0.126
+export const BOARD_T = 0.05
+export const FACE = BOARD_T / 2
+export const PITCH = 0.126
 const UP = new THREE.Vector3(0, 1, 0)
 /** modules lean back a little and turn to show their edge */
-const MODULE_TILT: [number, number, number] = [-0.3, 0.25, 0]
+export const MODULE_TILT: [number, number, number] = [-0.3, 0.25, 0]
 
-const metal = { color: '#d4d4d8', metalness: 0.9, roughness: 0.25 } as const
+export const metal = { color: '#d4d4d8', metalness: 0.9, roughness: 0.25 } as const
 /** for big metal faces: without an environment map full metalness looks black */
-const brushed = { color: '#d9dde3', metalness: 0.5, roughness: 0.32 } as const
-const silk = { color: '#f1f5f9', roughness: 0.7 } as const
-const chip = { color: '#1a1a1c', roughness: 0.45 } as const
+export const brushed = { color: '#d9dde3', metalness: 0.5, roughness: 0.32 } as const
+export const silk = { color: '#f1f5f9', roughness: 0.7 } as const
+export const chip = { color: '#1a1a1c', roughness: 0.45 } as const
 
 const unit = (v: number) => THREE.MathUtils.clamp(Number.isFinite(v) ? v : 0, 0, 1)
 
@@ -61,7 +61,7 @@ const micGrid = () => meshDisc(0.16, 0.04, 0.008)
 const gasGrid = () => meshDisc(0.3, 0.05, 0.01)
 
 /** A straight wire between two points. */
-function Wire({ from, to, radius = 0.018, color = metal.color }: { from: THREE.Vector3; to: THREE.Vector3; radius?: number; color?: string }) {
+export function Wire({ from, to, radius = 0.018, color = metal.color }: { from: THREE.Vector3; to: THREE.Vector3; radius?: number; color?: string }) {
   const direction = to.clone().sub(from)
   const length = direction.length()
   const quaternion = new THREE.Quaternion().setFromUnitVectors(UP, direction.normalize())
@@ -88,7 +88,7 @@ function SmdLed({ x, y, off, color, material }: { x: number; y: number; off: str
  * along one edge, a red power LED and a green signal LED. Its face is at
  * z = FACE; whatever the module carries is passed as children.
  */
-function ModuleBoard({
+export function ModuleBoard({
   width,
   height,
   color,

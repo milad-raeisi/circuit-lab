@@ -5,7 +5,10 @@ import {
   LED_FORWARD_VOLTAGE,
   SENSORS,
   batteryResistance,
+  cellModel,
+  contactPairs,
   dimmerResistance,
+  isSupply,
   gateInputs,
   gateOutput,
   isGate,
@@ -19,6 +22,7 @@ import {
   thermistorResistance,
   timerHigh,
 } from './catalog'
+import { createDevice, type Device, type Mna } from './devices'
 import { displayCurrent, hasSignalInput, isDisplay } from './display'
 import type { LedColor, PartData } from './types'
 
@@ -124,10 +128,10 @@ export const EMPTY_RESULT: SimResult = {
   states: {},
 }
 
-/** What a sensor module puts out, as a share of its supply, when it is powered. */
-function moduleSignal(data: PartData): number {
+/** What a sensor module puts out at `time`, as a share of its supply, when it is powered. */
+function moduleSignal(data: PartData, time: number): number {
   const spec = SENSORS[data.type]
-  const raw = spec?.signal?.(data.sense ?? 0) ?? 0
+  const raw = spec?.signal?.(data.sense ?? 0, time) ?? 0
   return spec?.digital ? (raw > 0.5 ? 1 : 0) : Math.min(1, Math.max(0, raw))
 }
 
@@ -298,6 +302,22 @@ export function solveCircuit(parts: NetPart[], wires: NetWire[], options: SolveO
         fixed.push({ a: node(id, 'a'), b: node(id, 'b'), g, source: solarVoltage(data.light ?? 0.8) * g })
         break
       }
+      case 'lemon':
+      case 'coinCell':
+      case 'dynamo': {
+        // a push behind a resistance, like the battery
+        hasBattery = true
+        const cell = cellModel(data)!
+        const g = 1 / cell.resistance
+        fixed.push({ a: node(id, 'a'), b: node(id, 'b'), g, source: cell.voltage * g })
+        break
+      }
+      case 'slideSwitch':
+      case 'microSwitch':
+      case 'joystick':
+        // whichever contacts are touching, or the joystick's two knobs
+        for (const [from, to, r] of contactPairs(data)) fixed.push({ a: node(id, from), b: node(id, to), g: 1 / r, source: 0 })
+        break
       case 'arduino':
       case 'nano':
       case 'mega':
@@ -339,6 +359,7 @@ export function solveCircuit(parts: NetPart[], wires: NetWire[], options: SolveO
         break
       }
       case 'powerSupply':
+      case 'powerBank':
         hasBattery = true
         break // steady volts or current limit: solved iteratively below
       case 'potentiometer': {
@@ -417,7 +438,7 @@ export function solveCircuit(parts: NetPart[], wires: NetWire[], options: SolveO
   const modulePowered = new Map(modules.map((p) => [p.id, true]))
 
   // parts that switch between states start where they were after the last step
-  const supplies = parts.filter((p) => p.data.type === 'powerSupply')
+  const supplies = parts.filter((p) => isSupply(p.data.type))
   const supplyLimited = new Map(supplies.map((p) => [p.id, previousStates[p.id] === 1]))
   const relays = parts.filter((p) => p.data.type === 'relay')
   const relayClosed = new Map(relays.map((p) => [p.id, previousStates[p.id] === 1]))
@@ -445,9 +466,16 @@ export function solveCircuit(parts: NetPart[], wires: NetWire[], options: SolveO
     flips.set(key, count)
     return count <= MAX_FLIPS
   }
+  // the newer parts (Zener, PNP, MOSFET, multimeter, latch …) stamp and judge themselves: see devices.ts
+  const devices = new Map<string, Device>()
+  for (const { id, data } of parts) {
+    const device = createDevice({ id, data, pin: (handle) => node(id, handle), time, memory: previousStates })
+    if (device) devices.set(id, device)
+  }
 
   // 3. solve, refining diode and transistor states until they are consistent
   let voltages: Float64Array = new Float64Array(n)
+  const nodeVoltage = (i: number) => voltages[i]
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
     const matrix = new Float64Array(n * n)
     const rhs = new Float64Array(n)
@@ -463,6 +491,19 @@ export function solveCircuit(parts: NetPart[], wires: NetWire[], options: SolveO
       rhs[b] -= source
     }
     fixed.forEach(stamp)
+
+    const mna: Mna = {
+      stamp: (a, b, g, source = 0) => stamp({ a, b, g, source }),
+      vccs: (from, to, p, q, gm, offset = 0) => {
+        matrix[from * n + p] += gm
+        matrix[from * n + q] -= gm
+        rhs[from] += gm * offset
+        matrix[to * n + p] -= gm
+        matrix[to * n + q] += gm
+        rhs[to] -= gm * offset
+      },
+    }
+    for (const device of devices.values()) device.stamp(mna)
 
     for (const j of junctions) {
       if (!diodeOn.get(j.key)) continue
@@ -541,7 +582,7 @@ export function solveCircuit(parts: NetPart[], wires: NetWire[], options: SolveO
       const g = 1 / (SENSORS[m.data.type]?.digital ? E.module.digitalResistance : E.module.analogResistance)
       // OUT follows signal × (VCC − GND) through a small output resistance;
       // an unpowered module just pulls OUT down to GND
-      const k = modulePowered.get(m.id) ? moduleSignal(m.data) : 0
+      const k = modulePowered.get(m.id) ? moduleSignal(m.data, time) : 0
       matrix[out * n + out] += g
       matrix[out * n + gnd] += g * k - g
       matrix[out * n + vcc] -= g * k
@@ -651,6 +692,9 @@ export function solveCircuit(parts: NetPart[], wires: NetWire[], options: SolveO
         changed = true
       }
     }
+    for (const device of devices.values()) {
+      if (device.update(nodeVoltage, mayFlip)) changed = true
+    }
     if (!changed) break
   }
 
@@ -686,6 +730,11 @@ export function solveCircuit(parts: NetPart[], wires: NetWire[], options: SolveO
 
   for (const part of parts) {
     const { id, data } = part
+    const device = devices.get(id)
+    if (device) {
+      results[id] = device.result(nodeVoltage, states)
+      continue
+    }
     const handles = terminalIds(data.type)
     const voltage =
       data.type === 'transistor'
@@ -716,6 +765,35 @@ export function solveCircuit(parts: NetPart[], wires: NetWire[], options: SolveO
       }
       case 'solar': {
         deliver(result, (solarVoltage(data.light ?? 0.8) - voltage) / E.solar.resistance)
+        break
+      }
+      case 'lemon':
+      case 'coinCell':
+      case 'dynamo': {
+        const cell = cellModel(data)!
+        deliver(result, (cell.voltage - voltage) / cell.resistance)
+        break
+      }
+      case 'slideSwitch':
+      case 'microSwitch': {
+        // the current through the contact that is touching, from COM to that side
+        const [[from, to, r]] = contactPairs(data)
+        result.voltage = v(id, from) - v(id, to)
+        result.current = result.voltage / r
+        result.power = result.voltage * result.current
+        result.level = data.type === 'slideSwitch' ? (data.closed ? 1 : 0) : data.pressed ? 1 : 0
+        if (Math.abs(result.current) > 1e-3) result.status = 'on'
+        break
+      }
+      case 'joystick': {
+        // the volts on X and Y, from −
+        const gnd = v(id, 'GND')
+        result.current = voltage / (E.joystick.resistance / 2)
+        result.power = voltage * result.current
+        result.channels = { X: v(id, 'X') - gnd, Y: v(id, 'Y') - gnd }
+        result.level = Math.abs(voltage)
+        if (voltage > 0.5) result.status = 'on'
+        else if (voltage < -0.5) result.status = 'reverse'
         break
       }
       case 'arduino':
@@ -877,7 +955,8 @@ export function solveCircuit(parts: NetPart[], wires: NetWire[], options: SolveO
         }
         break
       }
-      case 'powerSupply': {
+      case 'powerSupply':
+      case 'powerBank': {
         const { voltage: set, limit } = supplySettings(data)
         const limited = supplyLimited.get(id) ?? false
         const delivered = limited ? limit - voltage / E.supply.shuntResistance : (set - voltage) / E.supply.resistance
@@ -1079,7 +1158,7 @@ export function solveCircuit(parts: NetPart[], wires: NetWire[], options: SolveO
           result.power = voltage * result.current
           if (modulePowered.get(id)) {
             // how strongly it is sensing right now: drives the little light on the module
-            result.level = moduleSignal(data)
+            result.level = moduleSignal(data, time)
             result.status = 'on'
           } else if (voltage > 0.5) {
             result.status = 'weak'

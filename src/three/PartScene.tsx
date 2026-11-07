@@ -37,6 +37,21 @@ import { RelayModel } from './models/Relay'
 import { RgbLedModel } from './models/RgbLed'
 import { SpeakerModel } from './models/Speaker'
 import { VibrationMotorModel } from './models/Vibration'
+import { meterReading } from '@/circuit/devices'
+import { BarGraphModel } from './models/BarGraph'
+import { BellModel } from './models/Bell'
+import { ComparatorModel, CounterModel, HBridgeModel, LatchModel } from './models/ChipModules'
+import { FanModel } from './models/Fan'
+import { IrLedModel } from './models/IrLed'
+import { LaserModel } from './models/Laser'
+import { LogicProbeModel } from './models/LogicProbe'
+import { MosfetModel } from './models/Mosfet'
+import { MultimeterModel } from './models/Multimeter'
+import { OptocouplerModel } from './models/Optocoupler'
+import { PumpModel } from './models/Pump'
+import { SolenoidModel } from './models/Solenoid'
+import { TrafficLightModel } from './models/TrafficLight'
+import { ZenerModel } from './models/Zener'
 
 /*
  * Camera framing for every model, measured so each one sits in the middle of
@@ -81,6 +96,25 @@ const FRAMING = {
   regulator: { camera: [0, 0.4, 4.6], scale: 1.05, lift: -0.12 },
   gate: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
   timer555: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
+  // the newer components, outputs, chips and meters
+  zener: { camera: [0, 0.4, 4.6], scale: 0.76, lift: 0 },
+  zenerUpright: { camera: [0, 0.4, 4.6], scale: 1.24, lift: 0 },
+  mosfet: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  optocoupler: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  laser: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  irLed: { camera: [0, 0.35, 4.2], scale: 1.15, lift: -0.13 },
+  solenoid: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  pump: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  bell: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  barGraph: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  trafficLight: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  fan: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  latch: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
+  counter: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
+  comparator: { camera: [0, 0.4, 4.6], scale: 0.9, lift: 0 },
+  hBridge: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  multimeter: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
+  logicProbe: { camera: [0, 0.4, 4.6], scale: 1, lift: 0 },
 } satisfies Record<string, Framing>
 
 /** The animated 3D preview of one part, driven by its simulation result. */
@@ -335,6 +369,8 @@ export function PartScene({ data, result }: { data: PartData; result?: PartResul
     case 'andGate':
     case 'orGate':
     case 'xorGate':
+    case 'nandGate':
+    case 'norGate':
       return (
         <Stage {...FRAMING.gate}>
           <LogicGateModel
@@ -349,6 +385,145 @@ export function PartScene({ data, result }: { data: PartData; result?: PartResul
       return (
         <Stage {...FRAMING.timer555}>
           <Timer555Model output={level} powered={status === 'on'} />
+        </Stage>
+      )
+    case 'zener':
+      return (
+        <Stage {...(upright ? FRAMING.zenerUpright : FRAMING.zener)}>
+          <ZenerModel
+            holding={result?.channels?.holding ?? 0}
+            forward={result?.channels?.forward ?? 0}
+            burnt={!!data.burnt}
+            rotation={data.rotation}
+          />
+        </Stage>
+      )
+    case 'pnp':
+      return (
+        <Stage {...FRAMING.transistor}>
+          <TransistorModel on={Math.min(1, (result?.current ?? 0) / 0.1)} burnt={!!data.burnt} />
+        </Stage>
+      )
+    case 'mosfet':
+      return (
+        <Stage {...FRAMING.mosfet}>
+          <MosfetModel drive={level} current={Math.abs(result?.current ?? 0)} hot={status === 'over'} />
+        </Stage>
+      )
+    case 'optocoupler':
+      return (
+        <Stage {...FRAMING.optocoupler}>
+          <OptocouplerModel
+            led={level}
+            output={Math.min(1, Math.abs(result?.channels?.switch ?? 0) / 0.02)}
+            burnt={!!data.burnt}
+          />
+        </Stage>
+      )
+    case 'laser':
+      return (
+        <Stage {...FRAMING.laser}>
+          <LaserModel level={level} burnt={!!data.burnt} />
+        </Stage>
+      )
+    case 'irLed':
+      return (
+        <Stage {...FRAMING.irLed}>
+          <IrLedModel level={level} burnt={!!data.burnt} camera={!!data.camera} />
+        </Stage>
+      )
+    case 'solenoid':
+      return (
+        <Stage {...FRAMING.solenoid}>
+          <SolenoidModel push={level} hot={status === 'over'} />
+        </Stage>
+      )
+    case 'pump':
+      return (
+        <Stage {...FRAMING.pump}>
+          <PumpModel flow={level} />
+        </Stage>
+      )
+    case 'bell':
+      return (
+        <Stage {...FRAMING.bell}>
+          <BellModel ring={level} hot={status === 'over'} />
+        </Stage>
+      )
+    case 'barGraph':
+      return (
+        <Stage {...FRAMING.barGraph}>
+          <BarGraphModel bars={level} powered={status === 'on'} />
+        </Stage>
+      )
+    case 'trafficLight':
+      return (
+        <Stage {...FRAMING.trafficLight}>
+          <TrafficLightModel r={result?.channels?.R ?? 0} y={result?.channels?.Y ?? 0} g={result?.channels?.G ?? 0} />
+        </Stage>
+      )
+    case 'fan':
+      return (
+        <Stage {...FRAMING.fan}>
+          <FanModel speed={level} hot={status === 'over'} />
+        </Stage>
+      )
+    case 'latch':
+      return (
+        <Stage {...FRAMING.latch}>
+          <LatchModel
+            set={result?.channels?.S ?? 0}
+            reset={result?.channels?.R ?? 0}
+            q={result?.channels?.Q ?? 0}
+            powered={(status === 'on' || status === 'idle') && (result?.voltage ?? 0) >= ELECTRICAL.logic.minVoltage}
+          />
+        </Stage>
+      )
+    case 'counter':
+      return (
+        <Stage {...FRAMING.counter}>
+          <CounterModel count={level} clock={result?.channels?.CLK ?? 0} powered={status === 'on'} />
+        </Stage>
+      )
+    case 'comparator':
+      return (
+        <Stage {...FRAMING.comparator}>
+          <ComparatorModel
+            out={result?.channels?.OUT ?? 0}
+            powered={(status === 'on' || status === 'idle') && (result?.voltage ?? 0) >= ELECTRICAL.logic.minVoltage}
+          />
+        </Stage>
+      )
+    case 'hBridge':
+      return (
+        <Stage {...FRAMING.hBridge}>
+          <HBridgeModel
+            direction={level}
+            in1={result?.channels?.IN1 ?? 0}
+            in2={result?.channels?.IN2 ?? 0}
+            powered={(result?.voltage ?? 0) >= ELECTRICAL.hBridge.minVoltage}
+            hot={status === 'over'}
+          />
+        </Stage>
+      )
+    case 'multimeter': {
+      const dial = data.dial ?? 'volts'
+      const { text, unit } = meterReading(dial, result)
+      return (
+        <Stage {...FRAMING.multimeter}>
+          <MultimeterModel dial={dial} text={text} unit={unit} beep={result?.channels?.beep === 1} />
+        </Stage>
+      )
+    }
+    case 'logicProbe':
+      return (
+        <Stage {...FRAMING.logicProbe}>
+          <LogicProbeModel
+            high={result?.channels?.high ?? 0}
+            low={result?.channels?.low ?? 0}
+            pulse={result?.channels?.pulse ?? 0}
+            powered={status === 'on'}
+          />
         </Stage>
       )
     default: {

@@ -50,6 +50,10 @@ function electricalKey(nodes: PartNode[], edges: WireEdge[]) {
       d.limit,
       d.pitch,
       d.rate,
+      // lemons in a row, where the joystick is pushed
+      d.cells,
+      d.stickX,
+      d.stickY,
       d.pins ? Object.values(d.pins).join('') : '',
     ].join(','),
   )

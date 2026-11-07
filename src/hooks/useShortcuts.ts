@@ -29,7 +29,7 @@ export function useShortcuts() {
         state.duplicatePart(part.id)
       } else if (!mod && key === 'r' && part) {
         state.rotatePart(part.id)
-      } else if (!mod && event.key === ' ' && part?.data.type === 'switch') {
+      } else if (!mod && event.key === ' ' && (part?.data.type === 'switch' || part?.data.type === 'slideSwitch')) {
         event.preventDefault()
         state.updatePart(part.id, { closed: !part.data.closed })
         playClick(!part.data.closed)

@@ -16,8 +16,10 @@ import {
   SENSORS,
   SPEAKER_NOTES,
   TIMER_RATES,
+  dynamoVoltage,
   formatAmps,
   formatOhms,
+  lemonCount,
   partWidth,
   pinModesFor,
   rgbMix,
@@ -36,6 +38,7 @@ import { useCircuit } from '@/store/circuit'
 import { useSimulation } from '@/store/simulation'
 import { DisplayControl } from './DisplayControl'
 import { ChoiceTrack, GateLamps, LcdRow, RelayRow, RgbBars } from './WorkshopControls'
+import { LemonTrack, SlideSwitchRow, StickRow } from './InputControls'
 import { ScopeFace } from '@/displays/ScopeFace'
 
 // three.js is the biggest library in the app: load it after the first paint
@@ -480,7 +483,8 @@ function NodeControl({ id, data, result }: { id: string; data: PartData; result?
         <div
           role="radiogroup"
           aria-label={t.inspector.batteryVoltage}
-          className="nodrag node-track grid grid-cols-4 gap-0.5 p-0.5"
+          className="nodrag node-track grid gap-0.5 p-0.5"
+          style={{ gridTemplateColumns: `repeat(${BATTERY_VOLTAGES.length}, minmax(0, 1fr))` }}
           dir="ltr"
         >
           {BATTERY_VOLTAGES.map((v) => (
@@ -489,18 +493,101 @@ function NodeControl({ id, data, result }: { id: string; data: PartData; result?
               type="button"
               role="radio"
               aria-checked={data.voltage === v}
+              aria-label={`${v} ${t.units.volt}`}
               onClick={() => updatePart(id, { voltage: v })}
               className={cn(
-                'rounded-[4px] text-[11px] font-semibold tabular-nums transition',
+                'min-w-0 rounded-[4px] text-[11px] font-semibold tracking-tight tabular-nums transition',
                 data.voltage === v
                   ? 'bg-amber-400 text-amber-950 shadow-sm'
                   : 'text-muted-foreground hover:bg-card hover:text-foreground',
               )}
             >
-              {v}V
+              {v}
+              {/* six sizes share the row, so the unit is small */}
+              <span className="text-[8.5px] font-bold opacity-70">V</span>
             </button>
           ))}
         </div>
+      )
+    case 'lemon':
+      return (
+        <LemonTrack
+          value={lemonCount(data)}
+          label={t.inputs.lemons}
+          optionLabel={t.inputs.lemonCount}
+          onChange={(cells) => {
+            updatePart(id, { cells })
+            playClick()
+          }}
+        />
+      )
+    case 'coinCell': {
+      // a load pulls the little cell's volts down: the bar shows how far
+      const volts = Math.max(0, result?.voltage ?? 0)
+      return (
+        <MeterRow fraction={volts / 3} text={`${volts.toFixed(1)} V`} color="#a1a1aa" label={t.inputs.volts} />
+      )
+    }
+    case 'dynamo': {
+      const speed = data.level ?? 0
+      return (
+        <SliderRow
+          value={speed}
+          label={t.inputs.crank}
+          text={`${dynamoVoltage(speed).toFixed(1)} V`}
+          icon={
+            <RotateCw
+              aria-hidden
+              className="size-3.5 shrink-0 text-orange-600 motion-safe:animate-spin dark:text-orange-400"
+              // the little crank turns as fast as the big one, and stops with it
+              style={{ animationDuration: `${1.6 / Math.max(0.05, speed)}s`, animationPlayState: speed > 0.01 ? 'running' : 'paused' }}
+            />
+          }
+          onChange={(v) => updatePart(id, { level: v }, { history: false })}
+        />
+      )
+    }
+    case 'powerBank':
+      return (
+        <MeterRow
+          fraction={Math.abs(result?.current ?? 0) / 2}
+          text={formatCurrent(result?.current ?? 0)}
+          color={accent}
+          label={t.inspector.current}
+        />
+      )
+    case 'slideSwitch':
+      return (
+        <SlideSwitchRow
+          toB={!!data.closed}
+          label={`${t.inputs.slideTo} ${data.closed ? 'B' : 'A'}`}
+          onToggle={() => {
+            updatePart(id, { closed: !data.closed })
+            playClick(true)
+          }}
+        />
+      )
+    case 'microSwitch':
+      return (
+        <HoldButton
+          held={!!data.pressed}
+          label={t.inputs.lever}
+          className="bg-rose-600 shadow-rose-600/30"
+          onHold={(down) => {
+            if (!down && !useCircuit.getState().nodes.find((n) => n.id === id)?.data.pressed) return
+            updatePart(id, { pressed: down }, { history: false })
+            playClick(down)
+          }}
+        />
+      )
+    case 'joystick':
+      return (
+        <StickRow
+          x={data.stickX ?? 0.5}
+          y={data.stickY ?? 0.5}
+          labels={{ x: t.inputs.stickX, y: t.inputs.stickY }}
+          onChange={(next) => updatePart(id, next, { history: false })}
+        />
       )
     case 'fuse':
       return (
@@ -846,10 +933,21 @@ function PartNodeComponent({ id, data, selected }: NodeProps<PartNodeType>) {
 
   // switches and buttons show their lever position, not whether current flows
   const mechanical =
-    data.type === 'switch' ? !!data.closed : data.type === 'button' ? !!data.pressed : null
+    data.type === 'switch'
+      ? !!data.closed
+      : data.type === 'button' || data.type === 'microSwitch'
+        ? !!data.pressed
+        : null
   const chipStatus: PartStatus = mechanical === null ? status : mechanical ? 'on' : 'idle'
+  // the two-way switch is always joined to one side: it says which one, and lights up while current flows
   const statusLabel =
-    chipStatus === 'on' ? t.parts[data.type].working : t.status[chipStatus]
+    data.type === 'slideSwitch'
+      ? data.closed
+        ? t.inputs.toB
+        : t.inputs.toA
+      : chipStatus === 'on'
+        ? t.parts[data.type].working
+        : t.status[chipStatus]
 
   return (
     // The wrapper has no background so the light glow (z-index −1) lands on the

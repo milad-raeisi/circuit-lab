@@ -1,0 +1,46 @@
+<!doctype html>
+<!-- TEMPORARY review sheet for the Toolbox drawings (removed when the Toolbox work is done). -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tool drawings</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import '/src/index.css'
+      import { createElement as h } from 'react'
+      import { createRoot } from 'react-dom/client'
+      import { ToolArt } from '/src/toolbox/ToolArt.tsx'
+      import { TOOL_IDS, TOOLS, CATEGORY_COLOR } from '/src/toolbox/catalog.ts'
+
+      const q = new URLSearchParams(location.search)
+      const ids = q.get('ids') ? q.get('ids').split(',') : TOOL_IDS
+      const sizes = (q.get('sizes') || '32,62,80,144,184').split(',').map(Number)
+      const dark = q.get('dark') === '1'
+      document.documentElement.classList.toggle('dark', dark)
+      document.body.style.background = 'var(--background)'
+      document.body.style.color = 'var(--foreground)'
+
+      const stage = (color) => ({
+        background: `radial-gradient(110% 85% at 50% 0%, color-mix(in oklch, ${color} 15%, transparent), transparent 72%) no-repeat, radial-gradient(circle, var(--stage-hole) 0 1px, transparent 1.5px) 5px 5px / 10px 10px, var(--stage-bg)`,
+        boxShadow: 'inset 0 0 0 1px var(--stage-line)',
+        display: 'grid',
+        placeItems: 'center',
+        borderRadius: '6px',
+        padding: '6px',
+      })
+
+      function Row({ id }) {
+        const color = CATEGORY_COLOR[TOOLS[id]?.category] || '#888'
+        return h(
+          'div',
+          { style: { display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 10px', borderBottom: '1px solid var(--border)' } },
+          h('code', { style: { width: '130px', fontSize: '12px' } }, id),
+          ...sizes.map((s) => h('div', { key: s, style: stage(color) }, h(ToolArt, { tool: id, size: s }))),
+        )
+      }
+      createRoot(document.getElementById('root')).render(h('div', null, ...ids.map((id) => h(Row, { key: id, id }))))
+    </script>
+  </body>
+</html>

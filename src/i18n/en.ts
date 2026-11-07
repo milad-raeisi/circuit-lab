@@ -254,6 +254,30 @@ export type Dictionary = {
     gateRules: Record<GateType, string>
     scopeReading: string
   }
+  /** the new switches, the joystick and the small power sources: lemons, coin cell, crank, power bank */
+  inputs: {
+    tips: {
+      lemonTiny: string
+      lemonMore: string
+      coinSag: string
+      crank: string
+      bankLimit: string
+      slideHint: string
+      microHint: string
+      joystickPower: string
+    }
+    lemons: string
+    lemonCount: (n: number) => string
+    crank: string
+    toA: string
+    toB: string
+    slideTo: string
+    lever: string
+    pressed: string
+    stickX: string
+    stickY: string
+    volts: string
+  }
   units: { volt: string; amp: string; milliamp: string; watt: string; ohm: string }
 }
 
@@ -441,6 +465,91 @@ export const en: Dictionary = {
       description: 'Sends a signal while you touch it.',
       working: 'Ready',
     },
+    flameSensor: {
+      name: 'Flame sensor',
+      description: 'Sees fire. A bigger, closer flame gives a bigger signal on S.',
+      working: 'Watching',
+    },
+    rainSensor: {
+      name: 'Rain sensor',
+      description: 'Feels raindrops on its striped plate. More rain gives a bigger signal.',
+      working: 'Sensing',
+    },
+    waterSensor: {
+      name: 'Water sensor',
+      description: 'Dip its strip in water. The higher the water, the bigger the signal.',
+      working: 'Sensing',
+    },
+    humiditySensor: {
+      name: 'Humidity sensor',
+      description: 'Feels how much water is in the air. Damp air gives a bigger signal.',
+      working: 'Sensing',
+    },
+    hallSensor: {
+      name: 'Magnet sensor',
+      description: 'Feels a magnet without touching it. S turns on when a magnet comes close.',
+      working: 'Sensing',
+    },
+    irSensor: {
+      name: 'Obstacle sensor',
+      description: 'Shines a light you can’t see. When something is in front, the light bounces back and S turns on.',
+      working: 'On',
+    },
+    lineSensor: {
+      name: 'Line sensor',
+      description: 'Looks at the floor. S turns on over a black line, so a robot can follow it.',
+      working: 'Looking',
+    },
+    forceSensor: {
+      name: 'Press sensor',
+      description: 'A flat pad that feels a push. Press harder for a bigger signal.',
+      working: 'Feeling',
+    },
+    pulseSensor: {
+      name: 'Heartbeat sensor',
+      description: 'Put your finger on it to feel your heartbeat. S jumps up with every beat.',
+      working: 'On',
+    },
+    knockSensor: {
+      name: 'Knock sensor',
+      description: 'Feels a knock or a shake. S turns on when you tap it.',
+      working: 'Feeling',
+    },
+    slideSwitch: {
+      name: 'Two-way switch',
+      description: 'Joins COM to A or to B. Use two of them to turn a stair light on and off from both ends.',
+      working: 'On',
+    },
+    microSwitch: {
+      name: 'Micro switch',
+      description: 'A tiny switch with a lever. Press it and COM moves from NC to NO. Robots use it to feel a wall.',
+      working: 'Pressed',
+    },
+    joystick: {
+      name: 'Joystick',
+      description: 'A thumb stick, like on a game controller. Push it right or up and X or Y gives more volts.',
+      working: 'On',
+    },
+    lemon: {
+      name: 'Lemon battery',
+      description: 'Lemons with a copper coin and a zinc nail make a little power. Three in a row can light a red LED!',
+      working: 'On',
+    },
+    coinCell: {
+      name: 'Coin cell',
+      description: 'A flat 3 V battery, like the one in a watch. It can light an LED, but it is too weak for a motor.',
+      working: 'Giving power',
+    },
+    dynamo: {
+      name: 'Crank generator',
+      description: 'Turn the crank to make power. The faster you turn it, the more volts you get.',
+      working: 'On',
+    },
+    powerBank: {
+      name: 'Power bank',
+      description: 'The battery you charge your phone with. It gives a steady 5 V, just like a USB port.',
+      working: 'Giving power',
+    },
     segment: {
       name: '7-segment display',
       description: 'Shows numbers with little light bars. It can count, show the time or show the volts on S.',
@@ -542,6 +651,106 @@ export const en: Dictionary = {
       description: 'Draws the voltage as it changes over time. Watch blinks, fades and charging!',
       working: 'Watching',
     },
+    zener: {
+      name: 'Zener diode',
+      description: 'A diode that holds a steady 5.1 V. Join its striped + end toward + through a resistor, and its − end to −.',
+      working: 'Holds 5.1 V',
+    },
+    pnp: {
+      name: 'PNP transistor',
+      description: 'The mirror of the NPN. Join E to +. A small current out of B lets a big current flow from E to C.',
+      working: 'On',
+    },
+    mosfet: {
+      name: 'MOSFET',
+      description: 'A switch worked by volts. A few volts on G let a big current flow from D to S. G takes almost no current.',
+      working: 'Switched on',
+    },
+    optocoupler: {
+      name: 'Optocoupler',
+      description: 'An LED and a light switch in one chip. Light the LED, and the switch from C to E closes. No wire joins the two sides!',
+      working: 'Switch on',
+    },
+    laser: {
+      name: 'Laser',
+      description: 'Shines a thin red beam and makes a bright dot. Never point it at anyone’s eyes!',
+      working: 'Beam on',
+    },
+    irLed: {
+      name: 'IR LED',
+      description: 'Gives a light your eyes can’t see, like a TV remote. Look at it through a phone camera!',
+      working: 'Shining',
+    },
+    solenoid: {
+      name: 'Solenoid',
+      description: 'A coil with a metal rod inside. Give it power, and the rod pushes out. Clack!',
+      working: 'Pushing',
+    },
+    pump: {
+      name: 'Water pump',
+      description: 'Pushes water up through a tube. More volts pump faster.',
+      working: 'Pumping',
+    },
+    bell: {
+      name: 'Electric bell',
+      description: 'A magnet pulls a little hammer that hits the bell, again and again. Ring ring!',
+      working: 'Ringing',
+    },
+    barGraph: {
+      name: 'LED bar graph',
+      description: 'Ten lights in a row. The higher the voltage on IN, the more bars light up.',
+      working: 'Showing',
+    },
+    trafficLight: {
+      name: 'Traffic light',
+      description: 'Red, yellow and green lights with their resistors inside. Join R, Y or G to +, and − to −.',
+      working: 'Shining',
+    },
+    fan: {
+      name: 'Fan',
+      description: 'Blows air to keep things cool. It only spins with + to + and − to −.',
+      working: 'Blowing',
+    },
+    nandGate: {
+      name: 'NAND gate',
+      description: 'Y is on, except when A and B are both on.',
+      working: 'Y is on',
+    },
+    norGate: {
+      name: 'NOR gate',
+      description: 'Y is on only when A and B are both off.',
+      working: 'Y is on',
+    },
+    latch: {
+      name: 'Memory latch',
+      description: 'Remembers one thing. A pulse on S turns Q on, and Q stays on until a pulse on R.',
+      working: 'Q is on',
+    },
+    counter: {
+      name: '4017 counter',
+      description: 'Counts the pulses on CLK. Each pulse moves the light to the next pin: 0, 1, 2, 3, 4, then 0 again.',
+      working: 'Counting',
+    },
+    comparator: {
+      name: 'Comparator',
+      description: 'Compares two voltages. OUT turns on when IN+ is higher than IN−.',
+      working: 'OUT is on',
+    },
+    hBridge: {
+      name: 'Motor driver',
+      description: 'Lets a board drive a motor both ways. IN1 on: forward. IN2 on: back. The motor goes on M1 and M2.',
+      working: 'Driving',
+    },
+    multimeter: {
+      name: 'Multimeter',
+      description: 'The tool every maker uses. Turn the dial to measure volts (V), amps (A) or ohms (Ω), or to beep on a joined path.',
+      working: 'Measuring',
+    },
+    logicProbe: {
+      name: 'Logic probe',
+      description: 'Touch its tip to a wire to see if it is HIGH, LOW or pulsing. It takes power from your circuit.',
+      working: 'Testing',
+    },
   },
   sense: {
     thermistor: 'Heat',
@@ -554,6 +763,16 @@ export const en: Dictionary = {
     gasSensor: 'Smoke',
     soilSensor: 'Water',
     touchSensor: 'Touch',
+    flameSensor: 'Fire',
+    rainSensor: 'Rain',
+    waterSensor: 'Water',
+    humiditySensor: 'Damp air',
+    hallSensor: 'Bring the magnet',
+    irSensor: 'Wall ahead',
+    lineSensor: 'Black line',
+    forceSensor: 'Press',
+    pulseSensor: 'Heart rate',
+    knockSensor: 'Knock',
   },
   categories: {
     power: 'Power',
@@ -573,6 +792,8 @@ export const en: Dictionary = {
     green: 'Green',
     blue: 'Blue',
     white: 'White',
+    orange: 'Orange',
+    pink: 'Pink',
     black: 'Black',
     auto: 'Auto',
   },
@@ -957,8 +1178,33 @@ export const en: Dictionary = {
       andGate: 'Y is on only when A and B are both on.',
       orGate: 'Y is on when A or B is on.',
       xorGate: 'Y is on when A and B are different.',
+      nandGate: 'Y is off only when A and B are both on.',
+      norGate: 'Y is on only when A and B are both off.',
     },
     scopeReading: 'Voltage now',
+  },
+  inputs: {
+    tips: {
+      lemonTiny: 'Lemons give only a tiny current. It is enough to make an LED glow, but never enough for a lamp or a motor.',
+      lemonMore: 'One lemon gives about 1 volt. Put more lemons in a row: three of them can light a red LED.',
+      coinSag: 'The coin cell is small inside. A big load pulls its volts right down, so it can’t spin a motor.',
+      crank: 'Turn the crank to make power. Slide it up to turn it faster.',
+      bankLimit: 'The power bank gives 2 A at most, so it is holding the current back. Something takes too much.',
+      slideHint: 'COM is joined to A or to B. Join two of these switches A to A and B to B, and you can switch a stair light from both ends.',
+      microHint: 'Hold the lever down: COM lets go of NC and joins NO.',
+      joystickPower: 'The joystick needs power. Join its + to 5V and its − to GND, then read X and Y.',
+    },
+    lemons: 'Lemons',
+    lemonCount: (n) => (n === 1 ? '1 lemon' : `${n} lemons`),
+    crank: 'Crank speed',
+    toA: 'To A',
+    toB: 'To B',
+    slideTo: 'Slide to',
+    lever: 'Press the lever',
+    pressed: 'Pressed',
+    stickX: 'Left and right',
+    stickY: 'Down and up',
+    volts: 'Volts now',
   },
   units: { volt: 'V', amp: 'A', milliamp: 'mA', watt: 'W', ohm: 'Ω' },
 }

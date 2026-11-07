@@ -35,6 +35,23 @@ export type PartType =
   | 'gasSensor'
   | 'soilSensor'
   | 'touchSensor'
+  | 'flameSensor'
+  | 'rainSensor'
+  | 'waterSensor'
+  | 'humiditySensor'
+  | 'hallSensor'
+  | 'irSensor'
+  | 'lineSensor'
+  | 'forceSensor'
+  | 'pulseSensor'
+  | 'knockSensor'
+  | 'slideSwitch'
+  | 'microSwitch'
+  | 'joystick'
+  | 'lemon'
+  | 'coinCell'
+  | 'dynamo'
+  | 'powerBank'
   | 'voltmeter'
   | 'ammeter'
   | 'segment'
@@ -57,6 +74,27 @@ export type PartType =
   | 'xorGate'
   | 'timer555'
   | 'oscilloscope'
+  // more components, outputs, chips and meters
+  | 'zener'
+  | 'pnp'
+  | 'mosfet'
+  | 'optocoupler'
+  | 'laser'
+  | 'irLed'
+  | 'solenoid'
+  | 'pump'
+  | 'bell'
+  | 'barGraph'
+  | 'trafficLight'
+  | 'fan'
+  | 'nandGate'
+  | 'norGate'
+  | 'latch'
+  | 'counter'
+  | 'comparator'
+  | 'hBridge'
+  | 'multimeter'
+  | 'logicProbe'
 
 /** What a screen shows. Each kind of screen offers some of these (see `DISPLAY_MODES`). */
 export type DisplayMode =
@@ -94,7 +132,7 @@ export type TerminalId = string
 export type Side = 'left' | 'top' | 'right' | 'bottom'
 
 export type LampColor = 'warm' | 'yellow' | 'red' | 'green' | 'blue'
-export type LedColor = 'red' | 'yellow' | 'green' | 'blue' | 'white'
+export type LedColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'white' | 'pink'
 export type WireColor = 'red' | 'black' | 'blue' | 'yellow' | 'green' | 'white'
 
 /**
@@ -129,14 +167,19 @@ export type PartData = {
   voltage?: number
   /** lamp / led: colour key */
   color?: LampColor | LedColor
-  /** switch: lever position */
+  /** switch: lever position; slide switch: false joins COM to A, true joins COM to B */
   closed?: boolean
-  /** push button: held down right now (never persisted) */
+  /** push button / micro switch: held down right now (never persisted) */
   pressed?: boolean
   /** resistor: ohms; potentiometer: ohms from end to end */
   resistance?: number
-  /** dimmer / potentiometer: knob position 0..1 */
+  /** dimmer / potentiometer: knob position 0..1; crank generator: how fast the crank turns, 0..1 */
   level?: number
+  /** lemon battery: how many lemons in a row, 1..4 */
+  cells?: number
+  /** joystick: where the stick is pushed, 0..1 (0.5 is the middle): left → right and down → up */
+  stickX?: number
+  stickY?: number
   /** capacitor: microfarads */
   capacitance?: number
   /** fuse: amps it can carry before it blows */
@@ -183,7 +226,14 @@ export type PartData = {
   rate?: number
   /** oscilloscope: seconds shown across the screen */
   span?: number
+  /** multimeter: what its dial is turned to */
+  dial?: MeterDial
+  /** IR LED: seen through a phone camera (true) or with your own eyes */
+  camera?: boolean
 }
+
+/** The multimeter's dial: volts, amps, ohms, or ohms with a beep for a joined path. */
+export type MeterDial = 'volts' | 'amps' | 'ohms' | 'beep'
 
 export type WireData = {
   color: WireColor

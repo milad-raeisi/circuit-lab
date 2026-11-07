@@ -17,17 +17,21 @@ Requires Node.js 22.12 or later (the Animate UI CLI needs it).
 
 ## What kids can do
 
-- **Power:** battery (1.5 / 3 / 4.5 / 9 V) and a solar panel with a sunlight slider.
-- **Arduino Uno:** pins 13 … 8 can be off, on, blinking, fading (PWM pins ~9, ~10, ~11) or following the sensor on A0; 5V and GND power other parts. The details panel shows the real Arduino code for the chosen program.
-- **Switches and knobs:** switch, push button, dimmer.
-- **Electronic parts:** resistor, capacitor (charges and discharges over time), diode, NPN transistor (B, C, E) and fuse (blows to protect the rest).
-- **Light, sound and motion:** lamp, LED, motor, buzzer and a servo motor whose arm follows its signal.
+- **Power:** battery (1.5 / 3 / 4.5 / 9 V), a solar panel with a sunlight slider, and a bench power supply (0–12 V with a current limit).
+- **Boards:** Arduino Uno, Nano and Mega, ESP32, ESP8266 NodeMCU, Raspberry Pi Pico, micro:bit and Raspberry Pi, each at its own voltage. Every output pin can be off, on, blinking, taking turns, fading (on PWM pins), stepping through a 3-second loop, or following the sensor on the board's input (also upside down, or as an alarm). The details panel shows the real code for the chosen programs: Arduino C++, MicroPython, micro:bit Python or gpiozero.
+- **Switches and knobs:** switch, push button, dimmer, potentiometer (a real voltage divider) and a relay.
+- **Electronic parts:** resistor (with a colour-code lesson), capacitor (charges and discharges over time), diode, NPN transistor (B, C, E), fuse (blows to protect the rest) and a 7805 regulator.
+- **Chips and logic:** NOT, AND, OR and XOR gates (with a live truth table) and a 555 blinker.
+- **Light, sound and motion:** lamp, LED, RGB LED, motor, vibration motor, buzzer, speaker, electromagnet and a servo motor whose arm follows its signal.
 - **Sensors:** light sensor (LDR), thermistor, tilt switch, magnet (reed) switch, and + / − / S modules for temperature, distance (ultrasonic), motion (PIR), sound, smoke/gas, soil moisture and touch. Each has a slider, hold button or toggle on its card.
-- **Meters:** voltmeter and ammeter with a needle and an LCD readout.
+- **Screens:** seven-segment digits, a text LCD, OLED and colour TFT screens, an LED matrix and LED walls of any size for scrolling shop signs and a city TV that plays your own photos and videos (stored in the browser).
+- **Meters:** voltmeter and ammeter with a needle and an LCD readout, and an oscilloscope that draws the voltage over time.
 - **Wiring:** drag from a coloured terminal dot to another part. Red is `+`, black is `−`. Wires show moving dots whose speed and direction follow the real current.
 - **Things that go wrong, safely:** 9 V burns out a lamp, an LED without a resistor burns out, a direct wire across the battery causes a short circuit (the battery heats up and the board warns), a reversed LED stays dark, a transistor without a base resistor burns, and a fuse blows before the lamp it protects.
-- **Examples menu:** flashlight, fan, doorbell, LED, series vs. parallel lamps, night light, short circuit, Arduino blink, transistor switch, capacitor light, solar fan, measuring with meters, servo sweep and a motion light.
-- **Missions:** fourteen challenges, from "build a flashlight" to "blink an LED with the Arduino" and "let a sensor switch on a light", with confetti when one is completed.
+- **Examples gallery:** 44 working projects on five shelves (first circuits, electronics, boards and code, smart gadgets, screens and signs), from a flashlight to a traffic light, a parking sensor, a radar, a smart home and a city TV.
+- **Lessons:** every part explains what it does in kid-friendly words, plus a "volts, amps and ohms" lesson that uses the live numbers from the board.
+- **Toolbox:** 27 real workshop tools (multimeter, soldering iron, wire stripper, safety glasses …), each with a drawing, how to use it, how to stay safe and a fun fact.
+- **Missions:** fifteen challenges, from "build a flashlight" to "blink an LED with the Arduino" and "let a sensor switch on a light", with confetti when one is completed.
 - **Comfort:** undo/redo, the board saved in the browser, dark mode (a "dark room" where lights really shine), sound effects, keyboard shortcuts, and touch support (tap a part to add it).
 
 ## Tech stack
@@ -82,8 +86,10 @@ All parts share **one** WebGL canvas (`src/three/SceneCanvas.tsx`). Each part no
 
 ```
 src/
-  circuit/      solver, parts catalog, presets, missions (no React)
-  editor/       board, part nodes, wires, sidebar, inspector, top/status bars
+  circuit/      solver, parts catalog, examples, missions (no React)
+  editor/       board, part nodes, wires, sidebar, inspector, lessons, gallery, top/status bars
+  displays/     screen faces (digits, LCD, OLED, TFT, LED walls, oscilloscope)
+  toolbox/      the workshop tools section
   three/        shared canvas, lighting helpers and the 3D part models
   store/        Zustand stores: circuit (with undo/redo), settings, simulation, drag
   i18n/         en (default), ar, fa dictionaries and the useI18n hook
@@ -95,4 +101,4 @@ src/
 ## Adding things
 
 - **A language:** copy `src/i18n/en.ts` (the `Dictionary` type makes TypeScript list every missing string), then register it in `LANGUAGES` and `DICTIONARIES` in `src/i18n/index.ts`.
-- **A part:** add it to `PartType` (`src/circuit/types.ts`), `PARTS` (`catalog.ts`), the solver, a model in `src/three/models/`, `PartScene.tsx`, `PartIcon.tsx` and the three dictionaries.
+- **A part:** add it to `PartType` (`src/circuit/types.ts`), `PARTS` and `PART_ORDER` (`catalog.ts`), the solver, a model in `src/three/models/` and its framing in `PartScene.tsx`, a tray drawing in `src/editor/PartArt.tsx`, a lesson in `src/i18n/learn/*` and the three dictionaries.
